@@ -153,8 +153,6 @@
     .online-data-notice{margin:14px 28px 0;padding:10px 13px;border:1px solid #cdd9e5;border-radius:10px;background:#f1f5f8;color:#41576b;font-size:11px;font-weight:700}
     .online-data-notice.offline{border-color:#ead7a8;background:#fff9eb;color:#715b27}
     .online-data-notice[hidden]{display:none}
-    .public-build-notice{margin:10px 28px 0;padding:9px 13px;border:1px solid #d8dfda;border-radius:10px;background:#f7faf8;color:#536159;font-size:11px;line-height:1.45}
-    .public-build-notice[hidden]{display:none}
     .view{display:none}
     .view.active{display:block}
     .content:has(> #dashboard.active){padding:0}
@@ -353,6 +351,12 @@
     .settings-data-item strong{display:block;font-size:20px}
     .settings-data-item span{display:block;margin-top:4px;color:var(--muted);font-size:10px}
     #settingsArchiveCard[hidden]{display:none}
+    .settings-sync-card{margin-top:16px}
+    .settings-sync-row{display:flex;align-items:center;gap:14px;padding:2px 0}
+    .settings-sync-copy{min-width:0;flex:1}
+    .settings-sync-copy strong{display:block;font-size:14px}
+    .settings-sync-copy p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+    .settings-sync-badge{flex:0 0 auto;padding:7px 11px}
     #settingsMigrationPreviewCard[hidden],#settingsMigrationPreview[hidden]{display:none}
     .settings-migration-actions{display:flex;align-items:center;gap:10px;margin-top:14px}
     .settings-migration-actions button[hidden]{display:none}
@@ -379,6 +383,19 @@
     .settings-migration-details .settings-migration-list{padding:0 12px 12px}
     .settings-migration-result{padding:12px;border:1px solid #bcdcc9;border-radius:11px;background:var(--accent-soft);color:#17683a;font-size:11px;line-height:1.55}
     .settings-migration-result strong{display:block;margin-bottom:3px;font-size:13px}
+    .attendance-migration-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+    .attendance-migration-block h4{margin:0;font-size:14px}
+    .attendance-migration-block>p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+    .attendance-conflict-list{display:grid;gap:10px}
+    .attendance-conflict-card{padding:13px 14px;border:1px solid #ead7a8;border-radius:11px;background:#fffdf7}
+    .attendance-conflict-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:9px}
+    .attendance-conflict-card-head strong{display:block;font-size:13px}
+    .attendance-conflict-card-head span{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+    .attendance-conflict-options{display:flex;flex-wrap:wrap;gap:7px}
+    .attendance-conflict-option{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-size:11px;font-weight:700}
+    .attendance-conflict-option:has(input:checked){border-color:#78aa8b;background:var(--accent-soft);color:#17683a}
+    .attendance-conflict-option input{margin:0;accent-color:var(--accent)}
+    .attendance-conflict-option small{color:var(--muted);font-size:9px;font-weight:600}
     .settings-groups-card .card-head h3{font-size:19px;font-weight:750}
     .settings-groups-card .card-head p{font-size:13px;line-height:1.5}
     .settings-groups{display:grid;gap:10px}
@@ -461,6 +478,7 @@
     .payment-month-cell.recorded-payment{background:#eef8f2}
     .payment-month-cell:hover{background:#f7faf8;box-shadow:inset 0 0 0 1px #d8e3dc}
     .payment-month-cell.recorded-payment:hover{background:#e8f5ed}
+    .payment-month-cell.saving{background:#f4f7f5;box-shadow:inset 0 0 0 1px #b9cbbf}
     .payment-month-cell:focus-within{background:#fff;box-shadow:none}
     .payment-month-input{width:100%;height:31px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--text);padding:5px;text-align:center;font:inherit;font-size:11px;font-weight:500;outline:0;cursor:text}
     .payment-month-cell.recorded-payment .payment-month-input{font-size:14px;font-weight:700}
@@ -721,9 +739,9 @@
       </div>
 
       <div class="club-card">
-        <div class="club-logo">К</div>
+        <div class="club-logo">Б</div>
         <div>
-          <strong>Вашият клуб</strong>
+          <strong>СКЛА Берое</strong>
           <span>Администраторски профил</span>
         </div>
       </div>
@@ -779,10 +797,10 @@
           <div class="test-user-list" id="testUserList"></div>
         </div>
         <button class="user-row" id="currentUserMenuButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Отвори менюто на акаунта" title="Отвори менюто на акаунта">
-          <div class="avatar" id="currentUserAvatar">П</div>
+          <div class="avatar" id="currentUserAvatar">СТ</div>
           <div>
             <strong id="currentUserName">Потребител</strong>
-            <span id="currentUserAccessLabel">ClubDesk</span>
+            <span id="currentUserAccessLabel">Главен администратор</span>
           </div>
         </button>
       </div>
@@ -806,7 +824,6 @@
       </header>
 
       <div class="online-data-notice" id="clubdeskOnlineDataNotice" role="status" aria-live="polite" hidden></div>
-      <div class="public-build-notice" id="publicBuildAdminNotice" role="note" hidden>Тестова онлайн версия: присъствията, таксите и календарът все още не се синхронизират между устройствата.</div>
 
       <div class="content">
         <section class="view active" id="dashboard">
@@ -1125,16 +1142,15 @@
               </div>
             </div>
           </div>
-          <div class="card" id="settingsMigrationPreviewCard" style="margin-top:16px" hidden>
-            <div class="card-head">
-              <div><h3>Миграция към Supabase</h3><p>Прегледайте кои локални групи и състезатели ще бъдат прехвърлени.</p></div>
-            </div>
+          <div class="card settings-sync-card" id="settingsOnlineSyncCard">
             <div class="card-body">
-              <div class="settings-migration-actions">
-                <button class="ghost-btn" id="previewSupabaseMigration" type="button">Преглед на данните</button>
-                <button class="primary-btn" id="executeSupabaseMigration" type="button" hidden disabled>Прехвърли към Supabase</button>
+              <div class="settings-sync-row">
+                <div class="settings-sync-copy">
+                  <strong>Онлайн синхронизация</strong>
+                  <p id="settingsOnlineSyncText">Част от данните все още не се синхронизират онлайн.</p>
+                </div>
+                <span class="pill gray settings-sync-badge" id="settingsOnlineSyncBadge">Непълна</span>
               </div>
-              <div class="settings-migration-preview" id="settingsMigrationPreview" aria-live="polite" hidden></div>
             </div>
           </div>
         </section>
@@ -1371,23 +1387,6 @@
       <div class="modal-actions">
         <button class="ghost-btn" id="cancelRestoreBackup" type="button">Отказ</button>
         <button class="primary-btn" id="confirmRestoreBackup" type="button">Възстанови</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-backdrop" id="supabaseMigrationConfirmModal" aria-hidden="true">
-    <div class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="supabaseMigrationConfirmTitle">
-      <div class="modal-head">
-        <div><h3 id="supabaseMigrationConfirmTitle">Потвърждение на миграцията</h3></div>
-        <button class="modal-close" id="closeSupabaseMigrationConfirm" type="button">×</button>
-      </div>
-      <div class="modal-body">
-        <p class="confirm-copy" id="supabaseMigrationConfirmText"></p>
-        <p class="confirm-copy">Локалните данни няма да бъдат изтрити.</p>
-      </div>
-      <div class="modal-actions">
-        <button class="ghost-btn" id="cancelSupabaseMigration" type="button">Отказ</button>
-        <button class="primary-btn" id="confirmSupabaseMigration" type="button">Прехвърли</button>
       </div>
     </div>
   </div>
@@ -1913,6 +1912,13 @@
     const STORAGE_SUPABASE_GROUPS_CACHE = "clubdesk-supabase-groups-cache-v1";
     const STORAGE_SUPABASE_ATHLETES_CACHE = "clubdesk-supabase-athletes-cache-v1";
     const STORAGE_SUPABASE_COACHES_CACHE = "clubdesk-supabase-coaches-cache-v1";
+    const STORAGE_SUPABASE_ATTENDANCE_CACHE = "clubdesk-supabase-attendance-cache-v1";
+    const STORAGE_SUPABASE_ATTENDANCE_MIGRATION = "clubdesk-supabase-attendance-migration-v1";
+    const STORAGE_ATTENDANCE_CONFLICT_RESOLUTIONS = "clubdesk-attendance-conflict-resolutions-v1";
+    const STORAGE_SUPABASE_PAYMENTS_CACHE = "clubdesk-supabase-payments-cache-v1";
+    const STORAGE_SUPABASE_PAYMENTS_MIGRATION = "clubdesk-supabase-payments-migration-v1";
+    const STORAGE_SUPABASE_CALENDAR_CACHE = "clubdesk-supabase-calendar-cache-v1";
+    const STORAGE_SUPABASE_CALENDAR_MIGRATION = "clubdesk-supabase-calendar-migration-v1";
     const DEMO_CURRENT_MONTH = getLocalMonthKey();
     const CURRENT_COACH_ID = "";
     let selectedCoachScope = "";
@@ -1931,9 +1937,31 @@
     let onlineGroupSaveInProgress = false;
     let onlineAthleteCreateInProgress = false;
     let onlineBulkSaveInProgress = false;
+    let onlineAttendanceStore = {};
+    let onlineAttendanceAvailable = false;
+    let onlineAttendanceLoading = false;
+    let onlineAttendanceLoadPromise = null;
+    let onlineAttendanceSaveInProgress = false;
+    let attendanceMigrationInProgress = false;
+    let currentAttendanceMigrationPreview = null;
+    let onlinePaymentsStore = {};
+    let onlinePaymentsAvailable = false;
+    let onlinePaymentsLoading = false;
+    let onlinePaymentsLoadPromise = null;
+    const onlinePaymentMutations = new Set();
+    let paymentsMigrationInProgress = false;
+    let currentPaymentsMigrationPreview = null;
+    let paymentsMigrationError = "";
+    let onlineCalendarEvents = [];
+    let onlineCalendarAvailable = false;
+    let onlineCalendarLoading = false;
+    let onlineCalendarLoadPromise = null;
+    let onlineCalendarMutationInProgress = false;
+    let calendarMigrationInProgress = false;
+    let currentCalendarMigrationPreview = null;
+    let calendarMigrationError = "";
 
     const initialCoaches = [];
-
     const baseAthletes = [];
     const importedKids = [];
 
@@ -2077,9 +2105,7 @@
     }
 
     function initializeGroups() {
-      if (localStorage.getItem(STORAGE_GROUPS) === null) {
-        localStorage.setItem(STORAGE_GROUPS,JSON.stringify(initialGroups));
-      }
+      return initialGroups;
     }
 
     function groups() {
@@ -2131,9 +2157,7 @@
     };
 
     function initializeGroupSchedules() {
-      if (localStorage.getItem(STORAGE_GROUP_SCHEDULES) === null) {
-        localStorage.setItem(STORAGE_GROUP_SCHEDULES,JSON.stringify(initialGroupSchedules));
-      }
+      return initialGroupSchedules;
     }
 
     function groupSchedules() {
@@ -2210,20 +2234,30 @@
       onlineGroups = cachedArray(STORAGE_SUPABASE_GROUPS_CACHE);
       onlineAthletes = cachedArray(STORAGE_SUPABASE_ATHLETES_CACHE);
       onlineCoachAccounts = cachedArray(STORAGE_SUPABASE_COACHES_CACHE);
+      onlinePaymentsStore = cachedOnlinePaymentsStore() || {};
+      onlineCalendarEvents = cachedOnlineCalendarEvents() || [];
       window.clubdeskGroupsDataSource = onlineGroups.length ? "supabase-cache" : "unavailable";
       window.clubdeskAthletesDataSource = onlineAthletes.length ? "supabase-cache" : "unavailable";
+      window.clubdeskPaymentsDataSource = Object.keys(onlinePaymentsStore).length ? "supabase-cache" : "unavailable";
+      window.clubdeskCalendarDataSource = onlineCalendarEvents.length ? "supabase-cache" : "unavailable";
     }
 
     function localBackupGroupFee(groupId,cachedGroups=onlineGroups) {
       const cached = cachedGroups.find(group => normalizeGroupId(group?.id) === normalizeGroupId(groupId));
       if (Number.isFinite(Number(cached?.defaultFee)) && Number(cached.defaultFee) >= 0) return Number(cached.defaultFee);
-      return 35;
+      const stored = readJson(STORAGE_GROUPS,[]);
+      const local = Array.isArray(stored) ? stored.find(group => normalizeGroupId(group?.id) === normalizeGroupId(groupId)) : null;
+      const fee = Number(local?.defaultFee);
+      return Number.isFinite(fee) && fee >= 0 ? fee : 35;
     }
 
     function localBackupAthleteFee(athleteId,cachedAthletes=onlineAthletes) {
       const cached = cachedAthletes.find(athlete => String(athlete?.id || "") === String(athleteId || ""));
       if (Number.isFinite(Number(cached?.defaultMonthlyFee)) && Number(cached.defaultMonthlyFee) >= 0) return Number(cached.defaultMonthlyFee);
-      return null;
+      const localSource = [...baseAthletes,...customAthletes()].find(athlete => String(athlete?.id || "") === String(athleteId || ""));
+      const merged = {...(localSource || {}),...(athleteEdits()[athleteId] || {})};
+      const fee = Number(merged.defaultMonthlyFee);
+      return Number.isFinite(fee) && fee >= 0 ? fee : null;
     }
 
     function localCoachIdForMembership(membershipId) {
@@ -2321,6 +2355,332 @@
       localStorage.setItem(STORAGE_SUPABASE_COACHES_CACHE,JSON.stringify({clubId,loadedAt,data:onlineCoachAccounts}));
     }
 
+    function attendanceMigrationStateForCurrentClub() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return membership?.club_id ? {version:1,clubId:String(membership.club_id),sessions:{}} : null;
+    }
+
+    function paymentsMigrationStateForCurrentClub() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return membership?.club_id ? {version:1,clubId:String(membership.club_id)} : null;
+    }
+
+    function normalizePaymentMonth(value) {
+      const match = /^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/.exec(String(value || "").trim());
+      if (!match) return "";
+      const year = Number(match[1]);
+      const month = Number(match[2]);
+      if (!Number.isInteger(year) || year < 1900 || year > 9999 || month < 1 || month > 12) return "";
+      if (match[3] && Number(match[3]) !== 1) return "";
+      return `${String(year).padStart(4,"0")}-${String(month).padStart(2,"0")}-01`;
+    }
+
+    function paymentMonthKey(value) {
+      const normalized = normalizePaymentMonth(value);
+      return normalized ? normalized.slice(0,7) : "";
+    }
+
+    function attendanceUuidMaps({requireMigrationMapping=false}={}) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const stored = readJson(STORAGE_SUPABASE_MIGRATION_MAP,null);
+      const storedValid = stored && typeof stored === "object" && !Array.isArray(stored)
+        && stored.groups && typeof stored.groups === "object" && !Array.isArray(stored.groups)
+        && stored.athletes && typeof stored.athletes === "object" && !Array.isArray(stored.athletes)
+        && String(stored.clubId || "") === String(membership?.club_id || "")
+        && String(stored.membershipId || "") === String(membership?.id || "");
+      if (requireMigrationMapping && !storedValid) return null;
+      const groupLocalToUuid = new Map(Object.entries(storedValid ? stored.groups : {}).map(([id,uuid]) => [normalizeGroupId(id),String(uuid || "")]).filter(([,uuid]) => uuid));
+      const athleteLocalToUuid = new Map(Object.entries(storedValid ? stored.athletes : {}).map(([id,uuid]) => [String(id),String(uuid || "")]).filter(([,uuid]) => uuid));
+      groups().forEach(group => {
+        if (group.id && group.supabaseId) groupLocalToUuid.set(normalizeGroupId(group.id),String(group.supabaseId));
+      });
+      allAthletes().forEach(athlete => {
+        if (athlete.id && athlete.supabaseId) athleteLocalToUuid.set(String(athlete.id),String(athlete.supabaseId));
+      });
+      return {
+        stored:storedValid ? stored : null,
+        groupLocalToUuid,
+        athleteLocalToUuid,
+        groupUuidToLocal:new Map([...groupLocalToUuid].map(([localId,uuid]) => [uuid,localId])),
+        athleteUuidToLocal:new Map([...athleteLocalToUuid].map(([localId,uuid]) => [uuid,localId]))
+      };
+    }
+
+    function cachedOnlineAttendanceStore() {
+      const value = readJson(STORAGE_SUPABASE_ATTENDANCE_CACHE,null);
+      const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
+      return value && typeof value === "object" && !Array.isArray(value)
+        && String(value.clubId || "") === clubId
+        && value.store && typeof value.store === "object" && !Array.isArray(value.store)
+        ? value.store
+        : null;
+    }
+
+    function cacheOnlineAttendance() {
+      const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
+      localStorage.setItem(STORAGE_SUPABASE_ATTENDANCE_CACHE,JSON.stringify({
+        clubId,
+        loadedAt:new Date().toISOString(),
+        store:onlineAttendanceStore
+      }));
+    }
+
+    function mapRemoteAttendanceStore(sessionRows,recordRows) {
+      const maps = attendanceUuidMaps();
+      const recordsBySession = (Array.isArray(recordRows) ? recordRows : []).reduce((result,row) => {
+        const sessionId = String(row?.session_id || "");
+        if (!sessionId) return result;
+        (result[sessionId] ||= []).push(row);
+        return result;
+      },{});
+      const store = {};
+      (Array.isArray(sessionRows) ? sessionRows : []).forEach(session => {
+        const group = maps.groupUuidToLocal.get(String(session?.group_id || ""));
+        const date = String(session?.session_date || "");
+        if (!group || !isValidAttendanceDate(date)) return;
+        const sourceLocalId = String(session?.source_local_id || `${date}|${group}`);
+        const statuses = {};
+        (recordsBySession[String(session.id)] || []).forEach(record => {
+          const athleteId = maps.athleteUuidToLocal.get(String(record?.athlete_id || ""));
+          if (athleteId && ATTENDANCE_STATUS_VALUES.includes(record?.status)) statuses[athleteId] = record.status;
+        });
+        const mapAthleteArray = values => [...new Set((Array.isArray(values) ? values : []).map(uuid => maps.athleteUuidToLocal.get(String(uuid || ""))).filter(Boolean))];
+        store[`${date}|${group}`] = {
+          supabaseId:String(session.id || ""),
+          sourceLocalId,
+          statuses,
+          statusSources:{},
+          sessionMode:["scheduled","extra-group","selected-athletes"].includes(session?.session_mode) ? session.session_mode : "scheduled",
+          rosterAthleteIds:mapAthleteArray(session?.roster_athlete_ids),
+          guestAthleteIds:mapAthleteArray(session?.guest_athlete_ids),
+          note:typeof session?.note === "string" ? session.note : ""
+        };
+      });
+      return store;
+    }
+
+    async function loadOnlineAttendance({force=false}={}) {
+      if (!attendanceMigrationStateForCurrentClub()) {
+        onlineAttendanceStore = {};
+        onlineAttendanceAvailable = false;
+        window.clubdeskAttendanceDataSource = "local";
+        return false;
+      }
+      if (onlineAttendanceLoadPromise) return onlineAttendanceLoadPromise;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      onlineAttendanceLoading = true;
+      onlineAttendanceLoadPromise = (async () => {
+        try {
+          if (!membership?.club_id) throw new Error("Missing authenticated club context");
+          const {data:sessions,error:sessionsError} = await window.clubdeskSupabase.from("attendance_sessions")
+            .select("id,club_id,group_id,session_date,note,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids")
+            .eq("club_id",membership.club_id);
+          if (sessionsError) throw sessionsError;
+          const sessionIds = (sessions || []).map(session => String(session.id || "")).filter(Boolean);
+          let records = [];
+          if (sessionIds.length) {
+            const {data,error} = await window.clubdeskSupabase.from("attendance_records")
+              .select("id,session_id,athlete_id,status")
+              .in("session_id",sessionIds);
+            if (error) throw error;
+            records = data || [];
+          }
+          onlineAttendanceStore = mapRemoteAttendanceStore(sessions || [],records);
+          onlineAttendanceAvailable = true;
+          window.clubdeskAttendanceDataSource = "supabase";
+          cacheOnlineAttendance();
+          setOnlineDataNotice();
+          return true;
+        } catch (error) {
+          console.error("ClubDesk Supabase attendance load error",error);
+          const cached = cachedOnlineAttendanceStore();
+          onlineAttendanceStore = cached || {};
+          onlineAttendanceAvailable = false;
+          window.clubdeskAttendanceDataSource = cached ? "supabase-cache" : "unavailable";
+          setOnlineDataNotice("Няма връзка със Supabase. Показват се последно заредените присъствия.",true);
+          return false;
+        } finally {
+          onlineAttendanceLoading = false;
+          onlineAttendanceLoadPromise = null;
+        }
+      })();
+      return onlineAttendanceLoadPromise;
+    }
+
+    function cachedOnlinePaymentsStore() {
+      const value = readJson(STORAGE_SUPABASE_PAYMENTS_CACHE,null);
+      const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
+      return value && typeof value === "object" && !Array.isArray(value)
+        && String(value.clubId || "") === clubId
+        && value.store && typeof value.store === "object" && !Array.isArray(value.store)
+        ? value.store
+        : null;
+    }
+
+    function cacheOnlinePayments() {
+      const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
+      localStorage.setItem(STORAGE_SUPABASE_PAYMENTS_CACHE,JSON.stringify({
+        clubId,
+        loadedAt:new Date().toISOString(),
+        store:onlinePaymentsStore
+      }));
+    }
+
+    function mapRemotePaymentsStore(rows) {
+      const maps = attendanceUuidMaps();
+      const store = {};
+      (Array.isArray(rows) ? rows : []).forEach(row => {
+        const athleteId = maps.athleteUuidToLocal.get(String(row?.athlete_id || ""));
+        const month = paymentMonthKey(row?.payment_month);
+        const amount = Number(row?.amount);
+        if (!athleteId || !month || !Number.isFinite(amount) || amount < 0) return;
+        store[month] ||= {};
+        store[month][athleteId] = {
+          status:amount > 0 ? "paid" : "unpaid",
+          amount,
+          paidAt:null,
+          amountCustomized:true,
+          paymentAmountEntered:true,
+          note:typeof row?.note === "string" ? row.note : "",
+          supabaseId:String(row?.id || "")
+        };
+      });
+      return store;
+    }
+
+    async function loadOnlinePayments({force=false}={}) {
+      if (!paymentsMigrationStateForCurrentClub()) {
+        onlinePaymentsStore = {};
+        onlinePaymentsAvailable = false;
+        window.clubdeskPaymentsDataSource = "local";
+        return false;
+      }
+      if (onlinePaymentsLoadPromise) return onlinePaymentsLoadPromise;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      onlinePaymentsLoading = true;
+      setOnlineDataNotice("Зареждане на таксите от Supabase...");
+      onlinePaymentsLoadPromise = (async () => {
+        try {
+          if (!membership?.club_id) throw new Error("Missing authenticated club context");
+          const {data,error} = await window.clubdeskSupabase.from("payments")
+            .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note")
+            .eq("club_id",membership.club_id);
+          if (error) throw error;
+          onlinePaymentsStore = mapRemotePaymentsStore(data || []);
+          onlinePaymentsAvailable = true;
+          window.clubdeskPaymentsDataSource = "supabase";
+          cacheOnlinePayments();
+          setOnlineDataNotice();
+          return true;
+        } catch (error) {
+          console.error("ClubDesk Supabase payments load error",error);
+          const cached = cachedOnlinePaymentsStore();
+          onlinePaymentsStore = cached || {};
+          onlinePaymentsAvailable = false;
+          window.clubdeskPaymentsDataSource = cached ? "supabase-cache" : "unavailable";
+          setOnlineDataNotice("Няма връзка със Supabase. Показват се последно заредените такси.",true);
+          return false;
+        } finally {
+          onlinePaymentsLoading = false;
+          onlinePaymentsLoadPromise = null;
+        }
+      })();
+      return onlinePaymentsLoadPromise;
+    }
+
+    function canEditOnlinePayments() {
+      return !paymentsMigrationStateForCurrentClub() || (onlinePaymentsAvailable && window.clubdeskPaymentsDataSource === "supabase");
+    }
+
+    function calendarMigrationStateForCurrentMembership() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return membership?.club_id && membership?.id
+        ? {version:1,clubId:String(membership.club_id),membershipId:String(membership.id)}
+        : null;
+    }
+
+    function cachedOnlineCalendarEvents() {
+      const value = readJson(STORAGE_SUPABASE_CALENDAR_CACHE,null);
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return value && typeof value === "object" && !Array.isArray(value)
+        && String(value.clubId || "") === String(membership?.club_id || "")
+        && String(value.membershipId || "") === String(membership?.id || "")
+        && Array.isArray(value.events) ? value.events.map(normalizedCalendarEvent) : null;
+    }
+
+    function cacheOnlineCalendar() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      localStorage.setItem(STORAGE_SUPABASE_CALENDAR_CACHE,JSON.stringify({
+        clubId:String(membership?.club_id || ""),
+        membershipId:String(membership?.id || ""),
+        loadedAt:new Date().toISOString(),
+        events:onlineCalendarEvents
+      }));
+    }
+
+    function normalizeCalendarTime(value) {
+      const match = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.exec(String(value || "").trim());
+      return match ? `${match[1]}:${match[2]}` : "";
+    }
+
+    function mapRemoteCalendarEvent(row) {
+      return normalizedCalendarEvent({
+        id:String(row?.source_local_id || ""),
+        supabaseId:String(row?.id || ""),
+        title:String(row?.title || "").trim(),
+        date:String(row?.event_date || ""),
+        time:row?.event_time ? normalizeCalendarTime(row.event_time) : "",
+        note:typeof row?.note === "string" ? row.note.trim() : "",
+        ownerCoachId:migrationPreviewCoachMatch()?.id || "",
+        createdAt:String(row?.created_at || "")
+      });
+    }
+
+    async function loadOnlineCalendar({force=false}={}) {
+      if (!calendarMigrationStateForCurrentMembership()) {
+        onlineCalendarEvents = [];
+        onlineCalendarAvailable = false;
+        window.clubdeskCalendarDataSource = "local";
+        return false;
+      }
+      if (onlineCalendarLoadPromise) return onlineCalendarLoadPromise;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      onlineCalendarLoading = true;
+      setOnlineDataNotice("Зареждане на календара от Supabase...");
+      onlineCalendarLoadPromise = (async () => {
+        try {
+          if (!membership?.club_id || !membership?.id) throw new Error("Missing authenticated calendar owner");
+          const {data,error} = await window.clubdeskSupabase.from("calendar_events")
+            .select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note,created_at,updated_at")
+            .eq("club_id",membership.club_id)
+            .eq("owner_membership_id",membership.id);
+          if (error) throw error;
+          onlineCalendarEvents = (Array.isArray(data) ? data : []).map(mapRemoteCalendarEvent).filter(event => event.id && event.supabaseId);
+          onlineCalendarAvailable = true;
+          window.clubdeskCalendarDataSource = "supabase";
+          cacheOnlineCalendar();
+          setOnlineDataNotice();
+          return true;
+        } catch (error) {
+          console.error("ClubDesk Supabase calendar load error",error);
+          const cached = cachedOnlineCalendarEvents();
+          onlineCalendarEvents = cached || [];
+          onlineCalendarAvailable = false;
+          window.clubdeskCalendarDataSource = cached ? "supabase-cache" : "unavailable";
+          setOnlineDataNotice("Няма връзка със Supabase. Показват се последно заредените събития.",true);
+          return false;
+        } finally {
+          onlineCalendarLoading = false;
+          onlineCalendarLoadPromise = null;
+        }
+      })();
+      return onlineCalendarLoadPromise;
+    }
+
+    function canEditOnlineCalendar() {
+      return !calendarMigrationStateForCurrentMembership() || (onlineCalendarAvailable && window.clubdeskCalendarDataSource === "supabase");
+    }
+
     function setOnlineDataNotice(message="",offline=false) {
       const notice = document.getElementById("clubdeskOnlineDataNotice");
       if (!notice) return;
@@ -2341,6 +2701,36 @@
         if (previewButton) previewButton.hidden = true;
         if (executeButton) executeButton.hidden = true;
       }
+      if (authenticatedMembershipIsAdmin() && paymentsMigrationStateForCurrentClub()) renderPaymentsMigrationPreview();
+      if (authenticatedMembershipIsAdmin() && calendarMigrationStateForCurrentMembership()) renderCalendarMigrationPreview();
+    }
+
+    function onlineSynchronizationIsActive() {
+      const authenticated = window.clubdeskAuthenticatedUser;
+      const authenticationReady = Boolean(
+        authenticated?.authUser?.id
+        && authenticated?.profile
+        && authenticated?.membership?.status === "active"
+      );
+      return authenticationReady
+        && window.clubdeskGroupsDataSource === "supabase"
+        && window.clubdeskAthletesDataSource === "supabase"
+        && window.clubdeskAttendanceDataSource === "supabase"
+        && window.clubdeskPaymentsDataSource === "supabase"
+        && window.clubdeskCalendarDataSource === "supabase";
+    }
+
+    function renderOnlineSynchronizationStatus() {
+      const badge = document.getElementById("settingsOnlineSyncBadge");
+      const text = document.getElementById("settingsOnlineSyncText");
+      if (!badge || !text) return;
+      const active = onlineSynchronizationIsActive();
+      badge.textContent = active ? "Активна" : "Непълна";
+      badge.classList.toggle("green",active);
+      badge.classList.toggle("gray",!active);
+      text.textContent = active
+        ? "Групите, състезателите, присъствията, таксите и календарът се съхраняват в Supabase."
+        : "Част от данните все още не се синхронизират онлайн.";
     }
 
     function refreshOnlineDataViews() {
@@ -2352,13 +2742,14 @@
       renderAttendance();
       renderAttendanceHistory();
       renderPaymentTable();
+      renderCalendar();
       updateDashboardStats();
       renderSettingsGroups();
       renderSettingsCoaches();
       renderSettingsDataSummary();
       renderCoachScopeContext();
       updatePermissionUI();
-      renderOnlineMigrationCardStatus();
+      renderOnlineSynchronizationStatus();
     }
 
     async function loadOnlineClubData() {
@@ -2463,8 +2854,20 @@
       onlineAthletesAvailable = false;
       onlineAthletesLoading = true;
       onlineDataLoadPromise = null;
+      onlineAttendanceStore = {};
+      onlineAttendanceAvailable = false;
+      onlineAttendanceLoadPromise = null;
+      onlinePaymentsStore = {};
+      onlinePaymentsAvailable = false;
+      onlinePaymentsLoadPromise = null;
+      onlineCalendarEvents = [];
+      onlineCalendarAvailable = false;
+      onlineCalendarLoadPromise = null;
       hydrateOnlineDataCaches();
       await loadOnlineClubData();
+      await loadOnlineAttendance({force:true});
+      await loadOnlinePayments({force:true});
+      await loadOnlineCalendar({force:true});
       initializeCoachScope();
       refreshOnlineDataViews();
     };
@@ -2513,29 +2916,24 @@
       };
     }
 
+    function localCalendarEvents() {
+      return [];
+    }
+
     function calendarEvents() {
-      const stored = readJson(STORAGE_CALENDAR_EVENTS, []);
-      return Array.isArray(stored) ? stored.map(normalizedCalendarEvent) : [];
+      return onlineCalendarEvents;
     }
 
     function saveCalendarEvents(events) {
-      localStorage.setItem(STORAGE_CALENDAR_EVENTS,JSON.stringify(events.map(normalizedCalendarEvent)));
+      return false;
     }
 
     function migrateCalendarEventOwners() {
-      if (localStorage.getItem(STORAGE_CALENDAR_OWNER_MIGRATION) === "done") return;
-      const stored = readJson(STORAGE_CALENDAR_EVENTS,[]);
-      const events = Array.isArray(stored) ? stored.map(event => ({
-        ...event,
-        ownerCoachId:String(event?.ownerCoachId || CURRENT_COACH_ID)
-      })) : [];
-      localStorage.setItem(STORAGE_CALENDAR_EVENTS,JSON.stringify(events));
-      localStorage.setItem(STORAGE_CALENDAR_OWNER_MIGRATION,"done");
+      return;
     }
 
     function personalCalendarEvents() {
-      const userId = currentUserId();
-      return calendarEvents().filter(event => event.ownerCoachId === userId);
+      return calendarEvents();
     }
 
     function attendanceRecordHasStatus(record,eligibleIds=null) {
@@ -2553,8 +2951,13 @@
       return `${year}-${month}-${day}`;
     }
 
-    function getLocalMonthKey() {
-      return getLocalTodayDate().slice(0,7);
+    function isValidAttendanceDate(value) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ""));
+      if (!match) return false;
+      const date = new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));
+      return date.getFullYear() === Number(match[1])
+        && date.getMonth() === Number(match[2])-1
+        && date.getDate() === Number(match[3]);
     }
 
     function isEligibleAttendanceEntry(entry,eligibleIds=null) {
@@ -2630,13 +3033,20 @@
         if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
         return;
       }
+      const canEditCalendar = canEditOnlineCalendar() && !onlineCalendarMutationInProgress;
+      if (!event && calendarMigrationStateForCurrentMembership() && !canEditCalendar) {
+        if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
+        return;
+      }
       activeCalendarEventId = event?.id || null;
       document.getElementById("calendarEventModalTitle").textContent = event ? "Редактиране на събитие" : "Ново събитие";
       calendarEventDate.value = event?.date || date || getLocalTodayDate();
       calendarEventTitle.value = event?.title || "";
       calendarEventTime.value = event?.time || "";
       calendarEventNote.value = event?.note || "";
-      deleteCalendarEvent.hidden = !event;
+      [calendarEventDate,calendarEventTitle,calendarEventTime,calendarEventNote].forEach(control => { control.disabled = !canEditCalendar; });
+      deleteCalendarEvent.hidden = !event || !canEditCalendar;
+      saveCalendarEvent.hidden = !canEditCalendar;
       saveCalendarEvent.textContent = event ? "Запази промените" : "Запази";
       calendarEventModal.classList.add("show");
       calendarEventModal.setAttribute("aria-hidden","false");
@@ -2659,7 +3069,7 @@
     document.getElementById("cancelCalendarEvent")?.addEventListener("click", closeCalendarEventModal);
     calendarEventModal?.addEventListener("click", event => { if (event.target === calendarEventModal) closeCalendarEventModal(); });
 
-    calendarEventForm?.addEventListener("submit", event => {
+    calendarEventForm?.addEventListener("submit", async event => {
       event.preventDefault();
       const title = calendarEventTitle.value.trim();
       if (!calendarEventDate.value || !title) return;
@@ -2681,6 +3091,55 @@
         ownerCoachId:previous.ownerCoachId || currentUserId(),
         createdAt:previous.createdAt || new Date().toISOString()
       },events.length);
+      if (calendarMigrationStateForCurrentMembership()) {
+        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress) {
+          if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
+          return;
+        }
+        const membership = window.clubdeskAuthenticatedUser?.membership;
+        if (!membership?.club_id || !membership?.id) {
+          if (typeof showToast === "function") showToast("Липсва активно членство в клуба.");
+          return;
+        }
+        const row = {
+          club_id:membership.club_id,
+          owner_membership_id:membership.id,
+          source_local_id:String(savedEvent.id),
+          title:savedEvent.title.trim(),
+          event_date:savedEvent.date,
+          event_time:savedEvent.time ? normalizeCalendarTime(savedEvent.time) : null,
+          note:savedEvent.note.trim() || null
+        };
+        onlineCalendarMutationInProgress = true;
+        saveCalendarEvent.disabled = true;
+        saveCalendarEvent.textContent = "Запазване...";
+        try {
+          const query = isEditing
+            ? window.clubdeskSupabase.from("calendar_events").update(row)
+                .eq("id",previous.supabaseId)
+                .eq("club_id",membership.club_id)
+                .eq("owner_membership_id",membership.id)
+            : window.clubdeskSupabase.from("calendar_events").insert(row);
+          const {data,error} = await query.select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note");
+          if (error) throw error;
+          if (!Array.isArray(data) || data.length !== 1 || String(data[0].owner_membership_id) !== String(membership.id)) throw new Error("Supabase calendar save verification failed");
+          const confirmed = mapRemoteCalendarEvent(data[0]);
+          if (isEditing) onlineCalendarEvents[existingIndex] = confirmed;
+          else onlineCalendarEvents.push(confirmed);
+          cacheOnlineCalendar();
+          closeCalendarEventModal();
+          refreshCalendarView();
+          if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено успешно.");
+        } catch (error) {
+          console.error("ClubDesk Supabase calendar save error",error);
+          if (typeof showToast === "function") showToast("Събитието не беше запазено. Опитайте отново.");
+        } finally {
+          onlineCalendarMutationInProgress = false;
+          saveCalendarEvent.disabled = false;
+          saveCalendarEvent.textContent = isEditing ? "Запази промените" : "Запази";
+        }
+        return;
+      }
       if (existingIndex >= 0) events[existingIndex] = savedEvent;
       else events.push(savedEvent);
       saveCalendarEvents(events);
@@ -2689,13 +3148,44 @@
       if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено");
     });
 
-    deleteCalendarEvent?.addEventListener("click", () => {
+    deleteCalendarEvent?.addEventListener("click", async () => {
       const event = personalCalendarEvents().find(item => item.id === activeCalendarEventId);
       if (!event) {
         if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
         return;
       }
       if (!confirm("Сигурни ли сте, че искате да изтриете събитието?")) return;
+      if (calendarMigrationStateForCurrentMembership()) {
+        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress || !event.supabaseId) {
+          if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
+          return;
+        }
+        const membership = window.clubdeskAuthenticatedUser?.membership;
+        onlineCalendarMutationInProgress = true;
+        deleteCalendarEvent.disabled = true;
+        try {
+          const {data,error} = await window.clubdeskSupabase.from("calendar_events")
+            .delete()
+            .eq("id",event.supabaseId)
+            .eq("club_id",membership.club_id)
+            .eq("owner_membership_id",membership.id)
+            .select("id");
+          if (error) throw error;
+          if (!Array.isArray(data) || data.length !== 1) throw new Error("Supabase calendar delete verification failed");
+          onlineCalendarEvents = onlineCalendarEvents.filter(item => item.id !== event.id);
+          cacheOnlineCalendar();
+          closeCalendarEventModal();
+          refreshCalendarView();
+          if (typeof showToast === "function") showToast("Събитието е изтрито");
+        } catch (error) {
+          console.error("ClubDesk Supabase calendar delete error",error);
+          if (typeof showToast === "function") showToast("Събитието не беше изтрито. Опитайте отново.");
+        } finally {
+          onlineCalendarMutationInProgress = false;
+          deleteCalendarEvent.disabled = false;
+        }
+        return;
+      }
       saveCalendarEvents(calendarEvents().filter(event => event.id !== activeCalendarEventId));
       closeCalendarEventModal();
       refreshCalendarView();
@@ -3152,14 +3642,1184 @@
       }
     }
 
-    document.getElementById("previewSupabaseMigration")?.addEventListener("click",renderSupabaseMigrationPreview);
-    document.getElementById("executeSupabaseMigration")?.addEventListener("click",openSupabaseMigrationConfirmModal);
-    document.getElementById("confirmSupabaseMigration")?.addEventListener("click",executeSupabaseMigration);
-    document.getElementById("cancelSupabaseMigration")?.addEventListener("click",closeSupabaseMigrationConfirmModal);
-    document.getElementById("closeSupabaseMigrationConfirm")?.addEventListener("click",closeSupabaseMigrationConfirmModal);
-    document.getElementById("supabaseMigrationConfirmModal")?.addEventListener("click",event => {
-      if (event.target === event.currentTarget) closeSupabaseMigrationConfirmModal();
-    });
+    function localAttendanceStatusEntries(record) {
+      const raw = record?.statuses;
+      if (Array.isArray(raw)) {
+        return raw.map(item => [String(item?.athleteId ?? item?.athlete_id ?? item?.id ?? ""),item?.status]);
+      }
+      return raw && typeof raw === "object" ? Object.entries(raw) : [];
+    }
+
+    function buildLegacyAttendanceMigrationPreviewData() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const maps = attendanceUuidMaps({requireMigrationMapping:true});
+      const blockingProblems = [];
+      const warnings = [];
+      if (!membership?.club_id || !membership?.id) blockingProblems.push("Липсва валидно активно членство в клуб.");
+      if (membership?.access_role !== "admin") blockingProblems.push("Само администратор може да прехвърля присъствия.");
+      if (!maps) blockingProblems.push("Липсва валидно съпоставяне на групи и състезатели към Supabase.");
+      const groupLocalToUuid = maps?.groupLocalToUuid || new Map();
+      const athleteLocalToUuid = maps?.athleteLocalToUuid || new Map();
+      const rawStore = localAttendanceStore();
+      const rawEntries = rawStore && typeof rawStore === "object" && !Array.isArray(rawStore) ? Object.entries(rawStore) : [];
+      const sessions = [];
+      const canonicalSessionCounts = new Map();
+      const unmappedGroups = new Set();
+      const unmappedAthletes = new Set();
+      const invalidStatuses = [];
+      const invalidDates = new Set();
+      let excludedRecordCount = 0;
+
+      rawEntries.forEach(([rawKey,record],index) => {
+        const separator = String(rawKey).indexOf("|");
+        const date = separator > 0 ? String(rawKey).slice(0,separator) : "";
+        const group = separator > 0 ? normalizeGroupId(String(rawKey).slice(separator+1)) : "";
+        const sourceLocalId = String(rawKey || `attendance-session-${index+1}`);
+        const dateValid = isValidAttendanceDate(date);
+        const groupUuid = groupLocalToUuid.get(group) || "";
+        if (!dateValid) invalidDates.add(sourceLocalId);
+        if (!groupUuid) unmappedGroups.add(group || sourceLocalId);
+        const canonicalKey = `${date}|${group}`;
+        canonicalSessionCounts.set(canonicalKey,(canonicalSessionCounts.get(canonicalKey) || 0)+1);
+
+        const statusEntries = localAttendanceStatusEntries(record);
+        const statusIdCounts = new Map();
+        const statuses = {};
+        const eligibleRecords = [];
+        let sessionHasInvalidStatus = false;
+        let sessionHasDuplicateAthlete = false;
+        statusEntries.forEach(([rawAthleteId,status]) => {
+          const athleteId = String(rawAthleteId || "");
+          if (!athleteId) return;
+          statusIdCounts.set(athleteId,(statusIdCounts.get(athleteId) || 0)+1);
+          if (status == null || status === "") return;
+          if (!ATTENDANCE_STATUS_VALUES.includes(status)) {
+            sessionHasInvalidStatus = true;
+            invalidStatuses.push(`${sourceLocalId}: ${athleteId} (${String(status)})`);
+            return;
+          }
+          statuses[athleteId] = status;
+          const athleteUuid = athleteLocalToUuid.get(athleteId);
+          if (!athleteUuid) {
+            unmappedAthletes.add(athleteId);
+            excludedRecordCount += 1;
+            return;
+          }
+          eligibleRecords.push({athleteLocalId:athleteId,athleteUuid,status});
+        });
+        statusIdCounts.forEach((count,athleteId) => {
+          if (count > 1) {
+            sessionHasDuplicateAthlete = true;
+            blockingProblems.push(`Дублиран запис за състезател ${athleteId} в сесия ${sourceLocalId}.`);
+          }
+        });
+
+        const entry = {
+          date,
+          group,
+          statuses,
+          sessionMode:record?.sessionMode,
+          rosterAthleteIds:Array.isArray(record?.rosterAthleteIds) ? record.rosterAthleteIds.map(String) : null,
+          guestAthleteIds:Array.isArray(record?.guestAthleteIds) ? record.guestAthleteIds.map(String) : [],
+          note:typeof record?.note === "string" ? record.note : ""
+        };
+        const resolved = resolvedAttendanceSession(entry);
+        const mapAthleteIds = ids => [...new Set((ids || []).map(String).map(id => {
+          const uuid = athleteLocalToUuid.get(id);
+          if (!uuid) unmappedAthletes.add(id);
+          return uuid;
+        }).filter(Boolean))];
+        sessions.push({
+          sourceLocalId,date,group,groupUuid,dateValid,sessionHasInvalidStatus,sessionHasDuplicateAthlete,
+          note:entry.note.trim() || null,
+          sessionMode:resolved.sessionMode,
+          rosterAthleteUuids:mapAthleteIds(resolved.rosterAthleteIds),
+          guestAthleteUuids:mapAthleteIds(resolved.guestAthleteIds),
+          records:eligibleRecords
+        });
+      });
+
+      canonicalSessionCounts.forEach((count,key) => {
+        if (count > 1) blockingProblems.push(`Дублиран локален идентификатор на сесия: ${key}.`);
+      });
+      invalidDates.forEach(id => blockingProblems.push(`Невалидна дата в сесия: ${id}.`));
+      invalidStatuses.forEach(value => blockingProblems.push(`Неподдържан статус: ${value}.`));
+      unmappedGroups.forEach(group => blockingProblems.push(`Сесията няма валидна свързана група: ${group}.`));
+      unmappedAthletes.forEach(id => warnings.push(`Състезател без Supabase съпоставяне: ${id}.`));
+      const eligibleSessions = sessions.filter(session => session.dateValid && session.groupUuid && !session.sessionHasInvalidStatus && !session.sessionHasDuplicateAthlete);
+      return {
+        membership,
+        maps,
+        localSessionCount:rawEntries.length,
+        sessions,
+        eligibleSessions,
+        eligibleRecordCount:eligibleSessions.reduce((sum,session) => sum+session.records.length,0),
+        excludedRecordCount,
+        unmappedGroupCount:unmappedGroups.size,
+        unmappedAthleteCount:unmappedAthletes.size,
+        invalidStatusCount:invalidStatuses.length,
+        invalidDateCount:invalidDates.size,
+        blockingProblems:[...new Set(blockingProblems)],
+        warnings:[...new Set(warnings)]
+      };
+    }
+
+    function attendanceMigrationAthleteInfo(athleteId) {
+      const id = String(athleteId || "");
+      const online = allAthletes().find(athlete => String(athlete?.id || "") === id);
+      if (online) return {id,name:String(online.name || ""),group:normalizeGroupId(online.group)};
+      const local = [...baseAthletes,...customAthletes()].find(athlete => String(athlete?.id || "") === id);
+      const merged = {...(local || {}),...(athleteEdits()[id] || {})};
+      return {id,name:String(merged.name || ""),group:normalizeGroupId(merged.group)};
+    }
+
+    function normalizeAttendanceMigrationDate(value) {
+      const raw = String(value || "").trim();
+      const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(raw);
+      if (!match) return raw;
+      return `${match[1]}-${String(Number(match[2])).padStart(2,"0")}-${String(Number(match[3])).padStart(2,"0")}`;
+    }
+
+    function attendanceConflictResolutions() {
+      const stored = readJson(STORAGE_ATTENDANCE_CONFLICT_RESOLUTIONS,{});
+      return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+    }
+
+    function hasAttendanceConflictResolution(resolutions,sessionId,athleteId) {
+      const sessionResolutions = resolutions?.[sessionId];
+      return Boolean(sessionResolutions && typeof sessionResolutions === "object" && Object.prototype.hasOwnProperty.call(sessionResolutions,athleteId));
+    }
+
+    function saveAttendanceConflictResolution(sessionId,athleteId,status) {
+      if (!sessionId || !athleteId || (status !== null && !ATTENDANCE_STATUS_VALUES.includes(status))) return;
+      const resolutions = attendanceConflictResolutions();
+      if (!resolutions[sessionId] || typeof resolutions[sessionId] !== "object" || Array.isArray(resolutions[sessionId])) resolutions[sessionId] = {};
+      resolutions[sessionId][athleteId] = status;
+      localStorage.setItem(STORAGE_ATTENDANCE_CONFLICT_RESOLUTIONS,JSON.stringify(resolutions));
+    }
+
+    function attendanceMigrationStatusLabel(status) {
+      return ({
+        present:"Присъства",
+        absent:"Отсъства",
+        injured:"Контузен",
+        competition:"Състезание",
+        rest:"Почивка"
+      })[status] || status;
+    }
+
+    function buildAttendanceMigrationPreviewData() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const maps = attendanceUuidMaps({requireMigrationMapping:true});
+      const resolutions = attendanceConflictResolutions();
+      const blockingProblems = [];
+      const warnings = [];
+      if (!membership?.club_id || !membership?.id) blockingProblems.push("Липсва валидно активно членство в клуб.");
+      if (membership?.access_role !== "admin") blockingProblems.push("Само администратор може да прехвърля присъствия.");
+      if (!maps) blockingProblems.push("Липсва валидно съпоставяне на групи и състезатели към Supabase.");
+      const groupLocalToUuid = maps?.groupLocalToUuid || new Map();
+      const athleteLocalToUuid = maps?.athleteLocalToUuid || new Map();
+      const rawStore = localAttendanceStore();
+      const rawEntries = rawStore && typeof rawStore === "object" && !Array.isArray(rawStore) ? Object.entries(rawStore) : [];
+      const logicalSessions = new Map();
+
+      rawEntries.forEach(([rawKey,record],index) => {
+        const separator = String(rawKey).indexOf("|");
+        const date = separator > 0 ? normalizeAttendanceMigrationDate(String(rawKey).slice(0,separator)) : "";
+        const group = separator > 0 ? normalizeGroupId(String(rawKey).slice(separator+1).trim()) : "";
+        const logicalKey = `${date}|${group}`;
+        if (!logicalSessions.has(logicalKey)) {
+          logicalSessions.set(logicalKey,{
+            sourceLocalId:logicalKey || `attendance-session-${index+1}`,
+            date,
+            group,
+            rawKeys:[],
+            statusCounts:new Map(),
+            rosterAthleteIds:new Set(),
+            guestAthleteIds:new Set(),
+            notes:new Set(),
+            modes:new Set(),
+            invalidStatuses:[]
+          });
+        }
+        const logical = logicalSessions.get(logicalKey);
+        logical.rawKeys.push(String(rawKey));
+        const copyStatuses = new Map();
+        localAttendanceStatusEntries(record).forEach(([rawAthleteId,status]) => {
+          const athleteId = String(rawAthleteId || "");
+          if (!athleteId || status == null || status === "") return;
+          if (!ATTENDANCE_STATUS_VALUES.includes(status)) {
+            logical.invalidStatuses.push(`${athleteId} (${String(status)})`);
+            return;
+          }
+          if (!copyStatuses.has(athleteId)) copyStatuses.set(athleteId,new Set());
+          copyStatuses.get(athleteId).add(status);
+        });
+        copyStatuses.forEach((statuses,athleteId) => {
+          if (!logical.statusCounts.has(athleteId)) logical.statusCounts.set(athleteId,new Map());
+          const counts = logical.statusCounts.get(athleteId);
+          statuses.forEach(status => counts.set(status,(counts.get(status) || 0)+1));
+        });
+        (Array.isArray(record?.rosterAthleteIds) ? record.rosterAthleteIds : []).forEach(id => logical.rosterAthleteIds.add(String(id)));
+        (Array.isArray(record?.guestAthleteIds) ? record.guestAthleteIds : []).forEach(id => logical.guestAthleteIds.add(String(id)));
+        const note = typeof record?.note === "string" ? record.note.trim() : "";
+        if (note) logical.notes.add(note);
+        if (["scheduled","extra-group","selected-athletes"].includes(record?.sessionMode)) logical.modes.add(record.sessionMode);
+      });
+
+      const unmappedGroups = new Set();
+      const unmappedAthletes = new Map();
+      const invalidDates = new Set();
+      const invalidStatuses = [];
+      const statusConflicts = [];
+      const unresolvedConflicts = [];
+      const sessions = [];
+      let excludedRecordCount = 0;
+
+      logicalSessions.forEach(logical => {
+        const dateValid = isValidAttendanceDate(logical.date);
+        const groupUuid = groupLocalToUuid.get(logical.group) || "";
+        if (!dateValid) invalidDates.add(logical.sourceLocalId);
+        if (!groupUuid) unmappedGroups.add(logical.group || logical.sourceLocalId);
+        logical.invalidStatuses.forEach(status => invalidStatuses.push(`${logical.sourceLocalId}: ${status}`));
+
+        const statuses = {};
+        let sessionHasUnresolvedConflict = false;
+        logical.statusCounts.forEach((counts,athleteId) => {
+          const distinctStatuses = [...counts.keys()];
+          if (distinctStatuses.length > 1) {
+            const info = attendanceMigrationAthleteInfo(athleteId);
+            const conflict = {
+              sessionId:logical.sourceLocalId,
+              athleteId,
+              athleteName:info.name || athleteId,
+              date:logical.date,
+              group:logical.group,
+              statusCounts:distinctStatuses.map(status => ({status,count:counts.get(status) || 0})),
+              resolved:hasAttendanceConflictResolution(resolutions,logical.sourceLocalId,athleteId),
+              resolution:null
+            };
+            if (!conflict.resolved) {
+              sessionHasUnresolvedConflict = true;
+              unresolvedConflicts.push(conflict);
+            } else {
+              const resolution = resolutions[logical.sourceLocalId][athleteId];
+              conflict.resolution = resolution;
+              if (resolution === null) excludedRecordCount += 1;
+              else if (distinctStatuses.includes(resolution)) statuses[athleteId] = resolution;
+              else {
+                conflict.resolved = false;
+                sessionHasUnresolvedConflict = true;
+                unresolvedConflicts.push(conflict);
+              }
+            }
+            statusConflicts.push(conflict);
+            return;
+          }
+          statuses[athleteId] = distinctStatuses[0];
+        });
+
+        const allAthleteIds = new Set([
+          ...logical.rosterAthleteIds,
+          ...logical.guestAthleteIds,
+          ...logical.statusCounts.keys()
+        ]);
+        const mappedRoster = [];
+        const mappedGuests = [];
+        const eligibleRecords = [];
+        allAthleteIds.forEach(athleteId => {
+          const athleteUuid = athleteLocalToUuid.get(athleteId);
+          const hasMarkedRecord = Object.prototype.hasOwnProperty.call(statuses,athleteId);
+          const hasAnyLocalMarkedRecord = logical.statusCounts.has(athleteId);
+          const inRoster = logical.rosterAthleteIds.has(athleteId);
+          const isGuest = logical.guestAthleteIds.has(athleteId);
+          if (!athleteUuid) {
+            const info = attendanceMigrationAthleteInfo(athleteId);
+            const existing = unmappedAthletes.get(athleteId) || {...info,marked:false,roster:false,guest:false,sessions:new Set()};
+            existing.marked ||= hasAnyLocalMarkedRecord;
+            existing.roster ||= inRoster;
+            existing.guest ||= isGuest;
+            existing.sessions.add(logical.sourceLocalId);
+            unmappedAthletes.set(athleteId,existing);
+            if (hasAnyLocalMarkedRecord) excludedRecordCount += 1;
+            return;
+          }
+          if (inRoster) mappedRoster.push(athleteUuid);
+          if (isGuest) mappedGuests.push(athleteUuid);
+          if (hasMarkedRecord) eligibleRecords.push({athleteLocalId:athleteId,athleteUuid,status:statuses[athleteId]});
+        });
+
+        const notes = [...logical.notes];
+        const note = notes.sort((a,b) => b.length-a.length || a.localeCompare(b,"bg-BG"))[0] || null;
+        if (notes.length > 1) warnings.push(`Различни бележки за ${logical.sourceLocalId}; запазена е най-дългата бележка.`);
+        const sessionMode = logical.modes.has("selected-athletes")
+          ? "selected-athletes"
+          : logical.modes.has("extra-group")
+            ? "extra-group"
+            : "scheduled";
+        sessions.push({
+          sourceLocalId:logical.sourceLocalId,
+          date:logical.date,
+          group:logical.group,
+          groupUuid,
+          dateValid,
+          sessionHasInvalidStatus:logical.invalidStatuses.length > 0,
+          sessionHasUnresolvedConflict,
+          note,
+          sessionMode,
+          rosterAthleteUuids:[...new Set(mappedRoster)],
+          guestAthleteUuids:[...new Set(mappedGuests)],
+          records:eligibleRecords,
+          rawCopyCount:logical.rawKeys.length
+        });
+      });
+
+      invalidDates.forEach(id => blockingProblems.push(`Невалидна дата в сесия: ${id}.`));
+      invalidStatuses.forEach(value => blockingProblems.push(`Неподдържан статус: ${value}.`));
+      unmappedGroups.forEach(group => blockingProblems.push(`Сесията няма валидна свързана група: ${group}.`));
+      unmappedAthletes.forEach(info => {
+        const groupLabel = info.group ? (groupNames[info.group] || info.group) : "Без група";
+        if (!info.marked && info.guest) {
+          warnings.push(`${info.name || "Неизвестен състезател"} няма онлайн съответствие и ще бъде изключен само от състава на тази тренировка. Няма да бъде загубен отбелязан статус.`);
+          return;
+        }
+        const appearance = info.marked
+          ? "има отбелязано присъствие"
+          : info.guest
+            ? "участва само като гост в състава"
+            : "участва само в състава";
+        warnings.push(`Несвързан състезател: ${info.name || "Неизвестен"} · локален ID: ${info.id} · група: ${groupLabel} · ${appearance}.`);
+      });
+
+      const eligibleSessions = sessions.filter(session => session.dateValid && session.groupUuid && !session.sessionHasInvalidStatus);
+      const mergedDuplicateCopyCount = Math.max(0,rawEntries.length-logicalSessions.size);
+      return {
+        membership,
+        maps,
+        localSessionCount:rawEntries.length,
+        logicalSessionCount:logicalSessions.size,
+        mergedDuplicateCopyCount,
+        sessions,
+        eligibleSessions,
+        eligibleRecordCount:eligibleSessions.reduce((sum,session) => sum+session.records.length,0),
+        excludedRecordCount,
+        unmappedGroupCount:unmappedGroups.size,
+        unmappedAthleteCount:unmappedAthletes.size,
+        unmappedAthletes:[...unmappedAthletes.values()].map(info => ({...info,sessions:[...info.sessions]})),
+        invalidStatusCount:invalidStatuses.length,
+        invalidDateCount:invalidDates.size,
+        statusConflictCount:statusConflicts.length,
+        statusConflicts,
+        unresolvedConflictCount:unresolvedConflicts.length,
+        unresolvedConflicts,
+        resolvedConflictCount:statusConflicts.length-unresolvedConflicts.length,
+        blockingProblems:[...new Set(blockingProblems)],
+        warnings:[...new Set(warnings)]
+      };
+    }
+
+    function renderAttendanceMigrationPreview() {
+      const container = document.getElementById("settingsAttendanceMigrationPreview");
+      const executeButton = document.getElementById("executeAttendanceMigration");
+      if (!container || !authenticatedMembershipIsAdmin()) return;
+      const data = buildAttendanceMigrationPreviewData();
+      currentAttendanceMigrationPreview = data;
+      const completed = attendanceMigrationStateForCurrentClub();
+      container.hidden = false;
+      executeButton.hidden = false;
+      executeButton.disabled = attendanceMigrationInProgress || data.blockingProblems.length > 0 || data.unresolvedConflictCount > 0 || data.eligibleSessions.length === 0;
+      executeButton.textContent = completed ? "Синхронизирай отново" : "Прехвърли присъствията";
+      const conflictCards = data.statusConflicts.map((conflict,index) => {
+        const groupLabel = groupNames[conflict.group] || conflict.group || "Без група";
+        const selectedValue = conflict.resolved ? conflict.resolution : undefined;
+        const options = conflict.statusCounts.map(item => `
+          <label class="attendance-conflict-option">
+            <input type="radio" name="attendance-conflict-${index}" value="${escapeHtml(item.status)}" data-conflict-session-id="${escapeHtml(conflict.sessionId)}" data-conflict-athlete-id="${escapeHtml(conflict.athleteId)}"${selectedValue === item.status ? " checked" : ""}>
+            <span>${escapeHtml(attendanceMigrationStatusLabel(item.status))}</span>
+            <small>${item.count} ${item.count === 1 ? "локално копие" : "локални копия"}</small>
+          </label>`).join("");
+        return `
+          <div class="attendance-conflict-card">
+            <div class="attendance-conflict-card-head">
+              <div><strong>${escapeHtml(conflict.athleteName)}</strong><span>${escapeHtml(formatBgDate(conflict.date))} · ${escapeHtml(groupLabel)}</span></div>
+            </div>
+            <div class="attendance-conflict-options">
+              ${options}
+              <label class="attendance-conflict-option">
+                <input type="radio" name="attendance-conflict-${index}" value="__unmarked__" data-conflict-session-id="${escapeHtml(conflict.sessionId)}" data-conflict-athlete-id="${escapeHtml(conflict.athleteId)}"${conflict.resolved && selectedValue === null ? " checked" : ""}>
+                <span>Остави без отбелязан статус</span>
+              </label>
+            </div>
+          </div>`;
+      }).join("");
+      const conflictResolution = data.statusConflicts.length ? `
+        <div class="attendance-migration-block">
+          <h4>Разрешаване на противоречия</h4>
+          ${data.unresolvedConflictCount
+            ? `<p class="settings-migration-message pending">Остават неразрешени противоречия: ${data.unresolvedConflictCount}</p>`
+            : '<div class="settings-migration-result"><strong>Всички противоречия са разрешени.</strong></div>'}
+          <div class="attendance-conflict-list">${conflictCards}</div>
+        </div>` : "";
+      const blockingSection = data.blockingProblems.length || data.unresolvedConflictCount ? `
+        <section class="settings-migration-section">
+          <h4>Проблеми, които блокират миграцията</h4>
+          ${data.blockingProblems.length ? `<ul class="settings-migration-warnings">${data.blockingProblems.map(problem => `<li>${escapeHtml(problem)}</li>`).join("")}</ul>` : ""}
+          ${conflictResolution}
+        </section>` : "";
+      const resolvedConflictSection = data.statusConflicts.length && !data.unresolvedConflictCount ? `<section class="settings-migration-section">${conflictResolution}</section>` : "";
+      const state = completed ? `
+        <div class="settings-migration-result">
+          <strong>Присъствията са прехвърлени успешно.</strong>
+          Присъствията вече се използват директно от Supabase.<br>
+          Прехвърлени тренировки: ${Number(completed.migratedSessionCount || 0)}<br>
+          Прехвърлени записи: ${Number(completed.migratedRecordCount || 0)}<br>
+          Дата: ${escapeHtml(formatMigrationDate(completed.migratedAt))}
+        </div>` : '<p class="settings-migration-notice">Това е само предварителен преглед. Няма изпратени присъствия.</p>';
+      container.innerHTML = `
+        ${state}
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.localSessionCount}</strong><span>Намерени локални записи за тренировки</span></div>
+          <div class="settings-migration-total"><strong>${data.eligibleSessions.length}</strong><span>Уникални тренировки за прехвърляне</span></div>
+          <div class="settings-migration-total"><strong>${data.eligibleRecordCount}</strong><span>Готови записи</span></div>
+          <div class="settings-migration-total"><strong>${data.excludedRecordCount}</strong><span>Изключени записи</span></div>
+        </div>
+        <p class="settings-migration-message">Обединени дублирани локални записи: ${data.mergedDuplicateCopyCount}</p>
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.unmappedGroupCount}</strong><span>Несвързани групи</span></div>
+          <div class="settings-migration-total"><strong>${data.unmappedAthleteCount}</strong><span>Несвързани състезатели</span></div>
+          <div class="settings-migration-total"><strong>${data.invalidStatusCount}</strong><span>Невалидни статуси</span></div>
+          <div class="settings-migration-total"><strong>${data.invalidDateCount}</strong><span>Невалидни дати</span></div>
+        </div>
+        ${blockingSection}
+        ${resolvedConflictSection}
+        ${data.warnings.length ? `<section class="settings-migration-section"><h4>Предупреждения</h4><ul class="settings-migration-warnings">${data.warnings.map(warning => `<li>${escapeHtml(warning)}</li>`).join("")}</ul></section>` : ""}`;
+    }
+
+    function closeAttendanceMigrationConfirmModal() {
+      if (attendanceMigrationInProgress) return;
+      const modal = document.getElementById("attendanceMigrationConfirmModal");
+      modal?.classList.remove("show");
+      modal?.setAttribute("aria-hidden","true");
+    }
+
+    function openAttendanceMigrationConfirmModal() {
+      const data = buildAttendanceMigrationPreviewData();
+      currentAttendanceMigrationPreview = data;
+      if (data.blockingProblems.length || data.unresolvedConflictCount || !data.eligibleSessions.length) {
+        renderAttendanceMigrationPreview();
+        return;
+      }
+      document.getElementById("attendanceMigrationConfirmText").textContent = `Ще бъдат прехвърлени ${data.eligibleSessions.length} тренировки и ${data.eligibleRecordCount} записа за присъствие.`;
+      const modal = document.getElementById("attendanceMigrationConfirmModal");
+      modal?.classList.add("show");
+      modal?.setAttribute("aria-hidden","false");
+    }
+
+    function attendanceSessionRowsForMigration(data) {
+      return data.eligibleSessions.map(session => ({
+        club_id:data.membership.club_id,
+        group_id:session.groupUuid,
+        session_date:session.date,
+        note:session.note,
+        created_by_membership_id:data.membership.id,
+        source_local_id:session.sourceLocalId,
+        session_mode:session.sessionMode,
+        roster_athlete_ids:session.rosterAthleteUuids,
+        guest_athlete_ids:session.guestAthleteUuids
+      }));
+    }
+
+    function resolveMigratedSessionIds(localSessions,remoteSessions) {
+      const result = {};
+      localSessions.forEach(local => {
+        const matches = (remoteSessions || []).filter(remote =>
+          String(remote.group_id || "") === local.groupUuid && String(remote.session_date || "") === local.date
+        );
+        if (matches.length !== 1 || !matches[0]?.id) throw new Error(`Неуспешно съпоставяне на сесия: ${local.sourceLocalId}`);
+        result[local.sourceLocalId] = String(matches[0].id);
+      });
+      return result;
+    }
+
+    async function verifyAttendanceMigration(data,sessionIdMap) {
+      const sessionIds = Object.values(sessionIdMap);
+      const {data:remoteSessions,error:sessionError} = await window.clubdeskSupabase.from("attendance_sessions")
+        .select("id,group_id,session_date,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note")
+        .in("id",sessionIds);
+      if (sessionError) throw sessionError;
+      if ((remoteSessions || []).length !== sessionIds.length) throw new Error("Не всички тренировки бяха потвърдени от Supabase.");
+      const validAthleteUuids = new Set(data.maps.athleteLocalToUuid.values());
+      data.eligibleSessions.forEach(local => {
+        const remote = (remoteSessions || []).find(row => String(row.id) === sessionIdMap[local.sourceLocalId]);
+        if (!remote) throw new Error(`Липсва потвърдена тренировка: ${local.sourceLocalId}`);
+        const roster = Array.isArray(remote.roster_athlete_ids) ? remote.roster_athlete_ids.map(String) : [];
+        const guests = Array.isArray(remote.guest_athlete_ids) ? remote.guest_athlete_ids.map(String) : [];
+        if ([...roster,...guests].some(uuid => !validAthleteUuids.has(uuid))) throw new Error(`Невалиден състезател в състава на: ${local.sourceLocalId}`);
+      });
+      let remoteRecords = [];
+      if (sessionIds.length) {
+        const {data:records,error} = await window.clubdeskSupabase.from("attendance_records")
+          .select("id,session_id,athlete_id,status")
+          .in("session_id",sessionIds);
+        if (error) throw error;
+        remoteRecords = records || [];
+      }
+      const expectedRecords = data.eligibleSessions.flatMap(session => session.records.map(record => ({
+        sessionId:sessionIdMap[session.sourceLocalId],athleteId:record.athleteUuid,status:record.status
+      })));
+      expectedRecords.forEach(expected => {
+        const matches = remoteRecords.filter(record => String(record.session_id) === expected.sessionId && String(record.athlete_id) === expected.athleteId);
+        if (matches.length !== 1 || matches[0].status !== expected.status) throw new Error("Неуспешна проверка на запис за присъствие.");
+      });
+      return {remoteSessions,remoteRecords,expectedRecordCount:expectedRecords.length};
+    }
+
+    async function executeAttendanceMigration() {
+      if (attendanceMigrationInProgress) return;
+      const data = buildAttendanceMigrationPreviewData();
+      currentAttendanceMigrationPreview = data;
+      if (data.blockingProblems.length || data.unresolvedConflictCount || !data.eligibleSessions.length) {
+        closeAttendanceMigrationConfirmModal();
+        renderAttendanceMigrationPreview();
+        return;
+      }
+      attendanceMigrationInProgress = true;
+      const buttons = ["previewAttendanceMigration","executeAttendanceMigration","confirmAttendanceMigration","cancelAttendanceMigration"].map(id => document.getElementById(id)).filter(Boolean);
+      buttons.forEach(button => { button.disabled = true; });
+      document.getElementById("confirmAttendanceMigration").textContent = "Прехвърляне...";
+      try {
+        const sessionRows = attendanceSessionRowsForMigration(data);
+        const {data:returnedSessions,error:sessionError} = await window.clubdeskSupabase.from("attendance_sessions")
+          .upsert(sessionRows,{onConflict:"group_id,session_date"})
+          .select("id,group_id,session_date,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+        if (sessionError) throw sessionError;
+        const sessionIdMap = resolveMigratedSessionIds(data.eligibleSessions,returnedSessions || []);
+        const recordRows = data.eligibleSessions.flatMap(session => session.records.map(record => ({
+          session_id:sessionIdMap[session.sourceLocalId],
+          athlete_id:record.athleteUuid,
+          status:record.status
+        })));
+        if (recordRows.length) {
+          const {error:recordError} = await window.clubdeskSupabase.from("attendance_records")
+            .upsert(recordRows,{onConflict:"session_id,athlete_id"})
+            .select("id,session_id,athlete_id,status");
+          if (recordError) throw recordError;
+        }
+        const verification = await verifyAttendanceMigration(data,sessionIdMap);
+        const migratedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_SUPABASE_ATTENDANCE_MIGRATION,JSON.stringify({
+          version:1,
+          clubId:data.membership.club_id,
+          membershipId:data.membership.id,
+          migratedAt,
+          sessions:sessionIdMap,
+          migratedSessionCount:Object.keys(sessionIdMap).length,
+          migratedRecordCount:verification.expectedRecordCount
+        }));
+        document.getElementById("attendanceMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("attendanceMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+        await loadOnlineAttendance({force:true});
+        attendanceSessionDraft = null;
+        renderAttendanceMigrationPreview();
+        renderAttendance();
+        renderAttendanceHistory();
+        updateDashboardStats();
+        renderSettingsDataSummary();
+        updatePermissionUI();
+        if (typeof showToast === "function") showToast("Присъствията са прехвърлени успешно.");
+      } catch (error) {
+        console.error("ClubDesk Supabase attendance migration error",error);
+        document.getElementById("attendanceMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("attendanceMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+        const preview = document.getElementById("settingsAttendanceMigrationPreview");
+        if (preview) {
+          preview.hidden = false;
+          preview.insertAdjacentHTML("afterbegin",'<p class="settings-migration-message error">Прехвърлянето на присъствията не беше успешно. Локалните данни не са променени.</p>');
+        }
+      } finally {
+        attendanceMigrationInProgress = false;
+        buttons.forEach(button => { button.disabled = false; });
+        document.getElementById("confirmAttendanceMigration").textContent = "Прехвърли";
+        if (currentAttendanceMigrationPreview) renderAttendanceMigrationPreview();
+      }
+    }
+
+    function localPaymentCandidate(record) {
+      if (typeof record === "number") return {actual:true,amount:record,note:""};
+      if (!record || typeof record !== "object" || Array.isArray(record)) return {actual:false};
+      const actual = record.status === "paid" || record.paid === true || record.paymentAmountEntered === true;
+      return {actual,amount:record.amount,note:typeof record.note === "string" ? record.note.trim() : ""};
+    }
+
+    function buildPaymentsMigrationPreviewData() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const maps = attendanceUuidMaps();
+      const blockingProblems = [];
+      const warnings = [];
+      if (!membership?.club_id || !membership?.id) blockingProblems.push("Липсва валидно активно членство в клуб.");
+      if (membership?.access_role !== "admin") blockingProblems.push("Само администратор може да прехвърля такси.");
+      const source = localMonthlyPayments();
+      const logical = new Map();
+      const invalidMonths = [];
+      const invalidAmounts = [];
+      const unmappedAthletes = new Map();
+      const postponedRecords = [];
+      let localRecordCount = 0;
+
+      Object.entries(source).forEach(([rawMonth,monthRecords]) => {
+        if (!monthRecords || typeof monthRecords !== "object" || Array.isArray(monthRecords)) return;
+        Object.entries(monthRecords).forEach(([rawAthleteId,rawRecord]) => {
+          const copies = Array.isArray(rawRecord) ? rawRecord : [rawRecord];
+          copies.forEach((copy,copyIndex) => {
+            const candidate = localPaymentCandidate(copy);
+            if (!candidate.actual) return;
+            localRecordCount += 1;
+            const athleteId = String(rawAthleteId || "");
+            const month = normalizePaymentMonth(rawMonth);
+            if (!month) {
+              invalidMonths.push(`${rawMonth} · ${athleteId || "без състезател"}`);
+              return;
+            }
+            const amount = Number(candidate.amount);
+            if (!Number.isFinite(amount) || amount < 0) {
+              invalidAmounts.push(`${rawMonth} · ${athleteId || "без състезател"} · ${String(candidate.amount)}`);
+              return;
+            }
+            const key = `${athleteId}|${month}`;
+            if (!logical.has(key)) logical.set(key,{key,athleteId,month,amounts:[],notes:[],copyCount:0});
+            const entry = logical.get(key);
+            entry.amounts.push(amount);
+            if (candidate.note) entry.notes.push(candidate.note);
+            entry.copyCount += 1;
+            entry.sourceIndex = copyIndex;
+          });
+        });
+      });
+
+      const records = [];
+      const conflictingDuplicates = [];
+      let duplicateCombinationCount = 0;
+      logical.forEach(entry => {
+        const distinctAmounts = [...new Set(entry.amounts)];
+        if (entry.copyCount > 1) duplicateCombinationCount += 1;
+        if (distinctAmounts.length > 1) {
+          conflictingDuplicates.push({...entry,distinctAmounts});
+          blockingProblems.push(`Различни суми за ${entry.athleteId} · ${entry.month}: ${distinctAmounts.map(formatPaymentCellAmount).join(" / ")} €.`);
+          return;
+        }
+        const athleteUuid = maps.athleteLocalToUuid.get(entry.athleteId) || "";
+        if (!athleteUuid) {
+          const info = attendanceMigrationAthleteInfo(entry.athleteId);
+          const current = unmappedAthletes.get(entry.athleteId) || {id:entry.athleteId,name:info.name || "Неизвестен състезател",count:0};
+          current.count += 1;
+          unmappedAthletes.set(entry.athleteId,current);
+          postponedRecords.push({
+            athleteLocalId:entry.athleteId,
+            athleteName:current.name,
+            paymentMonth:entry.month,
+            amount:distinctAmounts[0]
+          });
+          return;
+        }
+        const notes = [...new Set(entry.notes.filter(Boolean))];
+        const note = notes.sort((a,b) => b.length-a.length || a.localeCompare(b,"bg-BG"))[0] || null;
+        if (notes.length > 1) warnings.push(`Различни бележки за ${entry.athleteId} · ${entry.month}; ще бъде запазена най-дългата.`);
+        records.push({
+          sourceKey:entry.key,
+          athleteLocalId:entry.athleteId,
+          athleteUuid,
+          paymentMonth:entry.month,
+          amount:distinctAmounts[0],
+          note,
+          copyCount:entry.copyCount
+        });
+      });
+      invalidMonths.forEach(value => blockingProblems.push(`Невалиден месец на плащане: ${value}.`));
+      invalidAmounts.forEach(value => blockingProblems.push(`Невалидна сума: ${value}.`));
+      unmappedAthletes.forEach(info => {
+        warnings.push(`Плащането за ${info.name} няма да бъде прехвърлено сега, защото състезателят още няма онлайн запис.`);
+      });
+      if (postponedRecords.length) warnings.push("Записът остава запазен локално и може да бъде прехвърлен по-късно.");
+      const totalAmount = records.reduce((sum,record) => sum+record.amount,0);
+      const postponedTotalAmount = postponedRecords.reduce((sum,record) => sum+record.amount,0);
+      return {
+        membership,
+        records,
+        localRecordCount,
+        eligibleRecordCount:records.length,
+        uniqueAthleteCount:new Set(records.map(record => record.athleteLocalId)).size,
+        totalAmount,
+        postponedRecords,
+        postponedRecordCount:postponedRecords.length,
+        postponedTotalAmount,
+        unmappedAthleteCount:unmappedAthletes.size,
+        unmappedAthletes:[...unmappedAthletes.values()],
+        invalidMonthCount:invalidMonths.length,
+        invalidAmountCount:invalidAmounts.length,
+        duplicateCombinationCount,
+        conflictingDuplicateCount:conflictingDuplicates.length,
+        blockingProblems:[...new Set(blockingProblems)],
+        warnings:[...new Set(warnings)]
+      };
+    }
+
+    function renderPaymentsMigrationPreview() {
+      const container = document.getElementById("settingsPaymentsMigrationPreview");
+      const executeButton = document.getElementById("executePaymentsMigration");
+      if (!container || !authenticatedMembershipIsAdmin()) return;
+      const data = buildPaymentsMigrationPreviewData();
+      currentPaymentsMigrationPreview = data;
+      const completed = paymentsMigrationStateForCurrentClub();
+      container.hidden = false;
+      executeButton.hidden = false;
+      executeButton.disabled = paymentsMigrationInProgress || data.blockingProblems.length > 0 || data.eligibleRecordCount === 0;
+      executeButton.textContent = completed ? "Синхронизирай отново" : "Прехвърли таксите";
+      const state = completed ? `
+        <div class="settings-migration-result">
+          <strong>Таксите са прехвърлени успешно.</strong>
+          Таксите вече се използват директно от Supabase.<br>
+          Прехвърлени плащания: ${Number(completed.migratedPaymentCount || 0)}<br>
+          Прехвърлена стойност: ${escapeHtml(formatPaymentTotal(completed.migratedTotalAmount || 0))}<br>
+          Отложени плащания: ${Number(completed.postponedPaymentCount || 0)}<br>
+          Отложена стойност: ${escapeHtml(formatPaymentTotal(completed.postponedTotalAmount || 0))}<br>
+          ${Number(completed.postponedPaymentCount || 0) > 0 ? "Има отложени плащания за състезатели без онлайн запис.<br>" : ""}
+          Дата: ${escapeHtml(formatMigrationDate(completed.migratedAt))}
+        </div>` : '<p class="settings-migration-notice">Това е само предварителен преглед. Няма изпратени такси.</p>';
+      const postponedDetails = data.postponedRecords.length ? `
+        <section class="settings-migration-section">
+          <h4>Отложени плащания</h4>
+          <div class="settings-migration-list">
+            ${data.postponedRecords.map(record => `
+              <div class="settings-migration-row compact">
+                <div><strong>${escapeHtml(record.athleteName)}</strong><small>${escapeHtml(paymentMonthLongLabel(record.paymentMonth.slice(0,7)))} · локален ID: ${escapeHtml(record.athleteLocalId)}</small></div>
+                <span>${escapeHtml(formatPaymentTotal(record.amount))}</span>
+              </div>`).join("")}
+          </div>
+        </section>` : "";
+      const errorPanel = paymentsMigrationError ? `
+        <div class="settings-migration-message error">
+          <strong>Таксите не бяха прехвърлени.</strong>
+          <span>${escapeHtml(paymentsMigrationError)}</span>
+        </div>` : "";
+      container.innerHTML = `
+        ${errorPanel}
+        ${state}
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.eligibleRecordCount}</strong><span>Готови за миграция</span></div>
+          <div class="settings-migration-total"><strong>${data.postponedRecordCount}</strong><span>Отложени плащания</span></div>
+          <div class="settings-migration-total"><strong>${escapeHtml(formatPaymentTotal(data.totalAmount))}</strong><span>Стойност за прехвърляне</span></div>
+          <div class="settings-migration-total"><strong>${escapeHtml(formatPaymentTotal(data.postponedTotalAmount))}</strong><span>Отложена стойност</span></div>
+        </div>
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.localRecordCount}</strong><span>Локални записи</span></div>
+          <div class="settings-migration-total"><strong>${data.uniqueAthleteCount}</strong><span>Свързани състезатели</span></div>
+          <div class="settings-migration-total"><strong>${data.unmappedAthleteCount}</strong><span>Несвързани състезатели</span></div>
+          <div class="settings-migration-total"><strong>${data.duplicateCombinationCount}</strong><span>Дублирани състезател/месец</span></div>
+        </div>
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.invalidMonthCount}</strong><span>Невалидни месеци</span></div>
+          <div class="settings-migration-total"><strong>${data.invalidAmountCount}</strong><span>Невалидни суми</span></div>
+        </div>
+        ${data.blockingProblems.length ? `<section class="settings-migration-section"><h4>Проблеми, които блокират миграцията</h4><ul class="settings-migration-warnings">${data.blockingProblems.map(problem => `<li>${escapeHtml(problem)}</li>`).join("")}</ul></section>` : ""}
+        ${data.warnings.length ? `<section class="settings-migration-section"><h4>Предупреждения</h4><ul class="settings-migration-warnings">${data.warnings.map(warning => `<li>${escapeHtml(warning)}</li>`).join("")}</ul></section>` : ""}
+        ${postponedDetails}`;
+    }
+
+    function closePaymentsMigrationConfirmModal() {
+      if (paymentsMigrationInProgress) return;
+      document.getElementById("paymentsMigrationConfirmModal")?.classList.remove("show");
+      document.getElementById("paymentsMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+    }
+
+    function paymentsMigrationContextError() {
+      const authenticated = window.clubdeskAuthenticatedUser;
+      const membership = authenticated?.membership;
+      if (!window.clubdeskSupabase) return "Липсва връзка със Supabase.";
+      if (!authenticated?.authUser) return "Липсва удостоверен потребител.";
+      if (!membership || membership.status !== "active") return "Липсва активно членство в клуба.";
+      if (!membership.club_id || !membership.id) return "Липсват данни за активното членство в клуба.";
+      return "";
+    }
+
+    function safePaymentsMigrationErrorDetail(error) {
+      const code = String(error?.code || "").toLowerCase();
+      const message = String(error?.message || "").toLowerCase();
+      if (code === "42501" || message.includes("permission") || message.includes("row-level security") || message.includes("policy")) return "Нямате права за запис.";
+      if (code === "23503" || message.includes("foreign key") || message.includes("athlete")) return "Липсва връзка със състезател.";
+      if (error?.clubdeskDetail) return String(error.clubdeskDetail);
+      return "Грешка при запис в Supabase.";
+    }
+
+    function openPaymentsMigrationConfirmModal() {
+      paymentsMigrationError = "";
+      const contextError = paymentsMigrationContextError();
+      if (contextError) {
+        paymentsMigrationError = contextError;
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      const data = currentPaymentsMigrationPreview || buildPaymentsMigrationPreviewData();
+      currentPaymentsMigrationPreview ||= data;
+      if (data.blockingProblems.length || !data.eligibleRecordCount) {
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      document.getElementById("paymentsMigrationConfirmText").textContent = `Ще бъдат прехвърлени ${data.eligibleRecordCount} месечни плащания на обща стойност ${formatPaymentTotal(data.totalAmount)}.`;
+      document.getElementById("paymentsMigrationConfirmModal")?.classList.add("show");
+      document.getElementById("paymentsMigrationConfirmModal")?.setAttribute("aria-hidden","false");
+    }
+
+    function paymentRowsForMigration(data) {
+      return data.records.map(record => ({
+        club_id:data.membership.club_id,
+        athlete_id:record.athleteUuid,
+        payment_month:record.paymentMonth,
+        amount:record.amount,
+        recorded_by_membership_id:data.membership.id,
+        note:record.note
+      }));
+    }
+
+    async function verifyPaymentsMigration(data) {
+      const athleteUuids = [...new Set(data.records.map(record => record.athleteUuid))];
+      const {data:remote,error} = await window.clubdeskSupabase.from("payments")
+        .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note")
+        .eq("club_id",data.membership.club_id)
+        .in("athlete_id",athleteUuids);
+      if (error) throw error;
+      const expectedKeys = new Set(data.records.map(record => `${record.athleteUuid}|${record.paymentMonth}`));
+      const relevant = (remote || []).filter(row => expectedKeys.has(`${String(row.athlete_id || "")}|${normalizePaymentMonth(row.payment_month)}`));
+      if (relevant.length !== data.records.length) throw new Error("Supabase payment count mismatch");
+      data.records.forEach(expected => {
+        const matches = relevant.filter(row => String(row.athlete_id) === expected.athleteUuid && normalizePaymentMonth(row.payment_month) === expected.paymentMonth);
+        if (matches.length !== 1 || Math.abs(Number(matches[0].amount)-expected.amount) > 0.000001) throw new Error("Supabase payment verification failed");
+      });
+      const remoteTotal = relevant.reduce((sum,row) => sum+Number(row.amount),0);
+      if (Math.abs(remoteTotal-data.totalAmount) > 0.000001) throw new Error("Supabase payment total mismatch");
+      return {count:relevant.length,total:remoteTotal};
+    }
+
+    async function executePaymentsMigration() {
+      if (paymentsMigrationInProgress) return;
+      paymentsMigrationError = "";
+      const contextError = paymentsMigrationContextError();
+      if (contextError) {
+        paymentsMigrationError = contextError;
+        closePaymentsMigrationConfirmModal();
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      const data = currentPaymentsMigrationPreview;
+      if (!data) {
+        paymentsMigrationError = "Първо прегледайте таксите за прехвърляне.";
+        closePaymentsMigrationConfirmModal();
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      if (data.blockingProblems.length || !data.eligibleRecordCount) {
+        paymentsMigrationError = data.blockingProblems[0] || "Няма готови плащания за прехвърляне.";
+        closePaymentsMigrationConfirmModal();
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      const paymentRows = paymentRowsForMigration(data);
+      const activeMembership = window.clubdeskAuthenticatedUser.membership;
+      const rowsAreValid = paymentRows.length === data.eligibleRecordCount && paymentRows.every(row =>
+        String(data.membership?.club_id || "") === String(activeMembership.club_id)
+        && String(data.membership?.id || "") === String(activeMembership.id)
+        && row.club_id === activeMembership.club_id
+        && row.recorded_by_membership_id === activeMembership.id
+        && Boolean(row.athlete_id)
+        && normalizePaymentMonth(row.payment_month) === row.payment_month
+        && Number.isFinite(Number(row.amount))
+        && Number(row.amount) >= 0
+      );
+      if (!rowsAreValid) {
+        paymentsMigrationError = "Липсва връзка със състезател или има невалидни данни за плащане.";
+        closePaymentsMigrationConfirmModal();
+        renderPaymentsMigrationPreview();
+        return;
+      }
+      paymentsMigrationInProgress = true;
+      const buttons = ["previewPaymentsMigration","executePaymentsMigration","confirmPaymentsMigration","cancelPaymentsMigration"].map(id => document.getElementById(id)).filter(Boolean);
+      buttons.forEach(button => { button.disabled = true; });
+      document.getElementById("confirmPaymentsMigration").textContent = "Прехвърляне...";
+      let migrationStarted = false;
+      try {
+        migrationStarted = true;
+        console.info("ClubDesk payments migration started");
+        const {data:upsertedRows,error} = await window.clubdeskSupabase.from("payments")
+          .upsert(paymentRows,{onConflict:"athlete_id,payment_month"})
+          .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note");
+        if (error) throw error;
+        if (!Array.isArray(upsertedRows) || upsertedRows.length !== data.eligibleRecordCount) {
+          const countError = new Error("Supabase payment upsert returned an unexpected row count");
+          countError.clubdeskDetail = `Supabase не потвърди всички ${data.eligibleRecordCount} плащания.`;
+          throw countError;
+        }
+        const expectedByKey = new Map(paymentRows.map(row => [`${row.athlete_id}|${row.payment_month}`,row]));
+        const returnedKeys = new Set();
+        upsertedRows.forEach(row => {
+          const normalizedMonth = normalizePaymentMonth(row?.payment_month);
+          const key = `${String(row?.athlete_id || "")}|${normalizedMonth}`;
+          const expected = expectedByKey.get(key);
+          if (!expected || returnedKeys.has(key) || String(row?.club_id || "") !== String(data.membership.club_id) || Math.abs(Number(row?.amount)-Number(expected.amount)) > 0.000001) {
+            const rowError = new Error("Supabase payment upsert returned invalid rows");
+            rowError.clubdeskDetail = "Supabase върна непълни или несъответстващи плащания.";
+            throw rowError;
+          }
+          returnedKeys.add(key);
+        });
+        const returnedTotal = upsertedRows.reduce((sum,row) => sum+Number(row.amount),0);
+        if (Math.abs(returnedTotal-data.totalAmount) > 0.000001) {
+          const totalError = new Error("Supabase payment upsert returned an unexpected total");
+          totalError.clubdeskDetail = "Потвърдената от Supabase обща стойност не съвпада с прегледа.";
+          throw totalError;
+        }
+        const verification = await verifyPaymentsMigration(data);
+        const migratedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_SUPABASE_PAYMENTS_MIGRATION,JSON.stringify({
+          version:1,
+          clubId:data.membership.club_id,
+          membershipId:data.membership.id,
+          migratedAt,
+          migratedPaymentCount:verification.count,
+          migratedTotalAmount:verification.total,
+          postponedPaymentCount:data.postponedRecordCount,
+          postponedTotalAmount:data.postponedTotalAmount
+        }));
+        document.getElementById("paymentsMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("paymentsMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+        await loadOnlinePayments({force:true});
+        renderPaymentsMigrationPreview();
+        renderPaymentTable();
+        updateDashboardStats();
+        renderSettingsDataSummary();
+        updatePermissionUI();
+        if (typeof showToast === "function") showToast("Таксите са прехвърлени успешно.");
+      } catch (error) {
+        console.error("ClubDesk Supabase payments migration error",error);
+        paymentsMigrationError = safePaymentsMigrationErrorDetail(error);
+        document.getElementById("paymentsMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("paymentsMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+      } finally {
+        if (migrationStarted) console.info("ClubDesk payments migration finished");
+        paymentsMigrationInProgress = false;
+        buttons.forEach(button => { button.disabled = false; });
+        document.getElementById("confirmPaymentsMigration").textContent = "Прехвърли";
+        if (currentPaymentsMigrationPreview) renderPaymentsMigrationPreview();
+      }
+    }
+
+    function calendarMigrationContextError() {
+      const authenticated = window.clubdeskAuthenticatedUser;
+      const membership = authenticated?.membership;
+      if (!window.clubdeskSupabase) return "Липсва връзка със Supabase.";
+      if (!authenticated?.authUser) return "Липсва удостоверен потребител.";
+      if (!membership || membership.status !== "active" || !membership.club_id || !membership.id) return "Липсва активно членство в клуба.";
+      return "";
+    }
+
+    function buildCalendarMigrationPreviewData() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const blockingProblems = [];
+      const localCoach = migrationPreviewCoachMatch();
+      const contextError = calendarMigrationContextError();
+      if (contextError) blockingProblems.push(contextError);
+      if (membership?.access_role !== "admin") blockingProblems.push("Само администратор може да прехвърля календарни събития.");
+      if (!localCoach) blockingProblems.push("Не може еднозначно да се свърже акаунтът с локален треньор.");
+      const stored = readJson(STORAGE_CALENDAR_EVENTS,[]);
+      const source = Array.isArray(stored) && localCoach
+        ? stored.filter(event => String(event?.ownerCoachId || "") === String(localCoach.id))
+        : [];
+      const idCounts = new Map();
+      source.forEach(event => {
+        const id = String(event?.id || "").trim();
+        if (id) idCounts.set(id,(idCounts.get(id) || 0)+1);
+      });
+      const missingIds = [];
+      const missingTitles = [];
+      const invalidDates = [];
+      const invalidTimes = [];
+      const duplicateIds = [...idCounts].filter(([,count]) => count > 1).map(([id]) => id);
+      const events = [];
+      source.forEach((event,index) => {
+        const id = String(event?.id || "").trim();
+        const title = String(event?.title || "").trim();
+        const date = normalizeAttendanceMigrationDate(event?.date);
+        const rawTime = String(event?.time || "").trim();
+        const time = rawTime ? normalizeCalendarTime(rawTime) : "";
+        let valid = true;
+        if (!id) { missingIds.push(index+1); valid = false; }
+        if (!title) { missingTitles.push(id || `запис ${index+1}`); valid = false; }
+        if (!isValidAttendanceDate(date)) { invalidDates.push(id || `запис ${index+1}`); valid = false; }
+        if (rawTime && !time) { invalidTimes.push(id || `запис ${index+1}`); valid = false; }
+        if (id && idCounts.get(id) > 1) valid = false;
+        if (!valid) return;
+        events.push({
+          sourceLocalId:id,
+          title,
+          eventDate:date,
+          eventTime:time || null,
+          note:legacyCalendarEventNote(event).trim() || null
+        });
+      });
+      missingIds.forEach(index => blockingProblems.push(`Липсва локален ID за календарен запис ${index}.`));
+      duplicateIds.forEach(id => blockingProblems.push(`Дублиран локален ID на календарно събитие: ${id}.`));
+      missingTitles.forEach(id => blockingProblems.push(`Липсва заглавие на календарно събитие: ${id}.`));
+      invalidDates.forEach(id => blockingProblems.push(`Невалидна дата на календарно събитие: ${id}.`));
+      invalidTimes.forEach(id => blockingProblems.push(`Невалиден час на календарно събитие: ${id}.`));
+      return {
+        membership,
+        localCoach,
+        localEventCount:source.length,
+        events,
+        eligibleEventCount:events.length,
+        invalidDateCount:invalidDates.length,
+        invalidTimeCount:invalidTimes.length,
+        missingTitleCount:missingTitles.length,
+        duplicateIdCount:duplicateIds.length,
+        missingIdCount:missingIds.length,
+        blockingProblems:[...new Set(blockingProblems)]
+      };
+    }
+
+    function renderCalendarMigrationPreview() {
+      const container = document.getElementById("settingsCalendarMigrationPreview");
+      const executeButton = document.getElementById("executeCalendarMigration");
+      if (!container || !authenticatedMembershipIsAdmin()) return;
+      const data = buildCalendarMigrationPreviewData();
+      currentCalendarMigrationPreview = data;
+      const completed = calendarMigrationStateForCurrentMembership();
+      container.hidden = false;
+      executeButton.hidden = false;
+      executeButton.disabled = calendarMigrationInProgress || data.blockingProblems.length > 0 || !data.eligibleEventCount;
+      executeButton.textContent = completed ? "Синхронизирай отново" : "Прехвърли календара";
+      const state = completed ? `
+        <div class="settings-migration-result">
+          <strong>Календарът е прехвърлен успешно.</strong>
+          Календарът вече се използва директно от Supabase.<br>
+          Прехвърлени събития: ${Number(completed.migratedEventCount || 0)}<br>
+          Дата: ${escapeHtml(formatMigrationDate(completed.migratedAt))}
+        </div>` : '<p class="settings-migration-notice">Това е само предварителен преглед. Няма изпратени календарни събития.</p>';
+      container.innerHTML = `
+        ${calendarMigrationError ? `<div class="settings-migration-message error"><strong>Календарът не беше прехвърлен.</strong><span>${escapeHtml(calendarMigrationError)}</span></div>` : ""}
+        ${state}
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.localEventCount}</strong><span>Локални събития</span></div>
+          <div class="settings-migration-total"><strong>${data.eligibleEventCount}</strong><span>Готови за миграция</span></div>
+          <div class="settings-migration-total"><strong>${data.invalidDateCount}</strong><span>Невалидни дати</span></div>
+          <div class="settings-migration-total"><strong>${data.invalidTimeCount}</strong><span>Невалидни часове</span></div>
+        </div>
+        <div class="settings-migration-totals">
+          <div class="settings-migration-total"><strong>${data.missingTitleCount}</strong><span>Липсващи заглавия</span></div>
+          <div class="settings-migration-total"><strong>${data.missingIdCount}</strong><span>Липсващи локални ID</span></div>
+          <div class="settings-migration-total"><strong>${data.duplicateIdCount}</strong><span>Дублирани локални ID</span></div>
+        </div>
+        ${data.blockingProblems.length ? `<section class="settings-migration-section"><h4>Проблеми, които блокират миграцията</h4><ul class="settings-migration-warnings">${data.blockingProblems.map(problem => `<li>${escapeHtml(problem)}</li>`).join("")}</ul></section>` : ""}`;
+    }
+
+    function closeCalendarMigrationConfirmModal() {
+      if (calendarMigrationInProgress) return;
+      document.getElementById("calendarMigrationConfirmModal")?.classList.remove("show");
+      document.getElementById("calendarMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+    }
+
+    function openCalendarMigrationConfirmModal() {
+      calendarMigrationError = "";
+      const data = currentCalendarMigrationPreview || buildCalendarMigrationPreviewData();
+      currentCalendarMigrationPreview ||= data;
+      if (data.blockingProblems.length || !data.eligibleEventCount) {
+        renderCalendarMigrationPreview();
+        return;
+      }
+      document.getElementById("calendarMigrationConfirmText").textContent = `Ще бъдат прехвърлени ${data.eligibleEventCount} календарни събития.`;
+      document.getElementById("calendarMigrationConfirmModal")?.classList.add("show");
+      document.getElementById("calendarMigrationConfirmModal")?.setAttribute("aria-hidden","false");
+    }
+
+    function calendarRowsForMigration(data) {
+      return data.events.map(event => ({
+        club_id:data.membership.club_id,
+        owner_membership_id:data.membership.id,
+        source_local_id:event.sourceLocalId,
+        title:event.title,
+        event_date:event.eventDate,
+        event_time:event.eventTime,
+        note:event.note
+      }));
+    }
+
+    async function verifyCalendarMigration(data) {
+      const sourceIds = data.events.map(event => event.sourceLocalId);
+      const {data:remote,error} = await window.clubdeskSupabase.from("calendar_events")
+        .select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note")
+        .eq("club_id",data.membership.club_id)
+        .eq("owner_membership_id",data.membership.id)
+        .in("source_local_id",sourceIds);
+      if (error) throw error;
+      if (!Array.isArray(remote) || remote.length !== data.eligibleEventCount) throw new Error("Supabase calendar count mismatch");
+      data.events.forEach(expected => {
+        const matches = remote.filter(row => String(row.source_local_id) === expected.sourceLocalId);
+        if (matches.length !== 1
+          || String(matches[0].owner_membership_id) !== String(data.membership.id)
+          || String(matches[0].title || "").trim() !== expected.title
+          || String(matches[0].event_date || "") !== expected.eventDate
+          || (matches[0].event_time ? normalizeCalendarTime(matches[0].event_time) : null) !== expected.eventTime) throw new Error("Supabase calendar verification failed");
+      });
+      return remote;
+    }
+
+    async function executeCalendarMigration() {
+      if (calendarMigrationInProgress) return;
+      const data = currentCalendarMigrationPreview;
+      const contextError = calendarMigrationContextError();
+      if (contextError || !data || data.blockingProblems.length || !data.eligibleEventCount) {
+        calendarMigrationError = contextError || data?.blockingProblems?.[0] || "Първо прегледайте календара за прехвърляне.";
+        closeCalendarMigrationConfirmModal();
+        renderCalendarMigrationPreview();
+        return;
+      }
+      calendarMigrationInProgress = true;
+      const buttons = ["previewCalendarMigration","executeCalendarMigration","confirmCalendarMigration","cancelCalendarMigration"].map(id => document.getElementById(id)).filter(Boolean);
+      buttons.forEach(button => { button.disabled = true; });
+      document.getElementById("confirmCalendarMigration").textContent = "Прехвърляне...";
+      try {
+        const rows = calendarRowsForMigration(data);
+        const {data:upserted,error} = await window.clubdeskSupabase.from("calendar_events")
+          .upsert(rows,{onConflict:"owner_membership_id,source_local_id"})
+          .select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note");
+        if (error) throw error;
+        if (!Array.isArray(upserted) || upserted.length !== data.eligibleEventCount) throw new Error("Supabase calendar upsert count mismatch");
+        await verifyCalendarMigration(data);
+        const migratedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_SUPABASE_CALENDAR_MIGRATION,JSON.stringify({
+          version:1,
+          clubId:data.membership.club_id,
+          membershipId:data.membership.id,
+          migratedAt,
+          migratedEventCount:data.eligibleEventCount
+        }));
+        document.getElementById("calendarMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("calendarMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+        await loadOnlineCalendar({force:true});
+        calendarMigrationError = "";
+        renderCalendarMigrationPreview();
+        refreshCalendarView();
+        updatePermissionUI();
+        if (typeof showToast === "function") showToast("Календарът е прехвърлен успешно.");
+      } catch (error) {
+        console.error("ClubDesk Supabase calendar migration error",error);
+        calendarMigrationError = "Грешка при запис в Supabase.";
+        document.getElementById("calendarMigrationConfirmModal")?.classList.remove("show");
+        document.getElementById("calendarMigrationConfirmModal")?.setAttribute("aria-hidden","true");
+      } finally {
+        calendarMigrationInProgress = false;
+        buttons.forEach(button => { button.disabled = false; });
+        document.getElementById("confirmCalendarMigration").textContent = "Прехвърли";
+        renderCalendarMigrationPreview();
+      }
+    }
 
     document.getElementById("downloadClubDeskBackup")?.addEventListener("click", () => {
       const backup = {
@@ -3231,14 +4891,13 @@
     restoreBackupModal?.addEventListener("click", event => { if (event.target === restoreBackupModal) closeRestoreBackupModal(); });
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && restoreBackupModal?.classList.contains("show")) closeRestoreBackupModal();
-      if (event.key === "Escape" && document.getElementById("supabaseMigrationConfirmModal")?.classList.contains("show")) closeSupabaseMigrationConfirmModal();
     });
     function customAthletes() {
-      return readJson(STORAGE_ATHLETES, []);
+      return [];
     }
 
     function athleteEdits() {
-      return readJson(STORAGE_ATHLETE_EDITS, {});
+      return {};
     }
 
     function migrateAthleteCoachAssignments() {
@@ -3345,6 +5004,22 @@
     function requireEditPermission() {
       if (canEditViewedScope()) return true;
       if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
+      return false;
+    }
+
+    function canEditAttendanceRecords() {
+      if (!canEditViewedScope()) return false;
+      if (!attendanceMigrationStateForCurrentClub()) return true;
+      return onlineAttendanceAvailable
+        && !onlineAttendanceLoading
+        && !onlineAttendanceSaveInProgress
+        && window.clubdeskAttendanceDataSource === "supabase";
+    }
+
+    function requireAttendanceEditAccess() {
+      if (canEditAttendanceRecords()) return true;
+      if (!canEditViewedScope()) return requireEditPermission();
+      if (typeof showToast === "function") showToast("Няма връзка със Supabase. Показват се последно заредените присъствия.");
       return false;
     }
 
@@ -3558,7 +5233,6 @@
       const canEdit = canEditViewedScope();
       const isAdmin = currentUserIsAdmin();
       const canEditOnline = canEdit && canEditOnlineRecords();
-      document.getElementById("publicBuildAdminNotice")?.toggleAttribute("hidden",!isAdmin);
       const quickAdd = document.getElementById("quickAdd");
       if (quickAdd) quickAdd.hidden = !canEditOnline;
       const dashboardAdd = document.getElementById("dashboardAddAthlete");
@@ -3571,23 +5245,22 @@
       const saveAttendanceButton = document.getElementById("saveAttendance");
       if (markAll) markAll.hidden = !canEdit;
       if (saveAttendanceButton) saveAttendanceButton.hidden = !canEdit;
+      if (markAll) markAll.disabled = !canEditAttendanceRecords();
+      if (saveAttendanceButton) saveAttendanceButton.disabled = !canEditAttendanceRecords();
       document.getElementById("addAttendanceGuests")?.toggleAttribute("hidden",!canEdit);
       document.getElementById("startExtraGroupAttendance")?.toggleAttribute("hidden",!canEdit);
       document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("hidden",!canEdit);
-      if (attendanceNote) attendanceNote.disabled = !canEdit;
+      document.getElementById("addAttendanceGuests")?.toggleAttribute("disabled",!canEditAttendanceRecords());
+      document.getElementById("startExtraGroupAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
+      document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
+      if (attendanceNote) attendanceNote.disabled = !canEditAttendanceRecords();
       document.getElementById("addGroupButton")?.toggleAttribute("hidden",!isAdmin || !canEditOnlineGroups());
       document.getElementById("addCoachButton")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("restoreClubDeskBackup")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("settingsArchiveCard")?.toggleAttribute("hidden",!isAdmin);
-      const migrationPreviewCard = document.getElementById("settingsMigrationPreviewCard");
-      const showMigrationPreview = authenticatedMembershipIsAdmin();
-      migrationPreviewCard?.toggleAttribute("hidden",!showMigrationPreview);
-      if (!showMigrationPreview) {
-        document.getElementById("settingsMigrationPreview")?.toggleAttribute("hidden",true);
-        document.getElementById("executeSupabaseMigration")?.toggleAttribute("hidden",true);
-        currentSupabaseMigrationPreview = null;
-      }
-      document.querySelectorAll("#paymentTable .payment-month-input").forEach(input => { input.disabled = !canEdit; });
+      renderOnlineSynchronizationStatus();
+      document.querySelectorAll("#paymentTable .payment-month-input").forEach(input => { input.disabled = !canEdit || !canEditOnlinePayments(); });
+      document.getElementById("newCalendarEvent")?.toggleAttribute("disabled",!canEditOnlineCalendar());
       if (!canEditOnline) clearBulkSelection();
     }
 
@@ -4005,14 +5678,52 @@
       return String(name || "").normalize("NFKC").trim().replace(/\s+/g," ").toLocaleLowerCase("bg-BG");
     }
 
+    function importKidsOnce() {
+      if (localStorage.getItem(STORAGE_KIDS_IMPORT) === "done") return 0;
+
+      const saved = customAthletes();
+      const existingKeys = new Set(allAthletes().map(athlete => `${normalizeAthleteName(athlete.name)}|${athlete.year}`));
+      let importedCount = 0;
+
+      importedKids.forEach(child => {
+        const duplicateKey = `${normalizeAthleteName(child.name)}|${child.year}`;
+        if (existingKeys.has(duplicateKey)) return;
+
+        saved.push({
+          id:child.id,
+          name:child.name,
+          year:child.year,
+          group:"kids",
+          coach:"Не е зададен",
+          events:"детска атлетика",
+          phone:String(child.phone),
+          active:true,
+          archived:false,
+          feeExempt:false,
+          defaultMonthlyFee:37,
+          defaultFeeCustomized:false
+        });
+        existingKeys.add(duplicateKey);
+        importedCount += 1;
+      });
+
+      localStorage.setItem(STORAGE_ATHLETES, JSON.stringify(saved));
+      localStorage.setItem(STORAGE_KIDS_IMPORT, "done");
+      return importedCount;
+    }
+
+    function localMonthlyPayments() {
+      return {};
+    }
+
     function monthlyPayments() {
-      const records = readJson(STORAGE_MONTHLY_PAYMENTS, {});
-      return records && typeof records === "object" && !Array.isArray(records) ? records : {};
+      return onlinePaymentsStore;
     }
 
     function saveMonthlyPayment(month, athleteId, status, paidAt = null, amount = null) {
       if (!requireEditPermission()) return false;
-      const records = monthlyPayments();
+      if (paymentsMigrationStateForCurrentClub()) return false;
+      const records = localMonthlyPayments();
       records[month] = records[month] || {};
       const existingRecord = records[month][athleteId] || {};
       records[month][athleteId] = {
@@ -4034,7 +5745,8 @@
 
     function saveMonthlyAmount(month, athleteId, amount) {
       if (!requireEditPermission()) return false;
-      const records = monthlyPayments();
+      if (paymentsMigrationStateForCurrentClub()) return false;
+      const records = localMonthlyPayments();
       records[month] = records[month] || {};
       const existingRecord = records[month][athleteId] || {status:"unpaid",paidAt:null};
       records[month][athleteId] = {...existingRecord,amount,amountCustomized:true};
@@ -4048,9 +5760,10 @@
     }
 
     function migratePermanentPayments() {
+      if (paymentsMigrationStateForCurrentClub()) return;
       if (localStorage.getItem(STORAGE_PAYMENT_MIGRATION) === "done") return;
 
-      const records = monthlyPayments();
+      const records = localMonthlyPayments();
       records[DEMO_CURRENT_MONTH] = records[DEMO_CURRENT_MONTH] || {};
 
       allAthletes().forEach(athlete => {
@@ -4069,9 +5782,10 @@
     }
 
     function migrateMonthlyAmounts() {
+      if (paymentsMigrationStateForCurrentClub()) return;
       if (localStorage.getItem(STORAGE_AMOUNT_MIGRATION) === "done") return;
 
-      const records = monthlyPayments();
+      const records = localMonthlyPayments();
       const athletesById = Object.fromEntries(allAthletes().map(athlete => [athlete.id,athlete]));
 
       Object.values(records).forEach(monthRecords => {
@@ -4090,6 +5804,7 @@
     }
 
     function migrateKidsFeeTo37() {
+      if (paymentsMigrationStateForCurrentClub()) return;
       if (localStorage.getItem(STORAGE_KIDS_FEE_MIGRATION) === "done") return;
 
       const kids = allAthletes().filter(athlete => athlete.group === "kids");
@@ -4100,7 +5815,7 @@
       localStorage.setItem(STORAGE_ATHLETE_EDITS, JSON.stringify(edits));
 
       const kidIds = new Set(kids.map(athlete => athlete.id));
-      const records = monthlyPayments();
+      const records = localMonthlyPayments();
       Object.values(records).forEach(monthRecords => {
         if (!monthRecords || typeof monthRecords !== "object") return;
         Object.entries(monthRecords).forEach(([athleteId,record]) => {
@@ -4264,7 +5979,7 @@
             const amount = paymentRecordAmount(records[month]?.[athlete.id]);
             const value = amount == null ? "" : formatPaymentCellAmount(amount);
             const label = `${athlete.name}, ${paymentMonthLongLabel(month)}`;
-            return `<td class="payment-month-cell ${month === DEMO_CURRENT_MONTH ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() ? "" : "disabled"} /></td>`;
+            return `<td class="payment-month-cell ${month === DEMO_CURRENT_MONTH ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
           }).join("")}
         </tr>
       `).join("") : `<tr><td colspan="13" class="empty">${selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор."}</td></tr>`;
@@ -4944,14 +6659,16 @@
           }
           changedIds.add(athlete.id);
         });
-        const records = monthlyPayments();
-        Object.values(records).forEach(monthRecords => {
-          if (!monthRecords || typeof monthRecords !== "object") return;
-          Object.entries(monthRecords).forEach(([athleteId,record]) => {
-            if (changedIds.has(athleteId) && record && typeof record === "object" && record.amountCustomized !== true) record.amount = amount;
+        if (!paymentsMigrationStateForCurrentClub()) {
+          const records = localMonthlyPayments();
+          Object.values(records).forEach(monthRecords => {
+            if (!monthRecords || typeof monthRecords !== "object") return;
+            Object.entries(monthRecords).forEach(([athleteId,record]) => {
+              if (changedIds.has(athleteId) && record && typeof record === "object" && record.amountCustomized !== true) record.amount = amount;
+            });
           });
-        });
-        localStorage.setItem(STORAGE_MONTHLY_PAYMENTS, JSON.stringify(records));
+          localStorage.setItem(STORAGE_MONTHLY_PAYMENTS, JSON.stringify(records));
+        }
         cacheOnlineData();
         toastMessage = "Месечната такса е променена";
       }
@@ -5047,7 +6764,7 @@
       return Number.isFinite(amount) && amount >= 0 ? {empty:false,amount} : {invalid:true};
     }
 
-    function savePaymentSheetInput(input) {
+    async function savePaymentSheetInput(input) {
       if (!requireEditPermission()) {
         input.value = input.dataset.originalValue || "";
         return false;
@@ -5063,8 +6780,7 @@
       const month = input.dataset.month;
       const athleteId = input.dataset.athleteId;
       const records = monthlyPayments();
-      records[month] = records[month] || {};
-      const existingRecord = records[month][athleteId];
+      const existingRecord = records[month]?.[athleteId];
       const previousAmount = paymentRecordAmount(existingRecord);
 
       if (parsed.empty && previousAmount != null && !window.confirm("Сигурни ли сте, че искате да премахнете записаното плащане?")) {
@@ -5073,42 +6789,124 @@
         return false;
       }
 
+      if (paymentsMigrationStateForCurrentClub()) {
+        if (!onlinePaymentsAvailable || window.clubdeskPaymentsDataSource !== "supabase") {
+          input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
+          if (typeof showToast === "function") showToast("Таксите са достъпни само за преглед без връзка със Supabase.");
+          return false;
+        }
+        const membership = window.clubdeskAuthenticatedUser?.membership;
+        const athlete = allAthletes().find(item => item.id === athleteId);
+        const athleteUuid = String(athlete?.supabaseId || attendanceUuidMaps().athleteLocalToUuid.get(athleteId) || "");
+        const paymentMonth = normalizePaymentMonth(month);
+        if (!membership?.club_id || !membership?.id || !athleteUuid || !paymentMonth) {
+          input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
+          if (typeof showToast === "function") showToast("Плащането не може да бъде свързано със Supabase.");
+          return false;
+        }
+        const mutationKey = `${athleteUuid}|${paymentMonth}`;
+        if (onlinePaymentMutations.has(mutationKey)) return false;
+        onlinePaymentMutations.add(mutationKey);
+        input.dataset.saving = "true";
+        input.disabled = true;
+        input.closest(".payment-month-cell")?.classList.add("saving");
+        setPaymentSaveState("Запазване...");
+        try {
+          if (parsed.empty) {
+            const {data,error} = await window.clubdeskSupabase.from("payments")
+              .delete()
+              .eq("club_id",membership.club_id)
+              .eq("athlete_id",athleteUuid)
+              .eq("payment_month",paymentMonth)
+              .select("id");
+            if (error) throw error;
+            if (previousAmount != null && (!Array.isArray(data) || data.length !== 1)) throw new Error("Supabase payment delete verification failed");
+            if (onlinePaymentsStore[month]) {
+              delete onlinePaymentsStore[month][athleteId];
+              if (!Object.keys(onlinePaymentsStore[month]).length) delete onlinePaymentsStore[month];
+            }
+            input.value = "";
+          } else {
+            const row = {
+              club_id:membership.club_id,
+              athlete_id:athleteUuid,
+              payment_month:paymentMonth,
+              amount:parsed.amount,
+              recorded_by_membership_id:membership.id,
+              note:typeof existingRecord?.note === "string" && existingRecord.note.trim() ? existingRecord.note.trim() : null
+            };
+            const {data,error} = await window.clubdeskSupabase.from("payments")
+              .upsert(row,{onConflict:"athlete_id,payment_month"})
+              .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note");
+            if (error) throw error;
+            if (!Array.isArray(data) || data.length !== 1 || Math.abs(Number(data[0].amount)-parsed.amount) > 0.000001) throw new Error("Supabase payment save verification failed");
+            onlinePaymentsStore[month] ||= {};
+            onlinePaymentsStore[month][athleteId] = {
+              status:parsed.amount > 0 ? "paid" : "unpaid",
+              amount:parsed.amount,
+              paidAt:null,
+              amountCustomized:true,
+              paymentAmountEntered:true,
+              note:data[0].note || "",
+              supabaseId:String(data[0].id || "")
+            };
+            input.value = formatPaymentCellAmount(parsed.amount);
+          }
+          cacheOnlinePayments();
+          input.dataset.originalValue = input.value;
+          input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",!parsed.empty);
+          updatePaymentSheetTotals();
+          if (month === DEMO_CURRENT_MONTH) updateDashboardStats();
+          setPaymentSaveState("Запазено","saved");
+          return true;
+        } catch (error) {
+          console.error("ClubDesk Supabase payment save error",error);
+          input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
+          input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",previousAmount != null);
+          setPaymentSaveState("Грешка");
+          if (typeof showToast === "function") showToast(parsed.empty ? "Плащането не беше премахнато. Опитайте отново." : "Плащането не беше запазено. Опитайте отново.");
+          return false;
+        } finally {
+          onlinePaymentMutations.delete(mutationKey);
+          input.dataset.saving = "false";
+          input.disabled = !canEditViewedScope() || !canEditOnlinePayments();
+          input.closest(".payment-month-cell")?.classList.remove("saving");
+        }
+      }
+
       setPaymentSaveState("Запазване...");
+      const localRecords = localMonthlyPayments();
+      localRecords[month] ||= {};
+      const localExistingRecord = localRecords[month][athleteId];
       if (parsed.empty) {
-        if (existingRecord) {
-          const clearedRecord = {...existingRecord,status:"unpaid",paidAt:null};
-          if (Object.prototype.hasOwnProperty.call(existingRecord,"paid")) clearedRecord.paid = false;
+        if (localExistingRecord) {
+          const clearedRecord = {...localExistingRecord,status:"unpaid",paidAt:null};
+          if (Object.prototype.hasOwnProperty.call(localExistingRecord,"paid")) clearedRecord.paid = false;
           delete clearedRecord.amount;
           delete clearedRecord.amountCustomized;
           delete clearedRecord.paymentAmountEntered;
-          records[month][athleteId] = clearedRecord;
+          localRecords[month][athleteId] = clearedRecord;
         }
         input.value = "";
       } else {
         const isPaid = parsed.amount > 0;
         const nextRecord = {
-          ...(existingRecord || {}),
+          ...(localExistingRecord || {}),
           status:isPaid ? "paid" : "unpaid",
           amount:parsed.amount,
-          paidAt:isPaid ? (existingRecord?.paidAt || new Date().toISOString()) : null,
+          paidAt:isPaid ? (localExistingRecord?.paidAt || new Date().toISOString()) : null,
           amountCustomized:true,
           paymentAmountEntered:true
         };
-        if (Object.prototype.hasOwnProperty.call(existingRecord || {},"paid")) nextRecord.paid = isPaid;
-        records[month][athleteId] = nextRecord;
+        if (Object.prototype.hasOwnProperty.call(localExistingRecord || {},"paid")) nextRecord.paid = isPaid;
+        localRecords[month][athleteId] = nextRecord;
         input.value = formatPaymentCellAmount(parsed.amount);
       }
-
-      localStorage.setItem(STORAGE_MONTHLY_PAYMENTS,JSON.stringify(records));
+      localStorage.setItem(STORAGE_MONTHLY_PAYMENTS,JSON.stringify(localRecords));
       input.dataset.originalValue = input.value;
       input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",!parsed.empty);
       updatePaymentSheetTotals();
-      if (month === DEMO_CURRENT_MONTH) {
-        renderAthleteTable();
-        updateDashboardStats();
-        const athlete = allAthletes().find(item => item.id === athleteId);
-        if (athlete && activeAthleteDetailsId === athleteId) renderAthleteDetails(athlete);
-      }
+      if (month === DEMO_CURRENT_MONTH) updateDashboardStats();
       setTimeout(() => setPaymentSaveState("Запазено","saved"),100);
       return true;
     }
@@ -5132,7 +6930,7 @@
       input.dataset.cancelled = "false";
       requestAnimationFrame(() => input.select());
     });
-    paymentTable?.addEventListener("keydown",event => {
+    paymentTable?.addEventListener("keydown",async event => {
       const input = event.target.closest(".payment-month-input");
       if (!input) return;
       if (event.key === "Escape") {
@@ -5144,17 +6942,18 @@
       }
       if (event.key === "Enter") {
         event.preventDefault();
-        if (savePaymentSheetInput(input)) focusAdjacentPaymentInput(input,event.shiftKey ? -1 : 1);
+        if (await savePaymentSheetInput(input)) focusAdjacentPaymentInput(input,event.shiftKey ? -1 : 1);
       }
     });
-    paymentTable?.addEventListener("focusout",event => {
+    paymentTable?.addEventListener("focusout",async event => {
       const input = event.target.closest(".payment-month-input");
       if (!input) return;
+      if (input.dataset.saving === "true") return;
       if (input.dataset.cancelled === "true") {
         input.dataset.cancelled = "false";
         return;
       }
-      if (input.value !== (input.dataset.originalValue || "") && !savePaymentSheetInput(input)) {
+      if (input.value !== (input.dataset.originalValue || "") && !await savePaymentSheetInput(input)) {
         setTimeout(() => input.focus(),0);
       }
     });
@@ -5482,8 +7281,12 @@
       return `${attendanceDate.value}|${normalizeGroupId(attendanceGroup.value)}`;
     }
 
+    function localAttendanceStore() {
+      return {};
+    }
+
     function attendanceStore() {
-      return readJson(STORAGE_ATTENDANCE, {});
+      return onlineAttendanceStore;
     }
 
     function attendanceRecord(date,group) {
@@ -5761,6 +7564,7 @@
         renderSettingsDataSummary();
         renderSettingsGroups();
         renderSettingsCoaches();
+        if (authenticatedMembershipIsAdmin() && attendanceMigrationStateForCurrentClub()) renderAttendanceMigrationPreview();
       }
     });
     document.getElementById("attendanceHistoryGroup")?.addEventListener("change", renderAttendanceHistory);
@@ -5868,7 +7672,8 @@
 
     function persistTodayAttendanceRoster(draft) {
       if (!draft?.existing || draft.date !== getLocalTodayDate()) return;
-      const store = attendanceStore();
+      if (attendanceMigrationStateForCurrentClub()) return;
+      const store = localAttendanceStore();
       const storageKey = attendanceRecordStorageKey(draft.date,draft.group,store);
       const record = store[storageKey];
       if (!record || typeof record !== "object") return;
@@ -6041,11 +7846,11 @@
               <div><strong>${escapeHtml(a.name)}${guestIds.has(a.id) ? '<span class="pill blue attendance-guest-badge">Гост</span>' : ""}</strong></div>
             </div>
             <div class="attendance-status-controls">
-              <button class="att-btn present ${status === "present" ? "active" : ""}" type="button" data-status="present" title="Присъства" aria-label="Присъства" ${canEditViewedScope() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">✓</span><span class="att-label">Присъства</span></button>
-              <button class="att-btn absent ${status === "absent" ? "active" : ""}" type="button" data-status="absent" title="Отсъства" aria-label="Отсъства" ${canEditViewedScope() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">×</span><span class="att-label">Отсъства</span></button>
-              <button class="att-btn injured ${status === "injured" ? "active" : ""}" type="button" data-status="injured" title="Контузен" aria-label="Контузен" ${canEditViewedScope() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">!</span><span class="att-label">Контузен</span></button>
-              <button class="att-btn competition ${status === "competition" ? "active" : ""}" type="button" data-status="competition" title="Състезание" aria-label="Състезание" ${canEditViewedScope() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">⚑</span><span class="att-label">Състезание</span></button>
-              <button class="att-btn rest ${status === "rest" ? "active" : ""} ${scheduledRest ? "has-schedule-source" : ""}" type="button" data-status="rest" title="${scheduledRest ? "Почивка според тренировъчния график" : "Почивка"}" aria-label="${scheduledRest ? "Почивка, по график" : "Почивка"}" ${canEditViewedScope() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">–</span><span class="att-label">Почивка</span>${scheduledRest ? '<span class="attendance-schedule-source" title="Почивка според тренировъчния график">По график</span>' : ""}</button>
+              <button class="att-btn present ${status === "present" ? "active" : ""}" type="button" data-status="present" title="Присъства" aria-label="Присъства" ${canEditAttendanceRecords() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">✓</span><span class="att-label">Присъства</span></button>
+              <button class="att-btn absent ${status === "absent" ? "active" : ""}" type="button" data-status="absent" title="Отсъства" aria-label="Отсъства" ${canEditAttendanceRecords() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">×</span><span class="att-label">Отсъства</span></button>
+              <button class="att-btn injured ${status === "injured" ? "active" : ""}" type="button" data-status="injured" title="Контузен" aria-label="Контузен" ${canEditAttendanceRecords() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">!</span><span class="att-label">Контузен</span></button>
+              <button class="att-btn competition ${status === "competition" ? "active" : ""}" type="button" data-status="competition" title="Състезание" aria-label="Състезание" ${canEditAttendanceRecords() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">⚑</span><span class="att-label">Състезание</span></button>
+              <button class="att-btn rest ${status === "rest" ? "active" : ""} ${scheduledRest ? "has-schedule-source" : ""}" type="button" data-status="rest" title="${scheduledRest ? "Почивка според тренировъчния график" : "Почивка"}" aria-label="${scheduledRest ? "Почивка, по график" : "Почивка"}" ${canEditAttendanceRecords() ? "" : "disabled"}><span class="att-icon" aria-hidden="true">–</span><span class="att-label">Почивка</span>${scheduledRest ? '<span class="attendance-schedule-source" title="Почивка според тренировъчния график">По график</span>' : ""}</button>
             </div>
           </div>
         `;
@@ -6082,7 +7887,7 @@
     }
 
     function openAttendanceAthletePicker() {
-      if (!requireEditPermission()) return;
+      if (!requireAttendanceEditAccess()) return;
       attendanceAthletePickerSelection = new Set();
       const search = document.getElementById("attendanceAthletePickerSearch");
       if (search) search.value = "";
@@ -6101,7 +7906,7 @@
     attendanceList?.addEventListener("click", event => {
       const button = event.target.closest(".att-btn");
       if (!button) return;
-      if (!requireEditPermission()) return;
+      if (!requireAttendanceEditAccess()) return;
 
       const row = button.closest(".attendance-row");
       row.dataset.status = button.dataset.status;
@@ -6117,7 +7922,7 @@
       updateDynamicAttendanceSummary();
     });
     document.getElementById("markAllAttendancePresent")?.addEventListener("click", () => {
-      if (!requireEditPermission()) return;
+      if (!requireAttendanceEditAccess()) return;
       attendanceList.querySelectorAll(".attendance-row").forEach(row => {
         if (ATTENDANCE_STATUS_VALUES.includes(row.dataset.status)) return;
         row.dataset.status = "present";
@@ -6131,7 +7936,7 @@
       updateDynamicAttendanceSummary();
     });
     document.getElementById("startExtraGroupAttendance")?.addEventListener("click", () => {
-      if (!requireEditPermission()) return;
+      if (!requireAttendanceEditAccess()) return;
       if (!window.confirm("Да се създаде ли извънредна тренировка за цялата група?")) return;
       const draft = initializeAttendanceSessionDraft();
       draft.sessionMode = "extra-group";
@@ -6142,7 +7947,7 @@
       renderAttendance();
     });
     document.getElementById("startSelectedAthletesAttendance")?.addEventListener("click", () => {
-      if (!requireEditPermission()) return;
+      if (!requireAttendanceEditAccess()) return;
       const draft = initializeAttendanceSessionDraft();
       draft.sessionMode = "selected-athletes";
       draft.rosterAthleteIds = [];
@@ -6217,15 +8022,82 @@
     document.getElementById("dashboardOpenAthletes")?.addEventListener("click", () => openView("athletes"));
     document.getElementById("dashboardDownloadBackup")?.addEventListener("click", () => document.getElementById("downloadClubDeskBackup")?.click());
 
-    document.getElementById("saveAttendance")?.addEventListener("click", () => {
-      if (!requireEditPermission()) return;
+    async function saveAttendanceToSupabase(draft,savedRecord) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const maps = attendanceUuidMaps();
+      const groupUuid = maps.groupLocalToUuid.get(normalizeGroupId(draft.group));
+      if (!membership?.club_id || !membership?.id || !groupUuid) throw new Error("Missing attendance Supabase mapping");
+      const mapAthleteIds = ids => [...new Set((ids || []).map(String).map(id => maps.athleteLocalToUuid.get(id)).filter(Boolean))];
+      const currentRecord = attendanceRecord(draft.date,draft.group);
+      const sourceLocalId = String(currentRecord?.sourceLocalId || attendanceKey());
+      const sessionRow = {
+        club_id:membership.club_id,
+        group_id:groupUuid,
+        session_date:draft.date,
+        note:savedRecord.note || null,
+        created_by_membership_id:membership.id,
+        source_local_id:sourceLocalId,
+        session_mode:savedRecord.sessionMode,
+        roster_athlete_ids:mapAthleteIds(savedRecord.rosterAthleteIds),
+        guest_athlete_ids:mapAthleteIds(savedRecord.guestAthleteIds)
+      };
+      const {data:sessionRows,error:sessionError} = await window.clubdeskSupabase.from("attendance_sessions")
+        .upsert([sessionRow],{onConflict:"group_id,session_date"})
+        .select("id,group_id,session_date,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+      if (sessionError) throw sessionError;
+      if (!Array.isArray(sessionRows) || sessionRows.length !== 1 || !sessionRows[0]?.id) throw new Error("Attendance session was not returned");
+      const session = sessionRows[0];
+      const visibleEditableIds = new Set(visibleAttendanceDraftAthleteIds(draft));
+      const markedRecords = Object.entries(savedRecord.statuses)
+        .filter(([athleteId,status]) => visibleEditableIds.has(String(athleteId)) && ATTENDANCE_STATUS_VALUES.includes(status))
+        .map(([athleteId,status]) => ({athleteId:String(athleteId),athleteUuid:maps.athleteLocalToUuid.get(String(athleteId)),status}))
+        .filter(record => record.athleteUuid);
+      const {data:existingRows,error:existingError} = await window.clubdeskSupabase.from("attendance_records")
+        .select("id,session_id,athlete_id,status")
+        .eq("session_id",session.id);
+      if (existingError) throw existingError;
+      if (markedRecords.length) {
+        const {error:recordError} = await window.clubdeskSupabase.from("attendance_records")
+          .upsert(markedRecords.map(record => ({session_id:session.id,athlete_id:record.athleteUuid,status:record.status})),{onConflict:"session_id,athlete_id"})
+          .select("id,session_id,athlete_id,status");
+        if (recordError) throw recordError;
+      }
+      const retainedAthleteUuids = new Set(markedRecords.map(record => String(record.athleteUuid)));
+      const visibleEditableUuids = new Set([...visibleEditableIds].map(id => maps.athleteLocalToUuid.get(id)).filter(Boolean).map(String));
+      const removedAthleteUuids = [...new Set((existingRows || []).map(row => String(row.athlete_id || "")).filter(uuid => uuid && visibleEditableUuids.has(uuid) && !retainedAthleteUuids.has(uuid)))];
+      if (removedAthleteUuids.length) {
+        const {error:deleteError} = await window.clubdeskSupabase.from("attendance_records")
+          .delete()
+          .eq("session_id",session.id)
+          .in("athlete_id",removedAthleteUuids);
+        if (deleteError) throw deleteError;
+      }
+      const {data:confirmedRows,error:confirmationError} = await window.clubdeskSupabase.from("attendance_records")
+        .select("id,session_id,athlete_id,status")
+        .eq("session_id",session.id);
+      if (confirmationError) throw confirmationError;
+      markedRecords.forEach(expected => {
+        const matches = (confirmedRows || []).filter(row => String(row.athlete_id) === String(expected.athleteUuid));
+        if (matches.length !== 1 || matches[0].status !== expected.status) throw new Error("Attendance record verification failed");
+      });
+      if ((confirmedRows || []).some(row => visibleEditableUuids.has(String(row.athlete_id)) && !retainedAthleteUuids.has(String(row.athlete_id)))) throw new Error("Unmarked attendance record was not removed");
+      onlineAttendanceStore[`${draft.date}|${normalizeGroupId(draft.group)}`] = {
+        ...savedRecord,
+        supabaseId:String(session.id),
+        sourceLocalId
+      };
+      cacheOnlineAttendance();
+      return onlineAttendanceStore[`${draft.date}|${normalizeGroupId(draft.group)}`];
+    }
+
+    document.getElementById("saveAttendance")?.addEventListener("click", async () => {
+      if (!requireAttendanceEditAccess()) return;
       const draft = initializeAttendanceSessionDraft();
       if (!draft.sessionMode) return;
       if (draft.sessionMode === "selected-athletes" && !draft.rosterAthleteIds.length) {
         if (typeof showToast === "function") showToast("Добавете поне един състезател.");
         return;
       }
-      const store = attendanceStore();
       const existingRecord = attendanceRecord(attendanceDate.value,attendanceGroup.value);
       const statuses = {...draft.statuses};
       const statusSources = {...draft.statusSources};
@@ -6244,28 +8116,45 @@
         note: attendanceNote.value.trim(),
         savedAt: new Date().toISOString()
       };
-      store[attendanceKey()] = savedRecord;
-      localStorage.setItem(STORAGE_ATTENDANCE, JSON.stringify(store));
-      attendanceSessionDraft = {...draft,existing:true,statuses:{...statuses},statusSources:{...statusSources},note:savedRecord.note};
-      renderAttendanceHistory();
-      updateDashboardStats();
-
-      if (typeof showToast === "function") showToast("Присъствието е запазено в браузъра");
+      const saveButton = document.getElementById("saveAttendance");
+      const originalText = saveButton?.textContent || "Запази присъствието";
+      onlineAttendanceSaveInProgress = attendanceMigrationStateForCurrentClub() !== null;
+      if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = "Запазване...";
+      }
+      try {
+        if (!attendanceMigrationStateForCurrentClub()) throw new Error("Missing authenticated attendance context");
+        await saveAttendanceToSupabase(draft,savedRecord);
+        attendanceSessionDraft = {...draft,existing:true,statuses:{...statuses},statusSources:{...statusSources},note:savedRecord.note};
+        renderAttendanceHistory();
+        updateDashboardStats();
+        renderSettingsDataSummary();
+        if (typeof showToast === "function") showToast("Присъствието е запазено.");
+      } catch (error) {
+        console.error("ClubDesk Supabase attendance save error",error);
+        if (typeof showToast === "function") showToast("Присъствието не беше запазено. Опитайте отново.");
+      } finally {
+        onlineAttendanceSaveInProgress = false;
+        if (saveButton) saveButton.textContent = originalText;
+        updatePermissionUI();
+        renderAttendance();
+      }
     });
     console.info("ClubDesk attendance save handler initialized once");
 
     hydrateOnlineDataCaches();
     if (onlineGroups.length || onlineAthletes.length) window.clubdeskDataSource = "supabase-cache";
     await loadOnlineClubData();
+    await loadOnlineAttendance();
+    await loadOnlinePayments();
+    await loadOnlineCalendar();
     refreshGroupNames();
     initializeCoachScope();
     renderGroupSelectors();
     attendanceDate.value = getLocalTodayDate();
     syncAttendanceDateControl();
     resetNewAthleteForm();
-    migratePermanentPayments();
-    migrateMonthlyAmounts();
-    migrateCalendarEventOwners();
     renderCalendar();
     renderAthleteTable();
     updateDashboardStats();
@@ -6279,7 +8168,6 @@
     renderCurrentUserProfile();
     renderCoachScopeContext();
     updatePermissionUI();
-    renderOnlineMigrationCardStatus();
   };
   </script>
 
