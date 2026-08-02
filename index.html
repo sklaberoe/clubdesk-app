@@ -32,9 +32,9 @@
     button,input,select{font:inherit}
     button{cursor:pointer}
     .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-    body.auth-pending .app,body.auth-signed-out .app{display:none}
+    body.auth-pending .app,body.auth-signed-out .app,body.auth-club-error .app{display:none}
     .auth-screen{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:#111722}
-    body.auth-pending #authLoading,body.auth-signed-out #authLogin{display:flex}
+    body.auth-pending #authLoading,body.auth-signed-out #authLogin,body.auth-club-error #authClubError{display:flex}
     .auth-loading-card,.auth-login-card{width:min(100%,420px);border:1px solid rgba(216,178,91,.28);border-radius:18px;background:#18202e;color:#fff;box-shadow:0 24px 64px rgba(0,0,0,.32)}
     .auth-loading-card{padding:36px;text-align:center}
     .auth-login-card{padding:32px}
@@ -52,6 +52,9 @@
     .auth-error[hidden]{visibility:hidden;display:block}
     .auth-submit{width:100%;min-height:46px;margin-top:16px;border:1px solid #d8b25b;border-radius:10px;background:#d8b25b;color:#111722;font-weight:900}
     .auth-submit:hover{background:#e4c477}.auth-submit:disabled{cursor:wait;opacity:.72}
+    .auth-error-actions{display:grid;gap:10px;margin-top:20px}
+    .auth-secondary{width:100%;min-height:44px;border:1px solid #4b5667;border-radius:10px;background:transparent;color:#fff;font-weight:800}
+    .auth-secondary:hover{background:rgba(255,255,255,.06)}
     .account-email{overflow-wrap:anywhere}
     .account-signout{width:100%;margin-top:6px;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:transparent;color:#fff;font-size:11px;font-weight:800;text-align:left}
     .account-signout:hover{background:rgba(255,255,255,.06)}
@@ -724,6 +727,18 @@
       <p class="auth-error" id="clubdeskLoginError" role="alert" hidden></p>
       <button class="auth-submit" id="clubdeskLoginButton" type="submit">Вход</button>
     </form>
+  </section>
+
+  <section class="auth-screen" id="authClubError" aria-labelledby="authClubErrorTitle">
+    <div class="auth-login-card">
+      <div class="auth-brand"><div class="auth-brand-mark">C</div><strong>ClubDesk</strong></div>
+      <h1 id="authClubErrorTitle">Профилът на клуба не можа да бъде зареден.</h1>
+      <p class="auth-helper">Сесията ви е запазена. Можете да опитате зареждането отново.</p>
+      <div class="auth-error-actions">
+        <button class="auth-submit" id="clubdeskRetryProfileButton" type="button">Опитай отново</button>
+        <button class="auth-secondary" id="clubdeskProfileErrorSignOut" type="button">Изход</button>
+      </div>
+    </div>
   </section>
 
   <div class="overlay" id="overlay"></div>
@@ -1545,6 +1560,8 @@
       const passwordInput = document.getElementById("clubdeskLoginPassword");
       const loginButton = document.getElementById("clubdeskLoginButton");
       const loginError = document.getElementById("clubdeskLoginError");
+      const retryProfileButton = document.getElementById("clubdeskRetryProfileButton");
+      const profileErrorSignOutButton = document.getElementById("clubdeskProfileErrorSignOut");
       const LAST_LOGIN_EMAIL_KEY = "clubdesk-last-login-email-v1";
       let initialSessionCheckComplete = false;
       let authLoadUserId = "";
@@ -1557,8 +1574,16 @@
       }
 
       function showAuthScreen(state,errorMessage="") {
-        document.body.classList.remove("auth-pending","auth-signed-out","auth-authenticated");
-        document.body.classList.add(state === "authenticated" ? "auth-authenticated" : state === "loading" ? "auth-pending" : "auth-signed-out");
+        document.body.classList.remove("auth-pending","auth-signed-out","auth-authenticated","auth-club-error");
+        document.body.classList.add(
+          state === "authenticated"
+            ? "auth-authenticated"
+            : state === "loading"
+              ? "auth-pending"
+              : state === "club-error"
+                ? "auth-club-error"
+                : "auth-signed-out"
+        );
         if (state === "login") {
           if (!emailInput.value.trim()) emailInput.value = String(localStorage.getItem(LAST_LOGIN_EMAIL_KEY) || "");
           passwordInput.value = "";
@@ -1579,6 +1604,7 @@
         authLoadUserId = "";
         authLoadPromise = null;
         window.clubdeskAuthenticatedUser = null;
+        window.clubdeskAppReady = false;
       }
 
       function handleSignedOut() {
@@ -1589,14 +1615,14 @@
         showAuthScreen("login");
       }
 
-      function loadAuthenticatedSession(session) {
+      function loadAuthenticatedSession(session,{force=false}={}) {
         const userId = session?.user?.id || "";
         if (!userId) {
           handleSignedOut();
           return Promise.resolve(false);
         }
         if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
-        if (window.clubdeskAuthenticatedUser?.authUser?.id === userId && window.clubdeskAppReady) {
+        if (!force && window.clubdeskAuthenticatedUser?.user?.id === userId && window.clubdeskAppReady) {
           showAuthScreen("authenticated");
           window.clubdeskRefreshAuthenticatedProfile?.();
           return Promise.resolve(true);
@@ -1606,22 +1632,28 @@
         authLoadUserId = userId;
         authLoadPromise = (async () => {
           try {
-            const [profileResult,membershipResult] = await Promise.all([
-              window.clubdeskSupabase.from("profiles").select("*").eq("id",userId).maybeSingle(),
-              window.clubdeskSupabase.from("club_memberships").select("*").eq("user_id",userId).eq("status","active").maybeSingle()
-            ]);
+            showAuthScreen("loading");
+            const user = session.user;
+            const profileResult = await window.clubdeskSupabase
+              .from("profiles")
+              .select("id,full_name")
+              .eq("id",user.id)
+              .single();
             if (profileResult.error) throw profileResult.error;
+            const membershipResult = await window.clubdeskSupabase
+              .from("club_memberships")
+              .select("id,club_id,user_id,access_role,club_role,status")
+              .eq("user_id",user.id)
+              .eq("status","active")
+              .single();
             if (membershipResult.error) throw membershipResult.error;
             if (requestVersion !== authRequestVersion) return false;
-            if (!membershipResult.data) {
-              window.clubdeskAuthenticatedUser = null;
-              showAuthScreen("login","Този акаунт няма активен достъп до клуб.");
-              return false;
-            }
+            if (!membershipResult.data) throw new Error("Active club membership was not found");
             if (!profileResult.data) throw new Error("Authenticated profile was not found");
 
             window.clubdeskAuthenticatedUser = {
-              authUser:session.user,
+              user,
+              authUser:user,
               profile:profileResult.data,
               membership:membershipResult.data
             };
@@ -1629,7 +1661,7 @@
               ? await window.clubdeskReloadOnlineDataForAuthenticatedUser?.()
               : await window.clubdeskInitializeApp?.();
             if (!appReady) {
-              showAuthScreen("login","Онлайн данните не можаха да бъдат заредени.");
+              showAuthScreen("club-error");
               return false;
             }
             window.clubdeskRefreshAuthenticatedProfile?.();
@@ -1638,8 +1670,7 @@
           } catch (error) {
             if (requestVersion !== authRequestVersion) return false;
             console.error("ClubDesk authenticated profile error",error);
-            window.clubdeskAuthenticatedUser = null;
-            showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
+            showAuthScreen("club-error");
             return false;
           } finally {
             if (authLoadUserId === userId) {
@@ -1665,11 +1696,12 @@
         try {
           const { data,error } = await window.clubdeskSupabase.auth.signInWithPassword({email,password});
           if (error) {
-            const invalidCredentials = error.code === "invalid_credentials" || String(error.message || "").toLowerCase().includes("invalid login credentials");
-            showLoginError(invalidCredentials ? "Невалиден имейл или парола." : "Входът не беше успешен. Опитайте отново.");
+            console.error("ClubDesk authentication error",{name:error.name,code:error.code,status:error.status,message:error.message});
+            showLoginError("Невалиден имейл или парола.");
             return;
           }
           localStorage.setItem(LAST_LOGIN_EMAIL_KEY,email);
+          showAuthScreen("loading");
           await loadAuthenticatedSession(data.session);
           passwordInput.value = "";
         } catch (error) {
@@ -1689,6 +1721,32 @@
           console.error("ClubDesk logout error",error);
         }
       };
+
+      retryProfileButton?.addEventListener("click",async () => {
+        if (authLoadPromise) return;
+        retryProfileButton.disabled = true;
+        retryProfileButton.textContent = "Зареждане...";
+        showAuthScreen("loading");
+        try {
+          const { data,error } = await window.clubdeskSupabase.auth.getSession();
+          if (error) throw error;
+          if (!data.session?.user) {
+            handleSignedOut();
+            return;
+          }
+          await loadAuthenticatedSession(data.session,{force:true});
+        } catch (error) {
+          console.error("ClubDesk profile retry error",error);
+          showAuthScreen("club-error");
+        } finally {
+          retryProfileButton.disabled = false;
+          retryProfileButton.textContent = "Опитай отново";
+        }
+      });
+
+      profileErrorSignOutButton?.addEventListener("click",() => {
+        void window.clubdeskSignOut?.();
+      });
 
       const { data:authStateData } = window.clubdeskSupabase.auth.onAuthStateChange((event,session) => {
         if (event === "INITIAL_SESSION" && !initialSessionCheckComplete) return;
@@ -2730,29 +2788,37 @@
     }
 
     async function loadActiveOnlineCoachAccounts(clubId) {
-      const fields = "id,user_id,club_id,access_role,club_role,status,profile:profiles(id,full_name)";
-      let result = await window.clubdeskSupabase
+      const membershipsResult = await window.clubdeskSupabase
         .from("club_memberships")
-        .select(fields)
+        .select("id,club_id,user_id,access_role,club_role,status")
         .eq("club_id",clubId)
         .eq("status","active");
-      if (result.error) {
-        result = await window.clubdeskSupabase
-          .from("club_memberships")
-          .select("id,user_id,club_id,access_role,club_role,status,profile:profiles!club_memberships_user_id_fkey(id,full_name)")
-          .eq("club_id",clubId)
-          .eq("status","active");
+      if (membershipsResult.error) throw membershipsResult.error;
+      const memberships = Array.isArray(membershipsResult.data) ? membershipsResult.data : [];
+      const userIds = [...new Set(memberships.map(row => String(row?.user_id || "")).filter(Boolean))];
+      let profiles = [];
+      if (userIds.length) {
+        const profilesResult = await window.clubdeskSupabase
+          .from("profiles")
+          .select("id,full_name")
+          .in("id",userIds);
+        if (profilesResult.error) throw profilesResult.error;
+        profiles = Array.isArray(profilesResult.data) ? profilesResult.data : [];
       }
-      if (result.error) throw result.error;
-      return (Array.isArray(result.data) ? result.data : []).map(row => {
-        const joinedProfile = Array.isArray(row?.profile) ? row.profile[0] : row?.profile;
+      const profilesByUserId = new Map(profiles.map(profile => [String(profile?.id || ""),profile]));
+      const missingProfileUserIds = userIds.filter(userId => !profilesByUserId.has(userId));
+      if (missingProfileUserIds.length) {
+        throw new Error(`Online coach profiles are missing for ${missingProfileUserIds.length} active memberships`);
+      }
+      return memberships.map(row => {
+        const profile = profilesByUserId.get(String(row?.user_id || ""));
         return {
           id:String(row?.id || ""),
           membershipId:String(row?.id || ""),
           supabaseMembershipId:String(row?.id || ""),
           userId:String(row?.user_id || ""),
           supabaseUserId:String(row?.user_id || ""),
-          fullName:String(joinedProfile?.full_name || "").trim(),
+          fullName:String(profile?.full_name || "").trim(),
           accessRole:String(row?.access_role || "coach"),
           clubRole:String(row?.club_role || "coach"),
           status:String(row?.status || ""),
