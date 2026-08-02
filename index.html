@@ -491,6 +491,25 @@
     .payment-sheet tfoot td:nth-child(-n+3){z-index:7;background:#f5f7f9}
     .payment-sheet tfoot td.current-month{background:#eaf4ee}
     .payment-total-cell{text-align:center!important;font-size:11px}
+    .payment-mobile-view{display:none}
+    .payment-mobile-list{display:grid;gap:10px}
+    .payment-mobile-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .payment-mobile-row.payment-athlete-paused{background:#fafbfc;color:#7f8793;opacity:.76}
+    .payment-mobile-athlete{min-width:0;flex:1}
+    .payment-mobile-athlete strong{display:block;font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+    .payment-mobile-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:5px}
+    .payment-mobile-status{color:var(--muted);font-size:11px;font-weight:700}
+    .payment-mobile-fee-exempt{display:inline-flex;padding:4px 7px;border-radius:999px;background:#edf1f5;color:#66717f;font-size:10px;font-weight:800}
+    .payment-mobile-amount{display:flex;align-items:center;gap:7px;flex:0 0 116px;min-width:116px;padding:0!important;border:0;background:transparent;box-shadow:none}
+    .payment-mobile-amount:hover,.payment-mobile-amount:focus-within{background:transparent;box-shadow:none}
+    .payment-mobile-amount.recorded-payment{background:transparent}
+    .payment-mobile-amount.recorded-payment .payment-mobile-input{border-color:#d8e9df;background:#eef8f2}
+    .payment-mobile-amount.saving .payment-mobile-input{border-color:#b9cbbf;background:#f4f7f5}
+    .payment-mobile-input{width:88px;min-height:44px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:16px;font-weight:700;text-align:right;outline:0}
+    .payment-mobile-input:hover{border-color:#cbd6cf;background:#fbfdfc}
+    .payment-mobile-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(20,138,74,.12)}
+    .payment-mobile-currency{font-size:14px;font-weight:800;color:var(--muted)}
+    .payment-mobile-empty{padding:22px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);font-size:13px;text-align:center}
     .empty{padding:44px;text-align:center;color:var(--muted)}
 
     .toast{
@@ -655,6 +674,59 @@
       #athleteTable .person strong{font-size:15px}
       #athleteTable .person span{font-size:13px}
       #athleteTable .athlete-group-cell .pill,#athleteTable .athlete-status-cell .pill{font-size:13px}
+    }
+
+    @media(max-width:768px){
+      #athletes{min-width:0;padding-bottom:44px}
+      #athletes .section-toolbar{align-items:stretch;flex-direction:column;gap:9px;margin-bottom:10px}
+      #athletes .toolbar-left,#athletes .toolbar-right{width:100%;gap:8px}
+      #athletes .search{min-width:0;width:100%}
+      #athletes .filter-select{flex:1 1 calc(50% - 4px);min-width:0}
+      #athletes .toolbar-right{justify-content:flex-end}
+      #athletes .toolbar-right .ghost-btn{min-height:44px;padding:0 16px}
+      #athletes .table-card{overflow:visible;border:0;background:transparent;box-shadow:none}
+      #athletes .table-wrap{overflow:visible}
+      #athleteTable{display:block;width:100%;min-width:0;table-layout:auto}
+      #athleteTable thead,#athleteTable colgroup{display:none}
+      #athleteTable tbody{display:grid;width:100%;gap:8px;padding:0}
+      #athleteTable tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 44px;grid-template-rows:auto auto;align-items:center;gap:7px 10px;width:100%;height:auto;min-height:104px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 3px 10px rgba(31,40,55,.04)}
+      #athleteTable tbody tr:hover{background:#fff;box-shadow:0 4px 13px rgba(31,40,55,.07)}
+      #athleteTable tbody tr.athlete-row-muted{background:#f7f8fa;opacity:.72}
+      #athleteTable tbody td{display:block;padding:0;border:0;min-width:0;font-size:13px}
+      #athleteTable .athlete-person-cell{grid-column:1;grid-row:1}
+      #athleteTable .athlete-person-cell .person{align-items:center;gap:10px;min-width:0}
+      #athleteTable .athlete-person-cell .person>div:last-child{min-width:0}
+      #athleteTable .athlete-person-cell .avatar{width:38px;height:38px;flex:0 0 38px;font-size:11px}
+      #athleteTable .athlete-person-cell .person strong{display:-webkit-box;overflow:hidden;font-size:15px;line-height:1.25;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+      #athleteTable .athlete-person-cell .person span{margin-top:3px;font-size:12px;line-height:1.3}
+      #athleteTable .athlete-action-cell{grid-column:2;grid-row:1;align-self:start;text-align:right}
+      #athleteTable .athlete-action-button{width:44px;height:44px;border-radius:10px;font-size:20px}
+      #athleteTable .athlete-group-cell{grid-column:1;grid-row:2;align-self:center}
+      #athleteTable .athlete-status-cell{grid-column:2;grid-row:2;align-self:center;justify-self:end;text-align:right}
+      #athleteTable .athlete-group-cell::before,#athleteTable .athlete-status-cell::before{display:none!important;content:none!important}
+      #athleteTable .athlete-group-cell .pill,#athleteTable .athlete-status-cell .pill{max-width:100%;padding:5px 8px;font-size:11px;line-height:1.2;white-space:normal}
+      #athleteTable .athlete-status-button{display:flex;align-items:center;justify-content:flex-end;min-width:44px;min-height:44px}
+      #athleteTable .athlete-status-select{min-height:44px;max-width:124px;font-size:12px}
+      #athleteTable .athlete-coach-cell,#athleteTable .athlete-phone-cell,#athleteTable .athlete-select-cell{display:none!important}
+      #athleteTable.mobile-bulk-active tbody tr{grid-template-columns:28px minmax(0,1fr) 44px}
+      #athleteTable.mobile-bulk-active .athlete-select-cell{display:block!important;grid-column:1;grid-row:1/3;align-self:start;padding-top:12px}
+      #athleteTable.mobile-bulk-active .athlete-person-cell,#athleteTable.mobile-bulk-active .athlete-group-cell{grid-column:2}
+      #athleteTable.mobile-bulk-active .athlete-action-cell,#athleteTable.mobile-bulk-active .athlete-status-cell{grid-column:3}
+      #athleteTable .athlete-select-checkbox{width:18px;height:18px}
+      #athleteTable tbody tr[data-scope-empty]{display:block;min-height:0;padding:20px 14px;text-align:center}
+      #athleteTable tbody tr[data-scope-empty] td{display:block!important}
+      #payments{min-width:0;padding-bottom:72px}
+      #payments .payment-sheet-toolbar{margin-bottom:12px}
+      #payments .payment-sheet-toolbar .toolbar-left{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
+      #payments #paymentGroupFilter{grid-column:1/-1;width:100%;min-height:44px}
+      #payments .payment-period-nav{grid-column:1/-1;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;width:100%;gap:8px}
+      #payments .payment-period-nav button{width:44px;height:44px}
+      #payments .payment-period-nav span{min-width:0;font-size:13px;color:var(--text)}
+      #payments #paymentCurrentMonth,#payments #downloadPaymentReport{width:100%;min-height:44px;padding:0 10px}
+      #payments .payment-current-summary{align-items:flex-start;flex-direction:column;gap:5px;padding:2px 1px 12px;font-size:13px}
+      #payments .payment-save-state{min-width:0;text-align:left}
+      .payment-desktop-view{display:none}
+      .payment-mobile-view{display:block;min-width:0}
     }
 
     @media(max-width:760px){
@@ -1088,7 +1160,7 @@
             <span class="payment-save-state" id="paymentSaveState" aria-live="polite"></span>
           </div>
 
-          <div class="card table-card">
+          <div class="card table-card payment-desktop-view">
             <div class="payment-sheet-wrap">
               <table class="payment-sheet" id="paymentTable">
                 <thead></thead>
@@ -1096,6 +1168,9 @@
                 <tfoot></tfoot>
               </table>
             </div>
+          </div>
+          <div class="payment-mobile-view" id="paymentMobileView">
+            <div class="payment-mobile-list" id="paymentMobileList"></div>
           </div>
         </section>
 
@@ -5335,7 +5410,7 @@
       document.getElementById("restoreClubDeskBackup")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("settingsArchiveCard")?.toggleAttribute("hidden",!isAdmin);
       renderOnlineSynchronizationStatus();
-      document.querySelectorAll("#paymentTable .payment-month-input").forEach(input => { input.disabled = !canEdit || !canEditOnlinePayments(); });
+      document.querySelectorAll("#paymentTable .payment-month-input,#paymentMobileList .payment-month-input").forEach(input => { input.disabled = !canEdit || !canEditOnlinePayments(); });
       document.getElementById("newCalendarEvent")?.toggleAttribute("disabled",!canEditOnlineCalendar());
       if (!canEditOnline) clearBulkSelection();
     }
@@ -5977,6 +6052,7 @@
     const paymentMonthLongNames = ["януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември"];
     let paymentPeriodOffset = 0;
     let paymentSaveStateTimer = null;
+    const paymentMobileMedia = window.matchMedia("(max-width: 768px)");
 
     function shiftPaymentMonth(month,offset) {
       const [year,monthNumber] = String(month).split("-").map(Number);
@@ -5986,6 +6062,10 @@
 
     function visiblePaymentMonths() {
       return Array.from({length:10},(_,index) => shiftPaymentMonth(DEMO_CURRENT_MONTH,paymentPeriodOffset - 8 + index));
+    }
+
+    function selectedPaymentMonth() {
+      return shiftPaymentMonth(DEMO_CURRENT_MONTH,paymentPeriodOffset);
     }
 
     function paymentMonthShortLabel(month) {
@@ -6032,7 +6112,33 @@
         if (cell) cell.textContent = formatPaymentTotal(paymentMonthTotal(month,athletes,records));
       });
       const summary = document.getElementById("paymentCurrentSummary");
-      if (summary) summary.textContent = `Събрано за ${paymentMonthLongLabel(DEMO_CURRENT_MONTH)}: ${formatPaymentTotal(paymentMonthTotal(DEMO_CURRENT_MONTH,athletes,records))}`;
+      const summaryMonth = paymentMobileMedia.matches ? selectedPaymentMonth() : DEMO_CURRENT_MONTH;
+      if (summary) summary.textContent = `Събрано за ${paymentMonthLongLabel(summaryMonth)}: ${formatPaymentTotal(paymentMonthTotal(summaryMonth,athletes,records))}`;
+    }
+
+    function renderMobilePaymentList(month,athletes,records) {
+      const container = document.getElementById("paymentMobileList");
+      if (!container) return;
+      const editable = canEditViewedScope() && canEditOnlinePayments();
+      container.innerHTML = athletes.length ? athletes.map(athlete => {
+        const amount = paymentRecordAmount(records[month]?.[athlete.id]);
+        const value = amount == null ? "" : formatPaymentCellAmount(amount);
+        const status = String(athlete.status || (athlete.active === false ? "paused" : "active"));
+        const subdued = status === "paused" || status === "inactive" || athlete.active === false;
+        const statusText = status === "inactive" ? "Неактивен" : status === "paused" ? "В пауза" : "";
+        const label = `${athlete.name}, ${paymentMonthLongLabel(month)}`;
+        return `
+          <div class="payment-mobile-row ${subdued ? "payment-athlete-paused" : "payment-athlete-active"}" data-athlete-id="${escapeHtml(athlete.id)}">
+            <div class="payment-mobile-athlete">
+              <strong>${escapeHtml(athlete.name)}</strong>
+              ${(statusText || athlete.feeExempt) ? `<div class="payment-mobile-meta">${statusText ? `<span class="payment-mobile-status">${escapeHtml(statusText)}</span>` : ""}${athlete.feeExempt ? '<span class="payment-mobile-fee-exempt">Без такса</span>' : ""}</div>` : ""}
+            </div>
+            <div class="payment-month-cell payment-mobile-amount ${amount == null ? "" : "recorded-payment"}">
+              <input class="payment-month-input payment-mobile-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${editable ? "" : "disabled"} />
+              <span class="payment-mobile-currency" aria-hidden="true">€</span>
+            </div>
+          </div>`;
+      }).join("") : `<div class="payment-mobile-empty">${selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор."}</div>`;
     }
 
     function renderPaymentTable() {
@@ -6044,6 +6150,21 @@
       const thead = table.querySelector("thead");
       const tbody = table.querySelector("tbody");
       const tfoot = table.querySelector("tfoot");
+
+      if (paymentMobileMedia.matches) {
+        thead.innerHTML = "";
+        tbody.innerHTML = "";
+        tfoot.innerHTML = "";
+        const month = selectedPaymentMonth();
+        renderMobilePaymentList(month,athletes,records);
+        const periodLabel = document.getElementById("paymentPeriodLabel");
+        if (periodLabel) periodLabel.textContent = paymentMonthLongLabel(month);
+        updatePaymentSheetTotals();
+        return;
+      }
+
+      const mobileList = document.getElementById("paymentMobileList");
+      if (mobileList) mobileList.innerHTML = "";
 
       thead.innerHTML = `<tr><th>Име</th><th>Тел. родител</th><th>Година</th>${months.map(month => `<th class="${month === DEMO_CURRENT_MONTH ? "current-month" : ""}">${paymentMonthShortLabel(month)}</th>`).join("")}</tr>`;
       tbody.innerHTML = athletes.length ? athletes.map(athlete => `
@@ -6472,6 +6593,7 @@
     }
 
     function syncBulkSelectionUI() {
+      document.getElementById("athleteTable")?.classList.toggle("mobile-bulk-active",selectedAthleteIds.size > 0);
       document.querySelectorAll(".athlete-select-checkbox").forEach(checkbox => {
         checkbox.checked = selectedAthleteIds.has(checkbox.dataset.athleteId);
       });
@@ -6988,56 +7110,65 @@
     }
 
     function focusAdjacentPaymentInput(input,direction) {
-      const inputs = [...document.querySelectorAll(`#paymentTable tbody .payment-month-input[data-month="${input.dataset.month}"]`)];
+      const container = input.closest("#paymentMobileList") || document.getElementById("paymentTable");
+      const inputs = [...container.querySelectorAll(`.payment-month-input[data-month="${input.dataset.month}"]`)];
       const nextInput = inputs[inputs.indexOf(input) + direction];
       if (nextInput) nextInput.focus();
     }
 
     const paymentTable = document.getElementById("paymentTable");
-    paymentTable?.addEventListener("click",event => {
-      const cell = event.target.closest(".payment-month-cell");
-      if (!cell || event.target.closest(".payment-month-input")) return;
-      cell.querySelector(".payment-month-input")?.focus();
-    });
-    paymentTable?.addEventListener("focusin",event => {
-      const input = event.target.closest(".payment-month-input");
-      if (!input) return;
-      input.dataset.originalValue = input.value;
-      input.dataset.cancelled = "false";
-      requestAnimationFrame(() => input.select());
-    });
-    paymentTable?.addEventListener("keydown",async event => {
-      const input = event.target.closest(".payment-month-input");
-      if (!input) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        input.dataset.cancelled = "true";
-        input.value = input.dataset.originalValue || "";
-        input.blur();
-        return;
-      }
-      if (event.key === "Enter") {
-        event.preventDefault();
-        if (await savePaymentSheetInput(input)) focusAdjacentPaymentInput(input,event.shiftKey ? -1 : 1);
-      }
-    });
-    paymentTable?.addEventListener("focusout",async event => {
-      const input = event.target.closest(".payment-month-input");
-      if (!input) return;
-      if (input.dataset.saving === "true") return;
-      if (input.dataset.cancelled === "true") {
+    const paymentMobileList = document.getElementById("paymentMobileList");
+
+    function bindPaymentInputContainer(container) {
+      container?.addEventListener("click",event => {
+        const cell = event.target.closest(".payment-month-cell");
+        if (!cell || event.target.closest(".payment-month-input")) return;
+        cell.querySelector(".payment-month-input")?.focus();
+      });
+      container?.addEventListener("focusin",event => {
+        const input = event.target.closest(".payment-month-input");
+        if (!input) return;
+        input.dataset.originalValue = input.value;
         input.dataset.cancelled = "false";
-        return;
-      }
-      if (input.value !== (input.dataset.originalValue || "") && !await savePaymentSheetInput(input)) {
-        setTimeout(() => input.focus(),0);
-      }
-    });
+        requestAnimationFrame(() => input.select());
+      });
+      container?.addEventListener("keydown",async event => {
+        const input = event.target.closest(".payment-month-input");
+        if (!input) return;
+        if (event.key === "Escape") {
+          event.preventDefault();
+          input.dataset.cancelled = "true";
+          input.value = input.dataset.originalValue || "";
+          input.blur();
+          return;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (await savePaymentSheetInput(input)) focusAdjacentPaymentInput(input,event.shiftKey ? -1 : 1);
+        }
+      });
+      container?.addEventListener("focusout",async event => {
+        const input = event.target.closest(".payment-month-input");
+        if (!input) return;
+        if (input.dataset.saving === "true") return;
+        if (input.dataset.cancelled === "true") {
+          input.dataset.cancelled = "false";
+          return;
+        }
+        if (input.value !== (input.dataset.originalValue || "") && !await savePaymentSheetInput(input)) {
+          setTimeout(() => input.focus(),0);
+        }
+      });
+    }
+
+    bindPaymentInputContainer(paymentTable);
+    bindPaymentInputContainer(paymentMobileList);
     document.getElementById("paymentGroupFilter")?.addEventListener("change",renderPaymentTable);
-    document.getElementById("paymentPreviousPeriod")?.addEventListener("click",() => { paymentPeriodOffset -= 10; renderPaymentTable(); });
-    document.getElementById("paymentNextPeriod")?.addEventListener("click",() => { paymentPeriodOffset += 10; renderPaymentTable(); });
+    document.getElementById("paymentPreviousPeriod")?.addEventListener("click",() => { paymentPeriodOffset -= paymentMobileMedia.matches ? 1 : 10; renderPaymentTable(); });
+    document.getElementById("paymentNextPeriod")?.addEventListener("click",() => { paymentPeriodOffset += paymentMobileMedia.matches ? 1 : 10; renderPaymentTable(); });
     document.getElementById("paymentCurrentMonth")?.addEventListener("click",() => { paymentPeriodOffset = 0; renderPaymentTable(); });
     document.getElementById("downloadPaymentReport")?.addEventListener("click",downloadPaymentReport);
+    paymentMobileMedia.addEventListener("change",renderPaymentTable);
 
     function updateDashboardStats() {
       const athletes = scopedAthletes();
