@@ -797,7 +797,7 @@
           <div class="test-user-list" id="testUserList"></div>
         </div>
         <button class="user-row" id="currentUserMenuButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Отвори менюто на акаунта" title="Отвори менюто на акаунта">
-          <div class="avatar" id="currentUserAvatar">СТ</div>
+          <div class="avatar" id="currentUserAvatar">CD</div>
           <div>
             <strong id="currentUserName">Потребител</strong>
             <span id="currentUserAccessLabel">Главен администратор</span>
@@ -1595,12 +1595,12 @@
           handleSignedOut();
           return Promise.resolve(false);
         }
-        if (window.clubdeskAuthenticatedUser?.authUser?.id === userId) {
+        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
+        if (window.clubdeskAuthenticatedUser?.authUser?.id === userId && window.clubdeskAppReady) {
           showAuthScreen("authenticated");
           window.clubdeskRefreshAuthenticatedProfile?.();
           return Promise.resolve(true);
         }
-        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
 
         const requestVersion = ++authRequestVersion;
         authLoadUserId = userId;
@@ -1625,8 +1625,13 @@
               profile:profileResult.data,
               membership:membershipResult.data
             };
-            if (window.clubdeskAppInitialized) await window.clubdeskReloadOnlineDataForAuthenticatedUser?.();
-            else window.clubdeskInitializeApp?.();
+            const appReady = window.clubdeskAppInitialized
+              ? await window.clubdeskReloadOnlineDataForAuthenticatedUser?.()
+              : await window.clubdeskInitializeApp?.();
+            if (!appReady) {
+              showAuthScreen("login","Онлайн данните не можаха да бъдат заредени.");
+              return false;
+            }
             window.clubdeskRefreshAuthenticatedProfile?.();
             showAuthScreen("authenticated");
             return true;
@@ -1753,7 +1758,8 @@
       navButtons.forEach(btn=>btn.classList.toggle("active",btn.dataset.view===id));
       viewEls.forEach(view=>view.classList.toggle("active",view.id===id));
       heading.textContent=views[id].title;
-      subheading.textContent=views[id].sub;
+      const authenticatedName=String(window.clubdeskAuthenticatedUser?.profile?.full_name||"").trim();
+      subheading.textContent=id==="settings"&&authenticatedName?`${authenticatedName} · ${views[id].sub}`:views[id].sub;
       sidebar.classList.remove("open");
       overlay.classList.remove("show");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -1891,8 +1897,9 @@
 
   <script>
   window.clubdeskInitializeApp = async function() {
-    if (window.clubdeskAppInitialized) return;
+    if (window.clubdeskAppInitialized) return Boolean(window.clubdeskAppReady);
     window.clubdeskAppInitialized = true;
+    window.clubdeskAppReady = false;
     const STORAGE_ATHLETES = "clubdesk-demo-athletes-v2";
     const STORAGE_ATHLETE_EDITS = "clubdesk-demo-athlete-edits-v1";
     const STORAGE_ATTENDANCE = "clubdesk-demo-attendance-v2";
@@ -2018,48 +2025,25 @@
     }
 
     function coaches() {
-      const source = onlineCoachAccounts.map(account => ({
-        id:`membership-${account.membershipId}`,
-        name:account.fullName,
-        role:account.accessRole,
-        clubRole:"coach",
-        accessRole:account.accessRole,
-        responsibleGroupIds:[],
-        active:account.status === "active",
-        supabaseMembershipId:account.membershipId,
-        supabaseUserId:account.userId
-      }));
-      const onlineMatchesByName = onlineCoachAccounts.reduce((map,account) => {
-        const normalizedName = normalizeCoachName(account?.fullName);
-        if (!normalizedName) return map;
-        const matches = map.get(normalizedName) || [];
-        matches.push(account);
-        map.set(normalizedName,matches);
-        return map;
-      },new Map());
       const ids = new Set();
-      const names = new Set();
-      return source.flatMap(coach => {
-        const id = String(coach?.id || "").trim();
-        const name = String(coach?.name || "").trim();
-        const normalizedName = normalizeCoachName(name);
-        if (!id || !name || ids.has(id) || names.has(normalizedName)) return [];
+      return onlineCoachAccounts.flatMap(account => {
+        const id = String(account?.membershipId || account?.id || "").trim();
+        const fullName = String(account?.fullName || account?.name || "").trim();
+        if (!id || !fullName || account?.status !== "active" || ids.has(id)) return [];
         ids.add(id);
-        names.add(normalizedName);
-        const isCurrentCoach = id === CURRENT_COACH_ID;
-        const onlineMatches = onlineMatchesByName.get(normalizedName) || [];
-        const onlineAccount = onlineMatches.length === 1 ? onlineMatches[0] : null;
         return [{
-          ...coach,
           id,
-          name,
-          clubRole:isCurrentCoach ? "coach" : (["coach","clubManager"].includes(coach?.clubRole) ? coach.clubRole : (coach?.role === "admin" ? "clubManager" : "coach")),
-          accessRole:isCurrentCoach ? "admin" : (["admin","coach"].includes(coach?.accessRole) ? coach.accessRole : "coach"),
-          responsibleGroupIds:[...new Set((Array.isArray(coach?.responsibleGroupIds) ? coach.responsibleGroupIds : []).map(normalizeGroupId).filter(Boolean))],
-          active:coach?.active !== false,
-          supabaseMembershipId:onlineAccount?.membershipId || null,
-          supabaseUserId:onlineAccount?.userId || null,
-          hasOnlineAccount:Boolean(onlineAccount)
+          supabaseMembershipId:id,
+          supabaseUserId:String(account?.userId || account?.supabaseUserId || "").trim(),
+          fullName,
+          name:fullName,
+          accessRole:["admin","coach"].includes(account?.accessRole) ? account.accessRole : "coach",
+          role:["admin","coach"].includes(account?.accessRole) ? account.accessRole : "coach",
+          clubRole:["coach","clubManager"].includes(account?.clubRole) ? account.clubRole : "coach",
+          responsibleGroupIds:[],
+          status:"active",
+          active:true,
+          hasOnlineAccount:true
         }];
       });
     }
@@ -2261,14 +2245,7 @@
     }
 
     function localCoachIdForMembership(membershipId) {
-      const account = onlineCoachAccounts.find(item => String(item?.membershipId || "") === String(membershipId || ""));
-      if (!account) return "";
-      const matches = coaches().filter(coach =>
-        coach.hasOnlineAccount
-        && String(coach.supabaseMembershipId || "") === String(membershipId || "")
-        && normalizeCoachName(coach.name) === normalizeCoachName(account.fullName)
-      );
-      return matches.length === 1 ? matches[0].id : "";
+      return String(membershipId || "").trim();
     }
 
     function mapSupabaseGroup(row,cachedGroups=onlineGroups) {
@@ -2281,7 +2258,7 @@
         defaultFee:localBackupGroupFee(id,cachedGroups),
         active:row?.status === "active",
         leadCoachMembershipId:String(row?.lead_coach_membership_id || "") || null,
-        leadCoachId:localCoachIdForMembership(row?.lead_coach_membership_id),
+        leadCoachId:String(row?.lead_coach_membership_id || "").trim(),
         scheduleDays:localScheduleDaysFromOnline(row?.schedule_days),
         startTime:/^([01]\d|2[0-3]):[0-5]\d$/.test(String(row?.start_time || "").slice(0,5)) ? String(row.start_time).slice(0,5) : ""
       };
@@ -2295,8 +2272,8 @@
       const group = normalizeGroupId(groupIdBySupabaseId.get(remoteGroupId) || "");
       const groupConnectionMissing = !group;
       const status = migrationSupportedStatuses.has(row?.status) ? row.status : "inactive";
-      const primaryCoachId = localCoachIdForMembership(row?.primary_coach_membership_id);
-      const coachConnectionMissing = !primaryCoachId;
+      const primaryCoachId = String(row?.primary_coach_membership_id || "").trim();
+      const coachConnectionMissing = Boolean(primaryCoachId && !coachById(primaryCoachId));
       const coach = coachById(primaryCoachId);
       const disciplines = Array.isArray(row?.disciplines) ? row.disciplines.map(value => String(value).trim()).filter(Boolean) : [];
       const savedFee = localBackupAthleteFee(id,cachedAthletes);
@@ -2752,6 +2729,38 @@
       renderOnlineSynchronizationStatus();
     }
 
+    async function loadActiveOnlineCoachAccounts(clubId) {
+      const fields = "id,user_id,club_id,access_role,club_role,status,profile:profiles(id,full_name)";
+      let result = await window.clubdeskSupabase
+        .from("club_memberships")
+        .select(fields)
+        .eq("club_id",clubId)
+        .eq("status","active");
+      if (result.error) {
+        result = await window.clubdeskSupabase
+          .from("club_memberships")
+          .select("id,user_id,club_id,access_role,club_role,status,profile:profiles!club_memberships_user_id_fkey(id,full_name)")
+          .eq("club_id",clubId)
+          .eq("status","active");
+      }
+      if (result.error) throw result.error;
+      return (Array.isArray(result.data) ? result.data : []).map(row => {
+        const joinedProfile = Array.isArray(row?.profile) ? row.profile[0] : row?.profile;
+        return {
+          id:String(row?.id || ""),
+          membershipId:String(row?.id || ""),
+          supabaseMembershipId:String(row?.id || ""),
+          userId:String(row?.user_id || ""),
+          supabaseUserId:String(row?.user_id || ""),
+          fullName:String(joinedProfile?.full_name || "").trim(),
+          accessRole:String(row?.access_role || "coach"),
+          clubRole:String(row?.club_role || "coach"),
+          status:String(row?.status || ""),
+          hasOnlineAccount:true
+        };
+      }).filter(account => account.membershipId && account.userId && account.fullName && account.status === "active");
+    }
+
     async function loadOnlineClubData() {
       if (onlineDataLoadPromise) return onlineDataLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
@@ -2765,29 +2774,15 @@
         try {
           if (!authUser || !membership || membership.status !== "active" || !membership.club_id) throw new Error("Missing authenticated club context");
           const clubId = membership.club_id;
-          const [groupsResult,membershipsResult] = await Promise.all([
-            window.clubdeskSupabase.from("training_groups").select("*").eq("club_id",clubId),
-            window.clubdeskSupabase.from("club_memberships").select("*").eq("club_id",clubId).eq("status","active")
-          ]);
-          if (groupsResult.error) throw groupsResult.error;
-          if (membershipsResult.error) throw membershipsResult.error;
-          const memberships = Array.isArray(membershipsResult.data) ? membershipsResult.data : [];
-          const userIds = [...new Set(memberships.map(item => String(item?.user_id || "")).filter(Boolean))];
-          let profiles = [];
-          if (userIds.length) {
-            const profilesResult = await window.clubdeskSupabase.from("profiles").select("*").in("id",userIds);
-            if (profilesResult.error) throw profilesResult.error;
-            profiles = Array.isArray(profilesResult.data) ? profilesResult.data : [];
+          const coachAccounts = await loadActiveOnlineCoachAccounts(clubId);
+          const currentMembershipId = String(membership.id || "");
+          if (!coachAccounts.some(account => account.membershipId === currentMembershipId)) {
+            throw new Error("Authenticated membership is missing from the online coach identity list");
           }
+          onlineCoachAccounts = coachAccounts;
+          const groupsResult = await window.clubdeskSupabase.from("training_groups").select("*").eq("club_id",clubId);
+          if (groupsResult.error) throw groupsResult.error;
           if (requestVersion !== onlineDataRequestVersion || String(window.clubdeskAuthenticatedUser?.membership?.club_id || "") !== String(clubId)) return false;
-          const profilesById = new Map(profiles.map(profile => [String(profile.id),profile]));
-          onlineCoachAccounts = memberships.map(item => ({
-            membershipId:String(item.id || ""),
-            userId:String(item.user_id || ""),
-            fullName:String(profilesById.get(String(item.user_id || ""))?.full_name || "").trim(),
-            accessRole:String(item.access_role || "coach"),
-            status:String(item.status || "")
-          })).filter(item => item.membershipId && item.userId && item.fullName);
           const previousGroups = [...onlineGroups];
           const previousAthletes = [...onlineAthletes];
           onlineGroups = (Array.isArray(groupsResult.data) ? groupsResult.data : []).map(row => mapSupabaseGroup(row,previousGroups)).filter(group => group.id && group.supabaseId);
@@ -2864,12 +2859,24 @@
       onlineCalendarAvailable = false;
       onlineCalendarLoadPromise = null;
       hydrateOnlineDataCaches();
-      await loadOnlineClubData();
-      await loadOnlineAttendance({force:true});
-      await loadOnlinePayments({force:true});
-      await loadOnlineCalendar({force:true});
+      const clubDataLoaded = await loadOnlineClubData();
+      if (!clubDataLoaded) {
+        window.clubdeskAppReady = false;
+        setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
+        return false;
+      }
+      const attendanceLoaded = await loadOnlineAttendance({force:true});
+      const paymentsLoaded = await loadOnlinePayments({force:true});
+      const calendarLoaded = await loadOnlineCalendar({force:true});
+      if (!attendanceLoaded || !paymentsLoaded || !calendarLoaded) {
+        window.clubdeskAppReady = false;
+        setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
+        return false;
+      }
       initializeCoachScope();
       refreshOnlineDataViews();
+      window.clubdeskAppReady = true;
+      return true;
     };
 
     function groupOptionLabel(group,includeAge=false) {
@@ -4965,14 +4972,12 @@
     }
 
     function initializeCoachScope() {
-      if (localStorage.getItem(STORAGE_CURRENT_USER) === null) {
-        localStorage.setItem(STORAGE_CURRENT_USER,CURRENT_COACH_ID);
-      }
       const user = currentUser();
+      if (user?.id) localStorage.setItem(STORAGE_CURRENT_USER,user.id);
       const savedScope = String(localStorage.getItem(STORAGE_SELECTED_COACH_SCOPE) || "");
       const validCoachScope = Boolean(coachById(savedScope));
       const isAdmin = currentUserIsAdmin();
-      const defaultScope = isAdmin ? "all" : (user?.id || CURRENT_COACH_ID);
+      const defaultScope = isAdmin ? "all" : (user?.id || "");
       selectedCoachScope = (savedScope === "all" && isAdmin) || validCoachScope
         ? savedScope
         : defaultScope;
@@ -4980,12 +4985,7 @@
     }
 
     function currentUserId() {
-      const authenticated = window.clubdeskAuthenticatedUser;
-      const linkedCoachId = String(authenticated?.membership?.coach_id || authenticated?.profile?.coach_id || "").trim();
-      if (linkedCoachId && coachById(linkedCoachId)) return linkedCoachId;
-      const authenticatedName = normalizeCoachName(authenticated?.profile?.full_name);
-      const matchedCoach = authenticatedName ? coaches().find(coach => normalizeCoachName(coach.name) === authenticatedName) : null;
-      return matchedCoach?.id || String(localStorage.getItem(STORAGE_CURRENT_USER) || CURRENT_COACH_ID);
+      return String(window.clubdeskAuthenticatedUser?.membership?.id || "").trim();
     }
 
     function currentUser() {
@@ -5112,6 +5112,9 @@
         document.getElementById("currentUserAvatar").textContent = initials(name);
         document.getElementById("currentUserName").textContent = name;
         document.getElementById("currentUserAccessLabel").textContent = authenticated.membership?.access_role === "admin" ? "Главен администратор" : "Треньор";
+        if (document.getElementById("settings")?.classList.contains("active")) {
+          document.getElementById("pageSubheading").textContent = `${name} · ${views.settings.sub}`;
+        }
         return;
       }
       const user = currentUser();
@@ -8145,10 +8148,18 @@
 
     hydrateOnlineDataCaches();
     if (onlineGroups.length || onlineAthletes.length) window.clubdeskDataSource = "supabase-cache";
-    await loadOnlineClubData();
-    await loadOnlineAttendance();
-    await loadOnlinePayments();
-    await loadOnlineCalendar();
+    const clubDataLoaded = await loadOnlineClubData();
+    if (!clubDataLoaded) {
+      setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
+      return false;
+    }
+    const attendanceLoaded = await loadOnlineAttendance();
+    const paymentsLoaded = await loadOnlinePayments();
+    const calendarLoaded = await loadOnlineCalendar();
+    if (!attendanceLoaded || !paymentsLoaded || !calendarLoaded) {
+      setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
+      return false;
+    }
     refreshGroupNames();
     initializeCoachScope();
     renderGroupSelectors();
@@ -8168,6 +8179,8 @@
     renderCurrentUserProfile();
     renderCoachScopeContext();
     updatePermissionUI();
+    window.clubdeskAppReady = true;
+    return true;
   };
   </script>
 
