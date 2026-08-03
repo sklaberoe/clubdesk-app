@@ -348,6 +348,11 @@
     .calendar-event{margin-top:7px;padding:6px 7px;border:1px solid #cfe9d9;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
     .calendar-event span{opacity:.75;margin-right:4px}
     .calendar-event small{display:block;margin-top:3px;opacity:.78;font-size:8px;font-weight:800}
+    .calendar-desktop-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .calendar-desktop-toolbar .calendar-desktop-nav{width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:20px}
+    .calendar-desktop-toolbar strong{min-width:150px;text-align:center;font-size:15px;text-transform:lowercase}
+    .calendar-desktop-toolbar .calendar-desktop-spacer{flex:1}
+    .calendar-desktop-toolbar .ghost-btn,.calendar-desktop-toolbar .primary-btn{min-height:40px}
     .calendar-mobile-view{display:none}
     .mobile-calendar-toolbar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
     .mobile-calendar-toolbar button{width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:22px}
@@ -1213,10 +1218,17 @@
         <section class="view" id="calendar">
           <div class="card calendar-desktop-view">
             <div class="card-head">
-              <div><h3>Календар · юли 2026</h3><p>Събитията в календара са само информативни и не влияят на присъствието.</p></div>
-              <button class="primary-btn" id="newCalendarEvent" type="button">+ Ново събитие</button>
+              <div><h3>Календар</h3><p>Събитията в календара са само информативни и не влияят на присъствието.</p></div>
             </div>
             <div class="card-body">
+              <div class="calendar-desktop-toolbar" aria-label="Навигация по месеци">
+                <button class="calendar-desktop-nav" id="desktopCalendarPrevious" type="button" aria-label="Предишен месец">‹</button>
+                <strong id="desktopCalendarMonthTitle"></strong>
+                <button class="calendar-desktop-nav" id="desktopCalendarNext" type="button" aria-label="Следващ месец">›</button>
+                <span class="calendar-desktop-spacer"></span>
+                <button class="ghost-btn" id="desktopCalendarToday" type="button">Текущ месец</button>
+                <button class="primary-btn" id="newCalendarEvent" type="button">+ Ново събитие</button>
+              </div>
               <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;min-width:700px">
                 <div style="color:var(--muted);font-size:10px;font-weight:900;text-align:center">ПОН</div>
                 <div style="color:var(--muted);font-size:10px;font-weight:900;text-align:center">ВТО</div>
@@ -3176,7 +3188,7 @@
       return Boolean(entry && entry.date <= getLocalTodayDate() && attendanceRecordHasStatus(entry,eligibleIds));
     }
 
-    let mobileCalendarMonth = getLocalTodayDate().slice(0,7);
+    let calendarDisplayedMonth = getLocalTodayDate().slice(0,7);
     let mobileCalendarSelectedDate = getLocalTodayDate();
 
     function calendarLocalDate(value) {
@@ -3203,13 +3215,13 @@
       mobileCalendarSelectedDate = today.startsWith(`${month}-`) ? today : `${month}-01`;
     }
 
-    function changeMobileCalendarMonth(offset) {
-      const first = calendarLocalDate(`${mobileCalendarMonth}-01`);
+    function changeCalendarMonth(offset) {
+      const first = calendarLocalDate(`${calendarDisplayedMonth}-01`);
       if (!first) return;
       const next = new Date(first.getFullYear(),first.getMonth()+offset,1,12);
-      mobileCalendarMonth = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}`;
-      selectInitialMobileCalendarDate(mobileCalendarMonth);
-      renderMobileCalendar();
+      calendarDisplayedMonth = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}`;
+      selectInitialMobileCalendarDate(calendarDisplayedMonth);
+      renderCalendar();
     }
 
     function renderMobileCalendar() {
@@ -3219,7 +3231,7 @@
       const eventList = document.getElementById("mobileCalendarEventList");
       if (!grid || !title || !selectedTitle || !eventList) return;
 
-      const first = calendarLocalDate(`${mobileCalendarMonth}-01`);
+      const first = calendarLocalDate(`${calendarDisplayedMonth}-01`);
       if (!first) return;
       const today = getLocalTodayDate();
       const events = personalCalendarEvents();
@@ -3230,7 +3242,7 @@
       });
       eventsByDate.forEach(items => items.sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")) || a.title.localeCompare(b.title,"bg")));
 
-      title.textContent = calendarMonthTitle(mobileCalendarMonth);
+      title.textContent = calendarMonthTitle(calendarDisplayedMonth);
       const mondayOffset = (first.getDay()+6)%7;
       const daysInMonth = new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
       const visibleCellCount = Math.ceil((mondayOffset+daysInMonth)/7)*7;
@@ -3239,7 +3251,7 @@
         const date = new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+index,12);
         const dateKey = calendarDateKey(date);
         const dayEvents = eventsByDate.get(dateKey) || [];
-        const outside = !dateKey.startsWith(`${mobileCalendarMonth}-`);
+        const outside = !dateKey.startsWith(`${calendarDisplayedMonth}-`);
         const classes = ["mobile-calendar-day",outside ? "outside" : "",dateKey === today ? "today" : "",dateKey === mobileCalendarSelectedDate ? "selected" : "",dayEvents.length ? "has-events" : ""].filter(Boolean).join(" ");
         const marker = dayEvents.length ? `<span class="mobile-calendar-event-mark" aria-hidden="true"><span class="mobile-calendar-event-dot"></span>${dayEvents.length > 1 ? `<span class="mobile-calendar-event-count">${dayEvents.length}</span>` : ""}</span>` : "";
         return `<button class="${classes}" type="button" data-mobile-calendar-date="${dateKey}" aria-label="${escapeHtml(calendarSelectedDateTitle(dateKey))}${dayEvents.length ? `, ${dayEvents.length} събития` : ""}"><span>${date.getDate()}</span>${marker}</button>`;
@@ -3267,22 +3279,34 @@
       if (!grid) return;
       grid.innerHTML = "";
       const events = personalCalendarEvents();
-      const firstDayOffset = (new Date(2026,6,1).getDay()+6)%7;
+      const firstDay = calendarLocalDate(`${calendarDisplayedMonth}-01`);
+      if (!firstDay) return;
+      const desktopTitle = document.getElementById("desktopCalendarMonthTitle");
+      if (desktopTitle) desktopTitle.textContent = calendarMonthTitle(calendarDisplayedMonth);
+      const today = getLocalTodayDate();
+      const firstDayOffset = (firstDay.getDay()+6)%7;
+      const daysInMonth = new Date(firstDay.getFullYear(),firstDay.getMonth()+1,0).getDate();
+      const eventsByDate = new Map();
+      events.filter(event => event.date.startsWith(`${calendarDisplayedMonth}-`)).forEach(event => {
+        if (!eventsByDate.has(event.date)) eventsByDate.set(event.date,[]);
+        eventsByDate.get(event.date).push(event);
+      });
       for (let index=0;index<firstDayOffset;index+=1) {
         const blank = document.createElement("div");
         blank.style.minHeight = "112px";
         grid.appendChild(blank);
       }
-      for (let day=1;day<=31;day+=1) {
-        const date = `2026-07-${String(day).padStart(2,"0")}`;
+      for (let day=1;day<=daysInMonth;day+=1) {
+        const date = `${calendarDisplayedMonth}-${String(day).padStart(2,"0")}`;
+        const isToday = date === today;
         const cell = document.createElement("div");
         cell.className = "calendar-day";
         cell.dataset.date = date;
         cell.setAttribute("role","button");
         cell.setAttribute("tabindex","0");
-        cell.setAttribute("aria-label",`Добави събитие за ${day} юли 2026`);
-        cell.style.cssText = `min-height:112px;border:1px solid var(--line);border-radius:12px;padding:9px;background:${day===16?"#f0faf4":"#fff"};`;
-        cell.innerHTML = `<div style="font-weight:900;font-size:12px;${day===16?"color:var(--accent)":""}">${day}</div>`;
+        cell.setAttribute("aria-label",`Добави събитие за ${calendarSelectedDateTitle(date)}`);
+        cell.style.cssText = `min-height:112px;border:1px solid var(--line);border-radius:12px;padding:9px;background:${isToday?"#f0faf4":"#fff"};`;
+        cell.innerHTML = `<div style="font-weight:900;font-size:12px;${isToday?"color:var(--accent)":""}">${day}</div>`;
         cell.addEventListener("click",() => openCalendarEventModal(date));
         cell.addEventListener("keydown",event => {
           if (event.key === "Enter" || event.key === " ") {
@@ -3290,7 +3314,7 @@
             openCalendarEventModal(date);
           }
         });
-        events.filter(event => event.date === date).forEach(event => {
+        (eventsByDate.get(date) || []).forEach(event => {
           const tag = document.createElement("div");
           tag.className = "calendar-event";
           tag.dataset.eventId = event.id;
@@ -3364,21 +3388,25 @@
     }
 
     document.getElementById("newCalendarEvent")?.addEventListener("click", () => openCalendarEventModal(getLocalTodayDate()));
-    document.getElementById("mobileCalendarPrevious")?.addEventListener("click",() => changeMobileCalendarMonth(-1));
-    document.getElementById("mobileCalendarNext")?.addEventListener("click",() => changeMobileCalendarMonth(1));
-    document.getElementById("mobileCalendarToday")?.addEventListener("click",() => {
-      mobileCalendarMonth = getLocalTodayDate().slice(0,7);
+    document.getElementById("desktopCalendarPrevious")?.addEventListener("click",() => changeCalendarMonth(-1));
+    document.getElementById("desktopCalendarNext")?.addEventListener("click",() => changeCalendarMonth(1));
+    document.getElementById("mobileCalendarPrevious")?.addEventListener("click",() => changeCalendarMonth(-1));
+    document.getElementById("mobileCalendarNext")?.addEventListener("click",() => changeCalendarMonth(1));
+    const resetCalendarToCurrentMonth = () => {
+      calendarDisplayedMonth = getLocalTodayDate().slice(0,7);
       mobileCalendarSelectedDate = getLocalTodayDate();
-      renderMobileCalendar();
-    });
+      renderCalendar();
+    };
+    document.getElementById("desktopCalendarToday")?.addEventListener("click",resetCalendarToCurrentMonth);
+    document.getElementById("mobileCalendarToday")?.addEventListener("click",resetCalendarToCurrentMonth);
     document.getElementById("mobileNewCalendarEvent")?.addEventListener("click",() => openCalendarEventModal(mobileCalendarSelectedDate));
     document.getElementById("mobileCalendarGrid")?.addEventListener("click",event => {
       const button = event.target.closest("[data-mobile-calendar-date]");
       if (!button) return;
       mobileCalendarSelectedDate = button.dataset.mobileCalendarDate;
       const selectedMonth = mobileCalendarSelectedDate.slice(0,7);
-      if (selectedMonth !== mobileCalendarMonth) mobileCalendarMonth = selectedMonth;
-      renderMobileCalendar();
+      if (selectedMonth !== calendarDisplayedMonth) calendarDisplayedMonth = selectedMonth;
+      renderCalendar();
     });
     document.getElementById("mobileCalendarEventList")?.addEventListener("click",async event => {
       const editButton = event.target.closest("[data-calendar-mobile-edit]");
