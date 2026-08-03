@@ -348,6 +348,34 @@
     .calendar-event{margin-top:7px;padding:6px 7px;border:1px solid #cfe9d9;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
     .calendar-event span{opacity:.75;margin-right:4px}
     .calendar-event small{display:block;margin-top:3px;opacity:.78;font-size:8px;font-weight:800}
+    .calendar-mobile-view{display:none}
+    .mobile-calendar-toolbar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
+    .mobile-calendar-toolbar button{width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:22px}
+    .mobile-calendar-toolbar strong{text-align:center;font-size:16px;text-transform:lowercase}
+    .mobile-calendar-actions{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.25fr);gap:8px;margin-top:10px}
+    .mobile-calendar-actions button{min-height:44px}
+    .mobile-calendar-weekdays,.mobile-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+    .mobile-calendar-weekdays{margin-top:16px}
+    .mobile-calendar-weekdays span{display:grid;place-items:center;height:24px;color:var(--muted);font-size:10px;font-weight:900}
+    .mobile-calendar-day{position:relative;display:grid;place-items:center;aspect-ratio:1;min-width:0;min-height:44px;padding:0;border:1px solid transparent;border-radius:10px;background:#f7f8fa;color:var(--text);font-size:12px;font-weight:800}
+    .mobile-calendar-day.outside{background:transparent;color:#aeb5bf}
+    .mobile-calendar-day.today{border-color:#a8d8ba;color:var(--accent)}
+    .mobile-calendar-day.selected{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+    .mobile-calendar-event-mark{position:absolute;left:50%;bottom:5px;display:flex;align-items:center;gap:2px;transform:translateX(-50%)}
+    .mobile-calendar-event-dot{display:block;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+    .mobile-calendar-event-count{color:var(--accent);font-size:8px;font-weight:900;line-height:1}
+    .mobile-calendar-selected{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+    .mobile-calendar-selected h4{margin:0 0 10px;font-size:14px}
+    .mobile-calendar-event-list{display:grid;gap:8px}
+    .mobile-calendar-event-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff}
+    .mobile-calendar-event-copy{min-width:0}
+    .mobile-calendar-event-copy strong{display:block;font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+    .mobile-calendar-event-copy time{display:block;margin-top:3px;color:var(--accent);font-size:11px;font-weight:800}
+    .mobile-calendar-event-copy p{display:-webkit-box;overflow:hidden;margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.4;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+    .mobile-calendar-event-actions{display:flex;align-items:flex-start;gap:5px}
+    .mobile-calendar-event-actions button{min-width:44px;min-height:44px;padding:0 9px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text);font-size:11px;font-weight:800}
+    .mobile-calendar-event-actions button[data-calendar-mobile-delete]{color:var(--danger)}
+    .mobile-calendar-empty{padding:18px 12px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);font-size:12px;text-align:center}
     .settings-backup-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
     .settings-data-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
     .settings-data-item{padding:13px;border:1px solid var(--line);border-radius:12px;background:#fafbfc}
@@ -727,6 +755,14 @@
       #payments .payment-save-state{min-width:0;text-align:left}
       .payment-desktop-view{display:none}
       .payment-mobile-view{display:block;min-width:0}
+      #calendar{min-width:0;padding-bottom:72px}
+      #calendar .calendar-desktop-view{display:none}
+      #calendar .calendar-mobile-view{display:block;min-width:0}
+      #calendar .calendar-mobile-card{overflow:hidden}
+      #calendar .calendar-mobile-card .card-body{padding:14px}
+      #calendarEventModal{align-items:flex-end;padding:0}
+      #calendarEventModal .modal{width:100%;max-width:none;max-height:92vh;border-radius:16px 16px 0 0}
+      #calendarEventModal .modal-body{overflow:auto}
     }
 
     @media(max-width:760px){
@@ -1175,7 +1211,7 @@
         </section>
 
         <section class="view" id="calendar">
-          <div class="card">
+          <div class="card calendar-desktop-view">
             <div class="card-head">
               <div><h3>Календар · юли 2026</h3><p>Събитията в календара са само информативни и не влияят на присъствието.</p></div>
               <button class="primary-btn" id="newCalendarEvent" type="button">+ Ново събитие</button>
@@ -1191,6 +1227,27 @@
                 <div style="color:var(--muted);font-size:10px;font-weight:900;text-align:center">НЕД</div>
               </div>
               <div id="calendarGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;min-width:700px;margin-top:8px"></div>
+            </div>
+          </div>
+          <div class="card calendar-mobile-view calendar-mobile-card">
+            <div class="card-body">
+              <div class="mobile-calendar-toolbar" aria-label="Навигация по месеци">
+                <button id="mobileCalendarPrevious" type="button" aria-label="Предишен месец">‹</button>
+                <strong id="mobileCalendarMonthTitle"></strong>
+                <button id="mobileCalendarNext" type="button" aria-label="Следващ месец">›</button>
+              </div>
+              <div class="mobile-calendar-actions">
+                <button class="ghost-btn" id="mobileCalendarToday" type="button">Днес</button>
+                <button class="primary-btn" id="mobileNewCalendarEvent" type="button">+ Добави събитие</button>
+              </div>
+              <div class="mobile-calendar-weekdays" aria-hidden="true">
+                <span>П</span><span>В</span><span>С</span><span>Ч</span><span>П</span><span>С</span><span>Н</span>
+              </div>
+              <div class="mobile-calendar-grid" id="mobileCalendarGrid"></div>
+              <section class="mobile-calendar-selected" aria-live="polite">
+                <h4 id="mobileCalendarSelectedTitle"></h4>
+                <div class="mobile-calendar-event-list" id="mobileCalendarEventList"></div>
+              </section>
             </div>
           </div>
         </section>
@@ -2748,7 +2805,7 @@
         date:String(row?.event_date || ""),
         time:row?.event_time ? normalizeCalendarTime(row.event_time) : "",
         note:typeof row?.note === "string" ? row.note.trim() : "",
-        ownerCoachId:migrationPreviewCoachMatch()?.id || "",
+        ownerCoachId:String(row?.owner_membership_id || ""),
         createdAt:String(row?.created_at || "")
       });
     }
@@ -3119,6 +3176,92 @@
       return Boolean(entry && entry.date <= getLocalTodayDate() && attendanceRecordHasStatus(entry,eligibleIds));
     }
 
+    let mobileCalendarMonth = getLocalTodayDate().slice(0,7);
+    let mobileCalendarSelectedDate = getLocalTodayDate();
+
+    function calendarLocalDate(value) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || ""));
+      return match ? new Date(Number(match[1]),Number(match[2])-1,Number(match[3]),12) : null;
+    }
+
+    function calendarDateKey(date) {
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+    }
+
+    function calendarMonthTitle(month) {
+      const date = calendarLocalDate(`${month}-01`);
+      return date ? new Intl.DateTimeFormat("bg-BG",{month:"long",year:"numeric"}).format(date).replace(/\s*г\.$/,"").toLocaleLowerCase("bg-BG") : "";
+    }
+
+    function calendarSelectedDateTitle(dateValue) {
+      const date = calendarLocalDate(dateValue);
+      return date ? new Intl.DateTimeFormat("bg-BG",{day:"numeric",month:"long",year:"numeric"}).format(date).replace(/\s*г\.$/,"") : "";
+    }
+
+    function selectInitialMobileCalendarDate(month) {
+      const today = getLocalTodayDate();
+      mobileCalendarSelectedDate = today.startsWith(`${month}-`) ? today : `${month}-01`;
+    }
+
+    function changeMobileCalendarMonth(offset) {
+      const first = calendarLocalDate(`${mobileCalendarMonth}-01`);
+      if (!first) return;
+      const next = new Date(first.getFullYear(),first.getMonth()+offset,1,12);
+      mobileCalendarMonth = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,"0")}`;
+      selectInitialMobileCalendarDate(mobileCalendarMonth);
+      renderMobileCalendar();
+    }
+
+    function renderMobileCalendar() {
+      const grid = document.getElementById("mobileCalendarGrid");
+      const title = document.getElementById("mobileCalendarMonthTitle");
+      const selectedTitle = document.getElementById("mobileCalendarSelectedTitle");
+      const eventList = document.getElementById("mobileCalendarEventList");
+      if (!grid || !title || !selectedTitle || !eventList) return;
+
+      const first = calendarLocalDate(`${mobileCalendarMonth}-01`);
+      if (!first) return;
+      const today = getLocalTodayDate();
+      const events = personalCalendarEvents();
+      const eventsByDate = new Map();
+      events.forEach(event => {
+        if (!eventsByDate.has(event.date)) eventsByDate.set(event.date,[]);
+        eventsByDate.get(event.date).push(event);
+      });
+      eventsByDate.forEach(items => items.sort((a,b) => String(a.time || "99:99").localeCompare(String(b.time || "99:99")) || a.title.localeCompare(b.title,"bg")));
+
+      title.textContent = calendarMonthTitle(mobileCalendarMonth);
+      const mondayOffset = (first.getDay()+6)%7;
+      const daysInMonth = new Date(first.getFullYear(),first.getMonth()+1,0).getDate();
+      const visibleCellCount = Math.ceil((mondayOffset+daysInMonth)/7)*7;
+      const gridStart = new Date(first.getFullYear(),first.getMonth(),1-mondayOffset,12);
+      grid.innerHTML = Array.from({length:visibleCellCount},(_,index) => {
+        const date = new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+index,12);
+        const dateKey = calendarDateKey(date);
+        const dayEvents = eventsByDate.get(dateKey) || [];
+        const outside = !dateKey.startsWith(`${mobileCalendarMonth}-`);
+        const classes = ["mobile-calendar-day",outside ? "outside" : "",dateKey === today ? "today" : "",dateKey === mobileCalendarSelectedDate ? "selected" : "",dayEvents.length ? "has-events" : ""].filter(Boolean).join(" ");
+        const marker = dayEvents.length ? `<span class="mobile-calendar-event-mark" aria-hidden="true"><span class="mobile-calendar-event-dot"></span>${dayEvents.length > 1 ? `<span class="mobile-calendar-event-count">${dayEvents.length}</span>` : ""}</span>` : "";
+        return `<button class="${classes}" type="button" data-mobile-calendar-date="${dateKey}" aria-label="${escapeHtml(calendarSelectedDateTitle(dateKey))}${dayEvents.length ? `, ${dayEvents.length} събития` : ""}"><span>${date.getDate()}</span>${marker}</button>`;
+      }).join("");
+
+      selectedTitle.textContent = `Събития за ${calendarSelectedDateTitle(mobileCalendarSelectedDate)}`;
+      const selectedEvents = eventsByDate.get(mobileCalendarSelectedDate) || [];
+      eventList.innerHTML = selectedEvents.length ? selectedEvents.map(event => `
+        <article class="mobile-calendar-event-card" data-calendar-mobile-event="${escapeHtml(event.id)}">
+          <div class="mobile-calendar-event-copy">
+            <strong>${escapeHtml(event.title)}</strong>
+            ${event.time ? `<time datetime="${escapeHtml(event.time)}">${escapeHtml(event.time)}</time>` : ""}
+            ${event.note ? `<p>${escapeHtml(event.note)}</p>` : ""}
+          </div>
+          <div class="mobile-calendar-event-actions">
+            <button type="button" data-calendar-mobile-edit="${escapeHtml(event.id)}" aria-label="Редактирай ${escapeHtml(event.title)}">Редактирай</button>
+            <button type="button" data-calendar-mobile-delete="${escapeHtml(event.id)}" aria-label="Изтрий ${escapeHtml(event.title)}">Изтрий</button>
+          </div>
+        </article>
+      `).join("") : '<div class="mobile-calendar-empty">Няма събития за този ден.</div>';
+    }
+
     function renderCalendar() {
       const grid = document.getElementById("calendarGrid");
       if (!grid) return;
@@ -3170,6 +3313,7 @@
         });
         grid.appendChild(cell);
       }
+      renderMobileCalendar();
     }
 
     const calendarEventModal = document.getElementById("calendarEventModal");
@@ -3220,6 +3364,37 @@
     }
 
     document.getElementById("newCalendarEvent")?.addEventListener("click", () => openCalendarEventModal(getLocalTodayDate()));
+    document.getElementById("mobileCalendarPrevious")?.addEventListener("click",() => changeMobileCalendarMonth(-1));
+    document.getElementById("mobileCalendarNext")?.addEventListener("click",() => changeMobileCalendarMonth(1));
+    document.getElementById("mobileCalendarToday")?.addEventListener("click",() => {
+      mobileCalendarMonth = getLocalTodayDate().slice(0,7);
+      mobileCalendarSelectedDate = getLocalTodayDate();
+      renderMobileCalendar();
+    });
+    document.getElementById("mobileNewCalendarEvent")?.addEventListener("click",() => openCalendarEventModal(mobileCalendarSelectedDate));
+    document.getElementById("mobileCalendarGrid")?.addEventListener("click",event => {
+      const button = event.target.closest("[data-mobile-calendar-date]");
+      if (!button) return;
+      mobileCalendarSelectedDate = button.dataset.mobileCalendarDate;
+      const selectedMonth = mobileCalendarSelectedDate.slice(0,7);
+      if (selectedMonth !== mobileCalendarMonth) mobileCalendarMonth = selectedMonth;
+      renderMobileCalendar();
+    });
+    document.getElementById("mobileCalendarEventList")?.addEventListener("click",async event => {
+      const editButton = event.target.closest("[data-calendar-mobile-edit]");
+      if (editButton) {
+        openCalendarEventModal(null,editButton.dataset.calendarMobileEdit);
+        return;
+      }
+      const deleteButton = event.target.closest("[data-calendar-mobile-delete]");
+      if (!deleteButton) return;
+      deleteButton.disabled = true;
+      try {
+        await deleteCalendarEventById(deleteButton.dataset.calendarMobileDelete,{closeModal:false});
+      } finally {
+        if (deleteButton.isConnected) deleteButton.disabled = false;
+      }
+    });
     document.getElementById("closeCalendarEventModal")?.addEventListener("click", closeCalendarEventModal);
     document.getElementById("cancelCalendarEvent")?.addEventListener("click", closeCalendarEventModal);
     calendarEventModal?.addEventListener("click", event => { if (event.target === calendarEventModal) closeCalendarEventModal(); });
@@ -3303,17 +3478,17 @@
       if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено");
     });
 
-    deleteCalendarEvent?.addEventListener("click", async () => {
-      const event = personalCalendarEvents().find(item => item.id === activeCalendarEventId);
-      if (!event) {
+    async function deleteCalendarEventById(eventId,{closeModal=true}={}) {
+      const calendarEvent = personalCalendarEvents().find(item => item.id === eventId);
+      if (!calendarEvent) {
         if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
-        return;
+        return false;
       }
-      if (!confirm("Сигурни ли сте, че искате да изтриете събитието?")) return;
+      if (!confirm("Сигурни ли сте, че искате да изтриете събитието?")) return false;
       if (calendarMigrationStateForCurrentMembership()) {
-        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress || !event.supabaseId) {
+        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress || !calendarEvent.supabaseId) {
           if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
-          return;
+          return false;
         }
         const membership = window.clubdeskAuthenticatedUser?.membership;
         onlineCalendarMutationInProgress = true;
@@ -3321,30 +3496,36 @@
         try {
           const {data,error} = await window.clubdeskSupabase.from("calendar_events")
             .delete()
-            .eq("id",event.supabaseId)
+            .eq("id",calendarEvent.supabaseId)
             .eq("club_id",membership.club_id)
             .eq("owner_membership_id",membership.id)
             .select("id");
           if (error) throw error;
           if (!Array.isArray(data) || data.length !== 1) throw new Error("Supabase calendar delete verification failed");
-          onlineCalendarEvents = onlineCalendarEvents.filter(item => item.id !== event.id);
+          onlineCalendarEvents = onlineCalendarEvents.filter(item => item.id !== calendarEvent.id);
           cacheOnlineCalendar();
-          closeCalendarEventModal();
+          if (closeModal) closeCalendarEventModal();
           refreshCalendarView();
           if (typeof showToast === "function") showToast("Събитието е изтрито");
+          return true;
         } catch (error) {
           console.error("ClubDesk Supabase calendar delete error",error);
           if (typeof showToast === "function") showToast("Събитието не беше изтрито. Опитайте отново.");
+          return false;
         } finally {
           onlineCalendarMutationInProgress = false;
           deleteCalendarEvent.disabled = false;
         }
-        return;
       }
-      saveCalendarEvents(calendarEvents().filter(event => event.id !== activeCalendarEventId));
-      closeCalendarEventModal();
+      saveCalendarEvents(calendarEvents().filter(event => event.id !== calendarEvent.id));
+      if (closeModal) closeCalendarEventModal();
       refreshCalendarView();
       if (typeof showToast === "function") showToast("Събитието е изтрито");
+      return true;
+    }
+
+    deleteCalendarEvent?.addEventListener("click", async () => {
+      await deleteCalendarEventById(activeCalendarEventId);
     });
 
     document.addEventListener("keydown", event => {
