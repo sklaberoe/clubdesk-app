@@ -32,9 +32,9 @@
     button,input,select{font:inherit}
     button{cursor:pointer}
     .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
-    body.auth-pending .app,body.auth-signed-out .app,body.auth-club-error .app{display:none}
+    body.auth-pending .app,body.auth-signed-out .app{display:none}
     .auth-screen{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:#111722}
-    body.auth-pending #authLoading,body.auth-signed-out #authLogin,body.auth-club-error #authClubError{display:flex}
+    body.auth-pending #authLoading,body.auth-signed-out #authLogin{display:flex}
     .auth-loading-card,.auth-login-card{width:min(100%,420px);border:1px solid rgba(216,178,91,.28);border-radius:18px;background:#18202e;color:#fff;box-shadow:0 24px 64px rgba(0,0,0,.32)}
     .auth-loading-card{padding:36px;text-align:center}
     .auth-login-card{padding:32px}
@@ -52,9 +52,6 @@
     .auth-error[hidden]{visibility:hidden;display:block}
     .auth-submit{width:100%;min-height:46px;margin-top:16px;border:1px solid #d8b25b;border-radius:10px;background:#d8b25b;color:#111722;font-weight:900}
     .auth-submit:hover{background:#e4c477}.auth-submit:disabled{cursor:wait;opacity:.72}
-    .auth-error-actions{display:grid;gap:10px;margin-top:20px}
-    .auth-secondary{width:100%;min-height:44px;border:1px solid #4b5667;border-radius:10px;background:transparent;color:#fff;font-weight:800}
-    .auth-secondary:hover{background:rgba(255,255,255,.06)}
     .account-email{overflow-wrap:anywhere}
     .account-signout{width:100%;margin-top:6px;padding:9px 10px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:transparent;color:#fff;font-size:11px;font-weight:800;text-align:left}
     .account-signout:hover{background:rgba(255,255,255,.06)}
@@ -98,21 +95,22 @@
     }
     .nav-btn:hover{background:rgba(255,255,255,.05);color:#fff}
     .nav-btn.active{background:linear-gradient(90deg,rgba(31,194,105,.18),rgba(31,194,105,.08));color:#fff;box-shadow:inset 3px 0 0 #28cf75}
+    .nav-btn[hidden]{display:none}
     .nav-icon{width:18px;height:18px;display:inline-grid;place-items:center;opacity:.95}
     .nav-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-    .coach-scope-panel{display:flex;flex:1;flex-direction:column;min-height:0;margin:18px 2px 12px;overflow:hidden}
+    .coach-scope-panel{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;margin:18px 2px 12px;overflow:hidden}
     .coach-scope-title{margin:0 8px 8px;color:#778397;font-size:9px;font-weight:900;letter-spacing:.12em}
-    .coach-scope-list{display:grid;align-content:start;gap:4px;max-height:100%;overflow-y:auto;padding-right:2px}
-    .coach-scope-item{width:100%;min-height:44px;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#aeb7c5;display:flex;align-items:center;gap:9px;text-align:left}
+    .coach-scope-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:4px;width:100%;max-width:100%;min-width:0;max-height:100%;overflow-x:hidden;overflow-y:auto;padding-right:2px}
+    .coach-scope-item{width:100%;max-width:100%;min-width:0;min-height:44px;box-sizing:border-box;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#aeb7c5;display:flex;align-items:center;gap:9px;overflow:hidden;text-align:left}
     .coach-scope-item:hover{background:rgba(255,255,255,.05);color:#fff}
     .coach-scope-item.active{background:rgba(31,194,105,.14);color:#fff;box-shadow:inset 3px 0 0 #28cf75}
     .coach-scope-item.muted:not(.active){opacity:.66}
     .coach-scope-avatar{width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:rgba(255,255,255,.11);display:grid;place-items:center;font-size:9px;font-weight:900}
-    .coach-scope-copy{min-width:0;flex:1}
+    .coach-scope-copy{min-width:0;max-width:100%;flex:1;overflow:hidden}
     .coach-scope-copy strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
-    .coach-scope-copy small{display:block;margin-top:2px;color:#7f8b9d;font-size:9px}
-    .coach-scope-lock{font-size:9px;color:#9aa5b5;white-space:nowrap}
+    .coach-scope-copy small{display:block;max-width:100%;margin-top:2px;overflow:hidden;color:#7f8b9d;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+    .coach-scope-lock{min-width:0;flex:0 0 auto;font-size:9px;color:#9aa5b5;white-space:nowrap}
 
     .sidebar-footer{position:relative;margin-top:auto;padding:16px 4px 0;border-top:1px solid rgba(255,255,255,.08)}
     .user-row{width:100%;display:flex;align-items:center;gap:10px;padding:5px 4px;border:0;border-radius:10px;background:transparent;color:#fff;text-align:left}
@@ -190,6 +188,9 @@
     .simple-dashboard-links{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;padding:0;border:0;background:transparent}
     .simple-dashboard-link{min-height:42px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:0 17px;color:var(--text);font-size:13px;font-weight:700;text-align:left}
     .simple-dashboard-link:hover{border-color:#b9d9c5;color:var(--accent)}
+    #dashboard.coach-dashboard .simple-dashboard-actions{grid-template-columns:1fr}
+    #dashboard.coach-dashboard .simple-dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .simple-dashboard-action[hidden],.simple-dashboard-summary-item[hidden],.simple-dashboard-link[hidden]{display:none}
 
     .section-toolbar{
       display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px
@@ -248,7 +249,12 @@
     .athlete-action-menu[hidden]{display:none}
     .athlete-action-menu button{display:block;width:100%;border:0;background:transparent;border-radius:8px;padding:9px 10px;text-align:left;font-size:11px;font-weight:800;color:var(--text)}
     .athlete-action-menu button:hover{background:var(--surface-2)}
+    .athlete-action-menu button[hidden]{display:none}
+    .athlete-action-menu button:disabled{cursor:not-allowed;color:var(--muted);opacity:.65}
+    .athlete-action-message{display:block;max-width:198px;padding:7px 10px;color:var(--muted);font-size:9px;line-height:1.4}
+    .athlete-action-message[hidden]{display:none}
     .athlete-action-menu button[data-action="archive"]{color:var(--danger)}
+    .athlete-action-menu button[data-action="delete"]{margin-top:5px;padding-top:11px;border-top:1px solid var(--line);border-radius:0 0 8px 8px;color:var(--danger)}
     .athlete-status-button{border:0;background:transparent;padding:0;border-radius:999px}
     .athlete-status-button .pill{transition:box-shadow .18s ease,transform .18s ease}
     .athlete-status-button:hover .pill{box-shadow:0 0 0 3px rgba(20,138,74,.1);transform:translateY(-1px)}
@@ -345,6 +351,9 @@
     .attendance-period{margin:-5px 0 10px;color:var(--muted);font-size:10px}
     .calendar-day{cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease}
     .calendar-day:hover{border-color:#bfc8d3!important;box-shadow:0 3px 10px rgba(31,45,61,.07)}
+    #calendar.calendar-readonly .calendar-day{cursor:default}
+    #calendar.calendar-readonly .calendar-day:hover{border-color:var(--line)!important;box-shadow:none}
+    #calendar.calendar-readonly .calendar-event{cursor:pointer}
     .calendar-event{margin-top:7px;padding:6px 7px;border:1px solid #cfe9d9;border-radius:7px;background:var(--accent-soft);color:var(--accent);font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
     .calendar-event span{opacity:.75;margin-right:4px}
     .calendar-event small{display:block;margin-top:3px;opacity:.78;font-size:8px;font-weight:800}
@@ -354,6 +363,14 @@
     .calendar-desktop-toolbar .calendar-desktop-spacer{flex:1}
     .calendar-desktop-toolbar .ghost-btn,.calendar-desktop-toolbar .primary-btn{min-height:40px}
     .calendar-mobile-view{display:none}
+    .calendar-readonly-indicator{margin:0 0 12px;padding:8px 11px;border:1px solid #d9e2e9;border-radius:9px;background:#f5f8fa;color:#536373;font-size:11px;font-weight:800}
+    .calendar-readonly-indicator[hidden]{display:none}
+    .calendar-readonly-details{display:grid;gap:12px}
+    .calendar-readonly-details[hidden]{display:none}
+    #calendarEventEditableFields[hidden]{display:none}
+    .calendar-readonly-details div{display:grid;gap:4px}
+    .calendar-readonly-details span{color:var(--muted);font-size:10px;font-weight:800}
+    .calendar-readonly-details strong,.calendar-readonly-details p{margin:0;color:var(--text);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
     .mobile-calendar-toolbar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
     .mobile-calendar-toolbar button{width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:22px}
     .mobile-calendar-toolbar strong{text-align:center;font-size:16px;text-transform:lowercase}
@@ -466,6 +483,7 @@
     .coach-group-option{display:flex;align-items:center;gap:8px;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fafbfc;font-size:11px;font-weight:700;cursor:pointer}
     .coach-group-option input{width:15px;height:15px;margin:0;accent-color:var(--accent)}
     .group-modal-section-title{grid-column:1/-1;margin:4px 0 0;padding-bottom:7px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+    #groupLeadCoachField[hidden]{display:none}
     .group-schedule-days-field{margin-top:0}
     .group-schedule-days{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
     .form-field .group-schedule-days label{display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;padding:7px;border:1px solid var(--line);border-radius:9px;background:#fafbfc;cursor:pointer;font-size:10px;font-weight:800}
@@ -599,6 +617,9 @@
     .athlete-status-help{display:grid;gap:3px;margin-top:2px;color:var(--muted);font-size:10px;line-height:1.4}
     .checkbox-control{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:11px;font-weight:900;color:#4e5867}
     .checkbox-control input,.form-field .checkbox-control input{width:16px;height:16px;margin:0;accent-color:var(--accent);flex:0 0 auto}
+    .athlete-delete-message{margin:0;color:var(--text);font-size:13px;line-height:1.5}
+    .athlete-delete-support{margin:9px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+    #athleteDeleteConfirmation[hidden],#athleteDeleteBlocked[hidden],#confirmDeleteAthlete[hidden]{display:none}
     .athlete-attendance-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .athlete-attendance-stat{display:flex;min-height:92px;flex-direction:column;align-items:center;justify-content:center;padding:16px;border:1px solid var(--line);border-radius:13px;background:#fafbfc;text-align:center}
     .athlete-attendance-stat strong{display:block;font-size:24px;font-weight:800}
@@ -618,6 +639,10 @@
     .modal.compact-modal{width:min(440px,100%)}
     .danger-btn{border:1px solid var(--danger);background:var(--danger);color:#fff;border-radius:11px;padding:10px 13px;font-weight:800;font-size:13px}
     .confirm-copy{margin:0;color:var(--text);font-size:13px;line-height:1.55}
+    .move-athlete-cross-coach{padding:12px 13px;border:1px solid #e4d2a5;border-radius:10px;background:#fff9eb;color:#624f24}
+    .move-athlete-cross-coach[hidden],#moveAthleteSelection[hidden],#confirmMoveAthlete[hidden],#moveGroupOnly[hidden],#moveGroupAndCoach[hidden]{display:none}
+    .move-athlete-cross-coach strong{display:block;font-size:13px}
+    .move-athlete-cross-coach p{margin:5px 0 0;font-size:11px;line-height:1.45}
     .confirm-note{margin:12px 0 0;padding:11px;border-radius:10px;background:var(--surface-2);color:var(--muted);font-size:11px;line-height:1.5}
     .modal-head{
       display:flex;align-items:flex-start;justify-content:space-between;gap:18px;
@@ -830,8 +855,8 @@
       <h1 id="authLoginTitle">Вход в ClubDesk</h1>
       <p class="auth-helper">Влезте с акаунта, предоставен от администратора на клуба.</p>
       <div class="auth-field">
-        <label for="clubdeskLoginEmail">Имейл</label>
-        <input id="clubdeskLoginEmail" type="email" inputmode="email" autocomplete="username" />
+        <label for="clubdeskLoginEmail">Потребител или имейл</label>
+        <input id="clubdeskLoginEmail" type="text" inputmode="text" autocomplete="username" placeholder="Потребител или имейл" />
       </div>
       <div class="auth-field">
         <label for="clubdeskLoginPassword">Парола</label>
@@ -840,18 +865,6 @@
       <p class="auth-error" id="clubdeskLoginError" role="alert" hidden></p>
       <button class="auth-submit" id="clubdeskLoginButton" type="submit">Вход</button>
     </form>
-  </section>
-
-  <section class="auth-screen" id="authClubError" aria-labelledby="authClubErrorTitle">
-    <div class="auth-login-card">
-      <div class="auth-brand"><div class="auth-brand-mark">C</div><strong>ClubDesk</strong></div>
-      <h1 id="authClubErrorTitle">Профилът на клуба не можа да бъде зареден.</h1>
-      <p class="auth-helper">Сесията ви е запазена. Можете да опитате зареждането отново.</p>
-      <div class="auth-error-actions">
-        <button class="auth-submit" id="clubdeskRetryProfileButton" type="button">Опитай отново</button>
-        <button class="auth-secondary" id="clubdeskProfileErrorSignOut" type="button">Изход</button>
-      </div>
-    </div>
   </section>
 
   <div class="overlay" id="overlay"></div>
@@ -887,7 +900,7 @@
           </span>
           Състезатели
         </button>
-        <button class="nav-btn" data-view="attendance">
+        <button class="nav-btn" id="attendanceNavItem" data-view="attendance">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           </span>
@@ -925,9 +938,9 @@
           <div class="test-user-list" id="testUserList"></div>
         </div>
         <button class="user-row" id="currentUserMenuButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Отвори менюто на акаунта" title="Отвори менюто на акаунта">
-          <div class="avatar" id="currentUserAvatar">CD</div>
+          <div class="avatar" id="currentUserAvatar">СТ</div>
           <div>
-            <strong id="currentUserName">Потребител</strong>
+            <strong id="currentUserName">ClubDesk</strong>
             <span id="currentUserAccessLabel">Главен администратор</span>
           </div>
         </button>
@@ -957,7 +970,7 @@
         <section class="view active" id="dashboard">
           <div class="simple-dashboard">
             <div class="simple-dashboard-actions" aria-label="Основни действия">
-              <button class="simple-dashboard-action" data-dashboard-action="attendance" type="button">
+              <button class="simple-dashboard-action" id="dashboardAttendanceAction" data-dashboard-action="attendance" type="button">
                 <h2>Отбележи присъствие</h2>
                 <p>Изберете група и отбележете кой е на тренировка.</p>
                 <span class="primary-btn">Отвори присъствие</span>
@@ -972,7 +985,7 @@
             <section class="simple-dashboard-section" aria-labelledby="simpleDashboardSummaryTitle">
               <h2 id="simpleDashboardSummaryTitle">Обобщение</h2>
               <div class="simple-dashboard-summary">
-                <div class="simple-dashboard-summary-item">
+                <div class="simple-dashboard-summary-item" id="dashboardAttendanceSummary">
                   <span>Активни състезатели</span>
                   <strong id="dashboardActiveAthletes">0</strong>
                 </div>
@@ -992,6 +1005,7 @@
               <div class="simple-dashboard-links">
                 <button class="simple-dashboard-link" id="dashboardAddAthlete" type="button">Добави състезател</button>
                 <button class="simple-dashboard-link" id="dashboardOpenAthletes" type="button">Всички състезатели</button>
+                <button class="simple-dashboard-link" id="dashboardOpenFees" type="button" hidden>Отвори такси</button>
                 <button class="simple-dashboard-link" id="dashboardDownloadBackup" type="button">Изтегли архив</button>
               </div>
             </section>
@@ -1008,9 +1022,6 @@
               </div>
               <select id="groupFilter" class="filter-select">
                 <option value="all">Всички групи</option>
-                <option value="14+">14+ години</option>
-                <option value="multievent">Многобой</option>
-                <option value="kids">Детска атлетика</option>
               </select>
               <select id="athleteStatusFilter" class="filter-select">
                 <option value="active">Активни</option>
@@ -1216,9 +1227,10 @@
         </section>
 
         <section class="view" id="calendar">
+          <div class="calendar-readonly-indicator" id="calendarReadOnlyIndicator" hidden>Клубен календар · Само за преглед</div>
           <div class="card calendar-desktop-view">
             <div class="card-head">
-              <div><h3>Календар</h3><p>Събитията в календара са само информативни и не влияят на присъствието.</p></div>
+              <div><h3>Календар</h3><p>Състезания, събития и важни дати за клуба</p></div>
             </div>
             <div class="card-body">
               <div class="calendar-desktop-toolbar" aria-label="Навигация по месеци">
@@ -1271,7 +1283,7 @@
             </div>
             <div class="card-body">
               <div class="settings-groups" id="settingsGroupList"></div>
-              <div class="settings-group-actions"><button class="primary-btn" id="addGroupButton" type="button">+ Нова група</button></div>
+              <div class="settings-group-actions"><button class="primary-btn" id="addGroupButton" type="button">+ Добави група</button></div>
             </div>
           </div>
           <div class="card settings-coaches-card">
@@ -1395,10 +1407,35 @@
     </aside>
   </div>
 
+  <div class="modal-backdrop" id="athleteDeleteModal" aria-hidden="true">
+    <div class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="athleteDeleteTitle">
+      <div class="modal-head">
+        <div><h3 id="athleteDeleteTitle">Изтриване на състезател</h3></div>
+        <button class="modal-close" id="closeAthleteDeleteModal" type="button">×</button>
+      </div>
+      <div class="modal-body">
+        <div id="athleteDeleteConfirmation">
+          <p class="athlete-delete-message" id="athleteDeleteQuestion"></p>
+          <p class="athlete-delete-support">Това действие не може да бъде отменено.</p>
+        </div>
+        <div id="athleteDeleteBlocked" hidden>
+          <p class="athlete-delete-message">Състезателят има запазена история и не може да бъде изтрит.</p>
+          <p class="athlete-delete-support">Използвайте статус „Неактивен“, за да запазите присъствията и плащанията.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost-btn" id="cancelAthleteDelete" type="button">Отказ</button>
+        <button class="danger-btn" id="confirmDeleteAthlete" type="button">Изтрий</button>
+      </div>
+    </div>
+  </div>
+
   <div class="athlete-action-menu" id="athleteActionMenu" hidden>
     <button type="button" data-action="profile">Отвори профил</button>
     <button type="button" data-action="move">Премести в група</button>
+    <small class="athlete-action-message" id="moveAthleteUnavailableMessage" hidden>Няма друга ваша група, в която да преместите състезателя.</small>
     <button type="button" data-action="archive">Премахни от клуба</button>
+    <button type="button" data-action="delete">Изтрий състезателя</button>
   </div>
 
   <div class="modal-backdrop" id="moveAthleteModal" aria-hidden="true">
@@ -1408,17 +1445,19 @@
         <button class="modal-close" id="closeMoveAthleteModal" type="button">×</button>
       </div>
       <div class="modal-body">
-        <div class="form-field">
+        <div class="form-field" id="moveAthleteSelection">
           <label for="moveAthleteGroup">Нова група</label>
-          <select id="moveAthleteGroup">
-            <option value="kids">Детска атлетика</option>
-            <option value="multievent">Многобой</option>
-            <option value="14+">14+ години</option>
-          </select>
+          <select id="moveAthleteGroup"></select>
+        </div>
+        <div class="move-athlete-cross-coach" id="moveAthleteCrossCoachConfirmation" hidden>
+          <strong>Групата е на друг треньор.</strong>
+          <p>Да бъде ли сменен и основният треньор на състезателя?</p>
         </div>
       </div>
       <div class="modal-actions">
         <button class="ghost-btn" id="cancelMoveAthlete" type="button">Отказ</button>
+        <button class="ghost-btn" id="moveGroupOnly" type="button" hidden>Само смени групата</button>
+        <button class="primary-btn" id="moveGroupAndCoach" type="button" hidden>Смени групата и треньора</button>
         <button class="primary-btn" id="confirmMoveAthlete" type="button">Премести</button>
       </div>
     </div>
@@ -1501,12 +1540,12 @@
   <div class="modal-backdrop" id="calendarEventModal" aria-hidden="true">
     <div class="modal compact-modal" role="dialog" aria-modal="true" aria-labelledby="calendarEventModalTitle">
       <div class="modal-head">
-        <div><h3 id="calendarEventModalTitle">Ново събитие</h3><p>Добавете лична бележка или важна дата.</p></div>
+        <div><h3 id="calendarEventModalTitle">Ново събитие</h3><p id="calendarEventModalDescription">Добавете събитие или важна дата за клуба.</p></div>
         <button class="modal-close" id="closeCalendarEventModal" type="button">×</button>
       </div>
       <form id="calendarEventForm">
         <div class="modal-body">
-          <div class="form-grid">
+          <div class="form-grid" id="calendarEventEditableFields">
             <div class="form-field full">
               <label for="calendarEventTitle">Заглавие</label>
               <input id="calendarEventTitle" required />
@@ -1523,6 +1562,12 @@
               <label for="calendarEventNote">Бележка</label>
               <textarea class="note-area" id="calendarEventNote"></textarea>
             </div>
+          </div>
+          <div class="calendar-readonly-details" id="calendarEventReadOnlyDetails" hidden>
+            <div><span>Заглавие</span><strong id="calendarReadOnlyTitle"></strong></div>
+            <div><span>Дата</span><strong id="calendarReadOnlyDate"></strong></div>
+            <div id="calendarReadOnlyTimeRow"><span>Час</span><strong id="calendarReadOnlyTime"></strong></div>
+            <div id="calendarReadOnlyNoteRow"><span>Бележка</span><p id="calendarReadOnlyNote"></p></div>
           </div>
         </div>
         <div class="modal-actions">
@@ -1561,10 +1606,10 @@
           <div class="form-grid">
             <h4 class="group-modal-section-title">Основни данни</h4>
             <div class="form-field full"><label for="groupNameInput">Име на групата</label><input id="groupNameInput" required /></div>
-            <div class="form-field"><label for="groupAgeRangeInput">Възрастова група</label><input id="groupAgeRangeInput" required /></div>
+            <div class="form-field"><label for="groupAgeRangeInput">Възраст</label><input id="groupAgeRangeInput" required /></div>
             <div class="form-field"><label for="groupDefaultFeeInput">Месечна такса</label><input id="groupDefaultFeeInput" type="number" min="0" step="0.01" required /></div>
             <div class="form-field full"><label for="groupActiveInput">Статус</label><select id="groupActiveInput"><option value="active">Активна</option><option value="inactive">Неактивна</option></select></div>
-            <div class="form-field full"><label for="groupLeadCoachInput">Водещ треньор</label><select id="groupLeadCoachInput"></select></div>
+            <div class="form-field full" id="groupLeadCoachField"><label for="groupLeadCoachInput">Водещ треньор</label><select id="groupLeadCoachInput"></select></div>
             <h4 class="group-modal-section-title">График</h4>
             <div class="form-field full group-schedule-days-field">
               <label>Дни за тренировка</label>
@@ -1698,21 +1743,12 @@
       }
     );
 
-    function getLocalMonthKey(value=new Date()) {
-      const date = value instanceof Date ? value : new Date(value);
-      const year = date.getFullYear();
-      const month = String(date.getMonth()+1).padStart(2,"0");
-      return `${year}-${month}`;
-    }
-
     (() => {
       const loginForm = document.getElementById("clubdeskLoginForm");
       const emailInput = document.getElementById("clubdeskLoginEmail");
       const passwordInput = document.getElementById("clubdeskLoginPassword");
       const loginButton = document.getElementById("clubdeskLoginButton");
       const loginError = document.getElementById("clubdeskLoginError");
-      const retryProfileButton = document.getElementById("clubdeskRetryProfileButton");
-      const profileErrorSignOutButton = document.getElementById("clubdeskProfileErrorSignOut");
       const LAST_LOGIN_EMAIL_KEY = "clubdesk-last-login-email-v1";
       let initialSessionCheckComplete = false;
       let authLoadUserId = "";
@@ -1725,16 +1761,8 @@
       }
 
       function showAuthScreen(state,errorMessage="") {
-        document.body.classList.remove("auth-pending","auth-signed-out","auth-authenticated","auth-club-error");
-        document.body.classList.add(
-          state === "authenticated"
-            ? "auth-authenticated"
-            : state === "loading"
-              ? "auth-pending"
-              : state === "club-error"
-                ? "auth-club-error"
-                : "auth-signed-out"
-        );
+        document.body.classList.remove("auth-pending","auth-signed-out","auth-authenticated");
+        document.body.classList.add(state === "authenticated" ? "auth-authenticated" : state === "loading" ? "auth-pending" : "auth-signed-out");
         if (state === "login") {
           if (!emailInput.value.trim()) emailInput.value = String(localStorage.getItem(LAST_LOGIN_EMAIL_KEY) || "");
           passwordInput.value = "";
@@ -1750,12 +1778,18 @@
         passwordInput.disabled = submitting;
       }
 
+      function normalizedLoginEmail(value) {
+        const login = String(value || "").trim();
+        if (login.includes("@")) return login;
+        const username = login.toLowerCase();
+        return /^[a-z0-9._-]+$/.test(username) ? `${username}@clubdesk.invalid` : "";
+      }
+
       function resetAuthenticatedRuntime() {
         authRequestVersion += 1;
         authLoadUserId = "";
         authLoadPromise = null;
         window.clubdeskAuthenticatedUser = null;
-        window.clubdeskAppReady = false;
       }
 
       function handleSignedOut() {
@@ -1766,62 +1800,56 @@
         showAuthScreen("login");
       }
 
-      function loadAuthenticatedSession(session,{force=false}={}) {
+      function loadAuthenticatedSession(session) {
         const userId = session?.user?.id || "";
         if (!userId) {
           handleSignedOut();
           return Promise.resolve(false);
         }
-        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
-        if (!force && window.clubdeskAuthenticatedUser?.user?.id === userId && window.clubdeskAppReady) {
+        if (window.clubdeskAuthenticatedUser?.authUser?.id === userId) {
+          window.clubdeskApplyAccessRoleUI?.();
+          window.ClubDeskRouter?.applyCurrentRoute({force:true});
           showAuthScreen("authenticated");
           window.clubdeskRefreshAuthenticatedProfile?.();
           return Promise.resolve(true);
         }
+        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
 
         const requestVersion = ++authRequestVersion;
         authLoadUserId = userId;
         authLoadPromise = (async () => {
           try {
-            showAuthScreen("loading");
-            const user = session.user;
-            const profileResult = await window.clubdeskSupabase
-              .from("profiles")
-              .select("id,full_name")
-              .eq("id",user.id)
-              .single();
+            const [profileResult,membershipResult] = await Promise.all([
+              window.clubdeskSupabase.from("profiles").select("*").eq("id",userId).maybeSingle(),
+              window.clubdeskSupabase.from("club_memberships").select("*").eq("user_id",userId).eq("status","active").maybeSingle()
+            ]);
             if (profileResult.error) throw profileResult.error;
-            const membershipResult = await window.clubdeskSupabase
-              .from("club_memberships")
-              .select("id,club_id,user_id,access_role,club_role,status")
-              .eq("user_id",user.id)
-              .eq("status","active")
-              .single();
             if (membershipResult.error) throw membershipResult.error;
             if (requestVersion !== authRequestVersion) return false;
-            if (!membershipResult.data) throw new Error("Active club membership was not found");
+            if (!membershipResult.data) {
+              window.clubdeskAuthenticatedUser = null;
+              showAuthScreen("login","Този акаунт няма активен достъп до клуб.");
+              return false;
+            }
             if (!profileResult.data) throw new Error("Authenticated profile was not found");
 
             window.clubdeskAuthenticatedUser = {
-              user,
-              authUser:user,
+              authUser:session.user,
               profile:profileResult.data,
               membership:membershipResult.data
             };
-            const appReady = window.clubdeskAppInitialized
-              ? await window.clubdeskReloadOnlineDataForAuthenticatedUser?.()
-              : await window.clubdeskInitializeApp?.();
-            if (!appReady) {
-              showAuthScreen("club-error");
-              return false;
-            }
+            window.clubdeskApplyAccessRoleUI?.();
+            window.ClubDeskRouter?.applyCurrentRoute({force:true});
+            if (window.clubdeskAppInitialized) await window.clubdeskReloadOnlineDataForAuthenticatedUser?.();
+            else window.clubdeskInitializeApp?.();
             window.clubdeskRefreshAuthenticatedProfile?.();
             showAuthScreen("authenticated");
             return true;
           } catch (error) {
             if (requestVersion !== authRequestVersion) return false;
             console.error("ClubDesk authenticated profile error",error);
-            showAuthScreen("club-error");
+            window.clubdeskAuthenticatedUser = null;
+            showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
             return false;
           } finally {
             if (authLoadUserId === userId) {
@@ -1835,11 +1863,16 @@
 
       loginForm.addEventListener("submit",async event => {
         event.preventDefault();
-        const email = emailInput.value.trim();
+        const login = emailInput.value.trim();
         const password = passwordInput.value;
         showLoginError();
-        if (!email || !password) {
-          showLoginError("Въведете имейл и парола.");
+        if (!login || !password) {
+          showLoginError("Въведете потребител или имейл и парола.");
+          return;
+        }
+        const email = normalizedLoginEmail(login);
+        if (!email) {
+          showLoginError("Невалиден потребител или парола.");
           return;
         }
 
@@ -1847,12 +1880,11 @@
         try {
           const { data,error } = await window.clubdeskSupabase.auth.signInWithPassword({email,password});
           if (error) {
-            console.error("ClubDesk authentication error",{name:error.name,code:error.code,status:error.status,message:error.message});
-            showLoginError("Невалиден имейл или парола.");
+            const invalidCredentials = error.code === "invalid_credentials" || String(error.message || "").toLowerCase().includes("invalid login credentials");
+            showLoginError(invalidCredentials ? "Невалиден потребител или парола." : "Входът не беше успешен. Опитайте отново.");
             return;
           }
-          localStorage.setItem(LAST_LOGIN_EMAIL_KEY,email);
-          showAuthScreen("loading");
+          localStorage.setItem(LAST_LOGIN_EMAIL_KEY,login);
           await loadAuthenticatedSession(data.session);
           passwordInput.value = "";
         } catch (error) {
@@ -1872,32 +1904,6 @@
           console.error("ClubDesk logout error",error);
         }
       };
-
-      retryProfileButton?.addEventListener("click",async () => {
-        if (authLoadPromise) return;
-        retryProfileButton.disabled = true;
-        retryProfileButton.textContent = "Зареждане...";
-        showAuthScreen("loading");
-        try {
-          const { data,error } = await window.clubdeskSupabase.auth.getSession();
-          if (error) throw error;
-          if (!data.session?.user) {
-            handleSignedOut();
-            return;
-          }
-          await loadAuthenticatedSession(data.session,{force:true});
-        } catch (error) {
-          console.error("ClubDesk profile retry error",error);
-          showAuthScreen("club-error");
-        } finally {
-          retryProfileButton.disabled = false;
-          retryProfileButton.textContent = "Опитай отново";
-        }
-      });
-
-      profileErrorSignOutButton?.addEventListener("click",() => {
-        void window.clubdeskSignOut?.();
-      });
 
       const { data:authStateData } = window.clubdeskSupabase.auth.onAuthStateChange((event,session) => {
         if (event === "INITIAL_SESSION" && !initialSessionCheckComplete) return;
@@ -1932,7 +1938,7 @@
       athletes:{title:"Състезатели",sub:"Профили, групи и контактна информация"},
       attendance:{title:"Присъствие",sub:"Отбелязване и статистика по групи"},
       payments:{title:"Такси",sub:"Месечни плащания по групи"},
-      calendar:{title:"Календар",sub:"Лични бележки и важни дати"},
+      calendar:{title:"Календар",sub:"Състезания, събития и важни дати за клуба"},
       settings:{title:"Настройки",sub:"Настройки на групите и данните на клуба"}
     };
 
@@ -1962,13 +1968,32 @@
     };
     let currentClubDeskRoute = "";
 
+    function authenticatedUserIsCoach(){
+      return window.clubdeskAuthenticatedUser?.membership?.access_role === "coach";
+    }
+
+    function routeAllowedForAuthenticatedUser(route){
+      return authenticatedUserIsCoach() && (route === "attendance/marking" || route === "attendance/history")
+        ? "dashboard"
+        : route;
+    }
+
+    window.clubdeskApplyAccessRoleUI = function(){
+      const coachMode = authenticatedUserIsCoach();
+      document.getElementById("attendanceNavItem")?.toggleAttribute("hidden",coachMode);
+      document.getElementById("dashboardAttendanceAction")?.toggleAttribute("hidden",coachMode);
+      document.getElementById("dashboardAttendanceSummary")?.toggleAttribute("hidden",coachMode);
+      document.getElementById("dashboardOpenFees")?.toggleAttribute("hidden",!coachMode);
+      document.getElementById("dashboardDownloadBackup")?.toggleAttribute("hidden",coachMode);
+      document.getElementById("dashboard")?.classList.toggle("coach-dashboard",coachMode);
+    };
+
     function renderView(id){
       if (!views[id]) id = "dashboard";
       navButtons.forEach(btn=>btn.classList.toggle("active",btn.dataset.view===id));
       viewEls.forEach(view=>view.classList.toggle("active",view.id===id));
       heading.textContent=views[id].title;
-      const authenticatedName=String(window.clubdeskAuthenticatedUser?.profile?.full_name||"").trim();
-      subheading.textContent=id==="settings"&&authenticatedName?`${authenticatedName} · ${views[id].sub}`:views[id].sub;
+      subheading.textContent=views[id].sub;
       sidebar.classList.remove("open");
       overlay.classList.remove("show");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -1993,7 +2018,9 @@
     }
 
     function renderRoute(route,{force=false}={}){
-      const validRoute=canonicalRoute(route)||"dashboard";
+      const requestedRoute=canonicalRoute(route)||"dashboard";
+      const validRoute=routeAllowedForAuthenticatedUser(requestedRoute);
+      if(validRoute!==requestedRoute&&window.location.hash!==`#${validRoute}`) replaceRouteHash(validRoute);
       if (!force&&currentClubDeskRoute===validRoute) return;
       const config=routeConfig[validRoute];
       renderView(config.view);
@@ -2008,7 +2035,7 @@
     }
 
     function navigateToRoute(route){
-      const validRoute=canonicalRoute(route)||"dashboard";
+      const validRoute=routeAllowedForAuthenticatedUser(canonicalRoute(route)||"dashboard");
       if (window.location.hash===`#${validRoute}`){
         renderRoute(validRoute);
         return;
@@ -2023,7 +2050,9 @@
     function applyCurrentRoute({force=false}={}){
       const route=canonicalRoute(window.location.hash);
       if (route){
-        renderRoute(route,{force});
+        const allowedRoute=routeAllowedForAuthenticatedUser(route);
+        if(allowedRoute!==route) replaceRouteHash(allowedRoute);
+        renderRoute(allowedRoute,{force});
         return;
       }
       if (window.location.hash){
@@ -2033,7 +2062,7 @@
       }
       let savedRoute="";
       try{savedRoute=canonicalRoute(localStorage.getItem(STORAGE_LAST_ROUTE))}catch{}
-      const initialRoute=savedRoute||"dashboard";
+      const initialRoute=routeAllowedForAuthenticatedUser(savedRoute||"dashboard");
       replaceRouteHash(initialRoute);
       renderRoute(initialRoute,{force:true});
     }
@@ -2043,6 +2072,7 @@
 
     navButtons.forEach(btn=>btn.addEventListener("click",()=>openView(btn.dataset.view)));
     document.querySelectorAll("[data-jump]").forEach(btn=>btn.addEventListener("click",()=>openView(btn.dataset.jump)));
+    window.clubdeskApplyAccessRoleUI();
     applyCurrentRoute();
 
     document.getElementById("menuBtn").addEventListener("click",()=>{
@@ -2133,7 +2163,7 @@
     const STORAGE_ATTENDANCE_CONFLICT_RESOLUTIONS = "clubdesk-attendance-conflict-resolutions-v1";
     const STORAGE_SUPABASE_PAYMENTS_CACHE = "clubdesk-supabase-payments-cache-v1";
     const STORAGE_SUPABASE_PAYMENTS_MIGRATION = "clubdesk-supabase-payments-migration-v1";
-    const STORAGE_SUPABASE_CALENDAR_CACHE = "clubdesk-supabase-calendar-cache-v1";
+    const STORAGE_SUPABASE_CALENDAR_CACHE = "clubdesk-supabase-club-calendar-cache-v1";
     const STORAGE_SUPABASE_CALENDAR_MIGRATION = "clubdesk-supabase-calendar-migration-v1";
     const DEMO_CURRENT_MONTH = getLocalMonthKey();
     const CURRENT_COACH_ID = "";
@@ -2236,23 +2266,27 @@
     function coaches() {
       const ids = new Set();
       return onlineCoachAccounts.flatMap(account => {
-        const id = String(account?.membershipId || account?.id || "").trim();
+        const membershipId = String(account?.membershipId || account?.id || "").trim();
+        const userId = String(account?.userId || account?.supabaseUserId || "").trim();
         const fullName = String(account?.fullName || account?.name || "").trim();
-        if (!id || !fullName || account?.status !== "active" || ids.has(id)) return [];
-        ids.add(id);
+        if (!membershipId || !fullName || account?.status !== "active" || ids.has(membershipId)) return [];
+        ids.add(membershipId);
+        const accessRole = account?.accessRole === "admin" ? "admin" : "coach";
+        const clubRole = account?.clubRole === "clubManager" ? "clubManager" : "coach";
         return [{
-          id,
-          supabaseMembershipId:id,
-          supabaseUserId:String(account?.userId || account?.supabaseUserId || "").trim(),
-          fullName,
+          id:membershipId,
           name:fullName,
-          accessRole:["admin","coach"].includes(account?.accessRole) ? account.accessRole : "coach",
-          role:["admin","coach"].includes(account?.accessRole) ? account.accessRole : "coach",
-          clubRole:["coach","clubManager"].includes(account?.clubRole) ? account.clubRole : "coach",
+          fullName,
+          role:clubRole,
+          clubRole,
+          accessRole,
           responsibleGroupIds:[],
-          status:"active",
           active:true,
-          hasOnlineAccount:true
+          status:"active",
+          supabaseMembershipId:membershipId,
+          supabaseUserId:userId,
+          hasOnlineAccount:true,
+          runtimeFromSupabase:true
         }];
       });
     }
@@ -2354,11 +2388,7 @@
     }
 
     function groupSchedules() {
-      if (onlineGroups.length || onlineDataLoading || window.clubdeskDataSource) {
-        return Object.fromEntries(groups().map(group => [group.id,{days:[...group.scheduleDays],time:group.startTime}]));
-      }
-      const stored = readJson(STORAGE_GROUP_SCHEDULES,{});
-      return stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {};
+      return Object.fromEntries(groups().map(group => [group.id,{days:[...group.scheduleDays],time:group.startTime}]));
     }
 
     function normalizedGroupSchedule(groupId) {
@@ -2454,7 +2484,14 @@
     }
 
     function localCoachIdForMembership(membershipId) {
-      return String(membershipId || "").trim();
+      const account = onlineCoachAccounts.find(item => String(item?.membershipId || "") === String(membershipId || ""));
+      if (!account) return "";
+      const matches = coaches().filter(coach =>
+        coach.hasOnlineAccount
+        && String(coach.supabaseMembershipId || "") === String(membershipId || "")
+        && normalizeCoachName(coach.name) === normalizeCoachName(account.fullName)
+      );
+      return matches.length === 1 ? matches[0].id : "";
     }
 
     function mapSupabaseGroup(row,cachedGroups=onlineGroups) {
@@ -2467,7 +2504,7 @@
         defaultFee:localBackupGroupFee(id,cachedGroups),
         active:row?.status === "active",
         leadCoachMembershipId:String(row?.lead_coach_membership_id || "") || null,
-        leadCoachId:String(row?.lead_coach_membership_id || "").trim(),
+        leadCoachId:localCoachIdForMembership(row?.lead_coach_membership_id),
         scheduleDays:localScheduleDaysFromOnline(row?.schedule_days),
         startTime:/^([01]\d|2[0-3]):[0-5]\d$/.test(String(row?.start_time || "").slice(0,5)) ? String(row.start_time).slice(0,5) : ""
       };
@@ -2481,8 +2518,8 @@
       const group = normalizeGroupId(groupIdBySupabaseId.get(remoteGroupId) || "");
       const groupConnectionMissing = !group;
       const status = migrationSupportedStatuses.has(row?.status) ? row.status : "inactive";
-      const primaryCoachId = String(row?.primary_coach_membership_id || "").trim();
-      const coachConnectionMissing = Boolean(primaryCoachId && !coachById(primaryCoachId));
+      const primaryCoachId = localCoachIdForMembership(row?.primary_coach_membership_id);
+      const coachConnectionMissing = !primaryCoachId;
       const coach = coachById(primaryCoachId);
       const disciplines = Array.isArray(row?.disciplines) ? row.disciplines.map(value => String(value).trim()).filter(Boolean) : [];
       const savedFee = localBackupAthleteFee(id,cachedAthletes);
@@ -2542,13 +2579,20 @@
     }
 
     function attendanceMigrationStateForCurrentClub() {
+      const value = readJson(STORAGE_SUPABASE_ATTENDANCE_MIGRATION,null);
       const membership = window.clubdeskAuthenticatedUser?.membership;
-      return membership?.club_id ? {version:1,clubId:String(membership.club_id),sessions:{}} : null;
+      if (!value || typeof value !== "object" || Array.isArray(value) || value.version !== 1) return null;
+      if (!membership || String(value.clubId || "") !== String(membership.club_id || "")) return null;
+      if (!value.sessions || typeof value.sessions !== "object" || Array.isArray(value.sessions)) return null;
+      return value;
     }
 
     function paymentsMigrationStateForCurrentClub() {
+      const value = readJson(STORAGE_SUPABASE_PAYMENTS_MIGRATION,null);
       const membership = window.clubdeskAuthenticatedUser?.membership;
-      return membership?.club_id ? {version:1,clubId:String(membership.club_id)} : null;
+      if (!value || typeof value !== "object" || Array.isArray(value) || value.version !== 1) return null;
+      if (!membership || String(value.clubId || "") !== String(membership.club_id || "")) return null;
+      return value;
     }
 
     function normalizePaymentMonth(value) {
@@ -2646,12 +2690,6 @@
     }
 
     async function loadOnlineAttendance({force=false}={}) {
-      if (!attendanceMigrationStateForCurrentClub()) {
-        onlineAttendanceStore = {};
-        onlineAttendanceAvailable = false;
-        window.clubdeskAttendanceDataSource = "local";
-        return false;
-      }
       if (onlineAttendanceLoadPromise) return onlineAttendanceLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
       onlineAttendanceLoading = true;
@@ -2735,12 +2773,6 @@
     }
 
     async function loadOnlinePayments({force=false}={}) {
-      if (!paymentsMigrationStateForCurrentClub()) {
-        onlinePaymentsStore = {};
-        onlinePaymentsAvailable = false;
-        window.clubdeskPaymentsDataSource = "local";
-        return false;
-      }
       if (onlinePaymentsLoadPromise) return onlinePaymentsLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
       onlinePaymentsLoading = true;
@@ -2775,14 +2807,17 @@
     }
 
     function canEditOnlinePayments() {
-      return !paymentsMigrationStateForCurrentClub() || (onlinePaymentsAvailable && window.clubdeskPaymentsDataSource === "supabase");
+      return onlinePaymentsAvailable
+        && !onlinePaymentsLoading
+        && window.clubdeskPaymentsDataSource === "supabase";
     }
 
     function calendarMigrationStateForCurrentMembership() {
+      const value = readJson(STORAGE_SUPABASE_CALENDAR_MIGRATION,null);
       const membership = window.clubdeskAuthenticatedUser?.membership;
-      return membership?.club_id && membership?.id
-        ? {version:1,clubId:String(membership.club_id),membershipId:String(membership.id)}
-        : null;
+      if (!value || typeof value !== "object" || Array.isArray(value) || value.version !== 1) return null;
+      if (!membership || String(value.clubId || "") !== String(membership.club_id || "") || String(value.membershipId || "") !== String(membership.id || "")) return null;
+      return value;
     }
 
     function cachedOnlineCalendarEvents() {
@@ -2790,15 +2825,13 @@
       const membership = window.clubdeskAuthenticatedUser?.membership;
       return value && typeof value === "object" && !Array.isArray(value)
         && String(value.clubId || "") === String(membership?.club_id || "")
-        && String(value.membershipId || "") === String(membership?.id || "")
-        && Array.isArray(value.events) ? value.events.map(normalizedCalendarEvent) : null;
+        && Array.isArray(value.events) ? value.events.map(normalizedCalendarEvent).sort(compareCalendarEvents) : null;
     }
 
     function cacheOnlineCalendar() {
       const membership = window.clubdeskAuthenticatedUser?.membership;
       localStorage.setItem(STORAGE_SUPABASE_CALENDAR_CACHE,JSON.stringify({
         clubId:String(membership?.club_id || ""),
-        membershipId:String(membership?.id || ""),
         loadedAt:new Date().toISOString(),
         events:onlineCalendarEvents
       }));
@@ -2817,31 +2850,30 @@
         date:String(row?.event_date || ""),
         time:row?.event_time ? normalizeCalendarTime(row.event_time) : "",
         note:typeof row?.note === "string" ? row.note.trim() : "",
-        ownerCoachId:String(row?.owner_membership_id || ""),
+        ownerMembershipId:String(row?.owner_membership_id || ""),
         createdAt:String(row?.created_at || "")
       });
     }
 
+    function compareCalendarEvents(left,right) {
+      return String(left?.date || "").localeCompare(String(right?.date || ""))
+        || String(left?.time || "99:99").localeCompare(String(right?.time || "99:99"))
+        || String(left?.title || "").localeCompare(String(right?.title || ""),"bg");
+    }
+
     async function loadOnlineCalendar({force=false}={}) {
-      if (!calendarMigrationStateForCurrentMembership()) {
-        onlineCalendarEvents = [];
-        onlineCalendarAvailable = false;
-        window.clubdeskCalendarDataSource = "local";
-        return false;
-      }
       if (onlineCalendarLoadPromise) return onlineCalendarLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
       onlineCalendarLoading = true;
       setOnlineDataNotice("Зареждане на календара от Supabase...");
       onlineCalendarLoadPromise = (async () => {
         try {
-          if (!membership?.club_id || !membership?.id) throw new Error("Missing authenticated calendar owner");
+          if (!membership?.club_id) throw new Error("Missing authenticated club context");
           const {data,error} = await window.clubdeskSupabase.from("calendar_events")
             .select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note,created_at,updated_at")
-            .eq("club_id",membership.club_id)
-            .eq("owner_membership_id",membership.id);
+            .eq("club_id",membership.club_id);
           if (error) throw error;
-          onlineCalendarEvents = (Array.isArray(data) ? data : []).map(mapRemoteCalendarEvent).filter(event => event.id && event.supabaseId);
+          onlineCalendarEvents = (Array.isArray(data) ? data : []).map(mapRemoteCalendarEvent).filter(event => event.id && event.supabaseId).sort(compareCalendarEvents);
           onlineCalendarAvailable = true;
           window.clubdeskCalendarDataSource = "supabase";
           cacheOnlineCalendar();
@@ -2863,8 +2895,15 @@
       return onlineCalendarLoadPromise;
     }
 
+    function canManageClubCalendar() {
+      return window.clubdeskAuthenticatedUser?.membership?.access_role === "admin";
+    }
+
     function canEditOnlineCalendar() {
-      return !calendarMigrationStateForCurrentMembership() || (onlineCalendarAvailable && window.clubdeskCalendarDataSource === "supabase");
+      return canManageClubCalendar()
+        && onlineCalendarAvailable
+        && !onlineCalendarLoading
+        && window.clubdeskCalendarDataSource === "supabase";
     }
 
     function setOnlineDataNotice(message="",offline=false) {
@@ -2887,8 +2926,6 @@
         if (previewButton) previewButton.hidden = true;
         if (executeButton) executeButton.hidden = true;
       }
-      if (authenticatedMembershipIsAdmin() && paymentsMigrationStateForCurrentClub()) renderPaymentsMigrationPreview();
-      if (authenticatedMembershipIsAdmin() && calendarMigrationStateForCurrentMembership()) renderCalendarMigrationPreview();
     }
 
     function onlineSynchronizationIsActive() {
@@ -2938,46 +2975,6 @@
       renderOnlineSynchronizationStatus();
     }
 
-    async function loadActiveOnlineCoachAccounts(clubId) {
-      const membershipsResult = await window.clubdeskSupabase
-        .from("club_memberships")
-        .select("id,club_id,user_id,access_role,club_role,status")
-        .eq("club_id",clubId)
-        .eq("status","active");
-      if (membershipsResult.error) throw membershipsResult.error;
-      const memberships = Array.isArray(membershipsResult.data) ? membershipsResult.data : [];
-      const userIds = [...new Set(memberships.map(row => String(row?.user_id || "")).filter(Boolean))];
-      let profiles = [];
-      if (userIds.length) {
-        const profilesResult = await window.clubdeskSupabase
-          .from("profiles")
-          .select("id,full_name")
-          .in("id",userIds);
-        if (profilesResult.error) throw profilesResult.error;
-        profiles = Array.isArray(profilesResult.data) ? profilesResult.data : [];
-      }
-      const profilesByUserId = new Map(profiles.map(profile => [String(profile?.id || ""),profile]));
-      const missingProfileUserIds = userIds.filter(userId => !profilesByUserId.has(userId));
-      if (missingProfileUserIds.length) {
-        throw new Error(`Online coach profiles are missing for ${missingProfileUserIds.length} active memberships`);
-      }
-      return memberships.map(row => {
-        const profile = profilesByUserId.get(String(row?.user_id || ""));
-        return {
-          id:String(row?.id || ""),
-          membershipId:String(row?.id || ""),
-          supabaseMembershipId:String(row?.id || ""),
-          userId:String(row?.user_id || ""),
-          supabaseUserId:String(row?.user_id || ""),
-          fullName:String(profile?.full_name || "").trim(),
-          accessRole:String(row?.access_role || "coach"),
-          clubRole:String(row?.club_role || "coach"),
-          status:String(row?.status || ""),
-          hasOnlineAccount:true
-        };
-      }).filter(account => account.membershipId && account.userId && account.fullName && account.status === "active");
-    }
-
     async function loadOnlineClubData() {
       if (onlineDataLoadPromise) return onlineDataLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
@@ -2991,15 +2988,30 @@
         try {
           if (!authUser || !membership || membership.status !== "active" || !membership.club_id) throw new Error("Missing authenticated club context");
           const clubId = membership.club_id;
-          const coachAccounts = await loadActiveOnlineCoachAccounts(clubId);
-          const currentMembershipId = String(membership.id || "");
-          if (!coachAccounts.some(account => account.membershipId === currentMembershipId)) {
-            throw new Error("Authenticated membership is missing from the online coach identity list");
-          }
-          onlineCoachAccounts = coachAccounts;
-          const groupsResult = await window.clubdeskSupabase.from("training_groups").select("*").eq("club_id",clubId);
+          const [groupsResult,membershipsResult] = await Promise.all([
+            window.clubdeskSupabase.from("training_groups").select("*").eq("club_id",clubId),
+            window.clubdeskSupabase.from("club_memberships").select("*").eq("club_id",clubId).eq("status","active")
+          ]);
           if (groupsResult.error) throw groupsResult.error;
+          if (membershipsResult.error) throw membershipsResult.error;
+          const memberships = Array.isArray(membershipsResult.data) ? membershipsResult.data : [];
+          const userIds = [...new Set(memberships.map(item => String(item?.user_id || "")).filter(Boolean))];
+          let profiles = [];
+          if (userIds.length) {
+            const profilesResult = await window.clubdeskSupabase.from("profiles").select("*").in("id",userIds);
+            if (profilesResult.error) throw profilesResult.error;
+            profiles = Array.isArray(profilesResult.data) ? profilesResult.data : [];
+          }
           if (requestVersion !== onlineDataRequestVersion || String(window.clubdeskAuthenticatedUser?.membership?.club_id || "") !== String(clubId)) return false;
+          const profilesById = new Map(profiles.map(profile => [String(profile.id),profile]));
+          onlineCoachAccounts = memberships.map(item => ({
+            membershipId:String(item.id || ""),
+            userId:String(item.user_id || ""),
+            fullName:String(profilesById.get(String(item.user_id || ""))?.full_name || "").trim(),
+            accessRole:String(item.access_role || "coach"),
+            clubRole:String(item.club_role || "coach"),
+            status:String(item.status || "")
+          })).filter(item => item.membershipId && item.userId && item.fullName);
           const previousGroups = [...onlineGroups];
           const previousAthletes = [...onlineAthletes];
           onlineGroups = (Array.isArray(groupsResult.data) ? groupsResult.data : []).map(row => mapSupabaseGroup(row,previousGroups)).filter(group => group.id && group.supabaseId);
@@ -3076,24 +3088,12 @@
       onlineCalendarAvailable = false;
       onlineCalendarLoadPromise = null;
       hydrateOnlineDataCaches();
-      const clubDataLoaded = await loadOnlineClubData();
-      if (!clubDataLoaded) {
-        window.clubdeskAppReady = false;
-        setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
-        return false;
-      }
-      const attendanceLoaded = await loadOnlineAttendance({force:true});
-      const paymentsLoaded = await loadOnlinePayments({force:true});
-      const calendarLoaded = await loadOnlineCalendar({force:true});
-      if (!attendanceLoaded || !paymentsLoaded || !calendarLoaded) {
-        window.clubdeskAppReady = false;
-        setOnlineDataNotice("Онлайн данните не можаха да бъдат заредени.",true);
-        return false;
-      }
+      await loadOnlineClubData();
+      await loadOnlineAttendance({force:true});
+      await loadOnlinePayments({force:true});
+      await loadOnlineCalendar({force:true});
       initializeCoachScope();
       refreshOnlineDataViews();
-      window.clubdeskAppReady = true;
-      return true;
     };
 
     function groupOptionLabel(group,includeAge=false) {
@@ -3141,7 +3141,8 @@
     }
 
     function localCalendarEvents() {
-      return [];
+      const stored = readJson(STORAGE_CALENDAR_EVENTS, []);
+      return Array.isArray(stored) ? stored.map(normalizedCalendarEvent) : [];
     }
 
     function calendarEvents() {
@@ -3153,10 +3154,18 @@
     }
 
     function migrateCalendarEventOwners() {
-      return;
+      if (window.clubdeskAuthenticatedUser?.membership?.club_id) return;
+      if (localStorage.getItem(STORAGE_CALENDAR_OWNER_MIGRATION) === "done") return;
+      const stored = readJson(STORAGE_CALENDAR_EVENTS,[]);
+      const events = Array.isArray(stored) ? stored.map(event => ({
+        ...event,
+        ownerCoachId:String(event?.ownerCoachId || CURRENT_COACH_ID)
+      })) : [];
+      localStorage.setItem(STORAGE_CALENDAR_EVENTS,JSON.stringify(events));
+      localStorage.setItem(STORAGE_CALENDAR_OWNER_MIGRATION,"done");
     }
 
-    function personalCalendarEvents() {
+    function clubCalendarEvents() {
       return calendarEvents();
     }
 
@@ -3173,6 +3182,12 @@
       const month = String(now.getMonth()+1).padStart(2,"0");
       const day = String(now.getDate()).padStart(2,"0");
       return `${year}-${month}-${day}`;
+    }
+
+    const CLUBDESK_FEES_START_MONTH = "2026-08";
+    function getLocalMonthKey(value = new Date()) {
+      const date = value instanceof Date ? value : new Date(value);
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
     }
 
     function isValidAttendanceDate(value) {
@@ -3234,7 +3249,8 @@
       const first = calendarLocalDate(`${calendarDisplayedMonth}-01`);
       if (!first) return;
       const today = getLocalTodayDate();
-      const events = personalCalendarEvents();
+      const events = clubCalendarEvents();
+      const canManageCalendar = canManageClubCalendar() && canEditOnlineCalendar();
       const eventsByDate = new Map();
       events.forEach(event => {
         if (!eventsByDate.has(event.date)) eventsByDate.set(event.date,[]);
@@ -3260,16 +3276,16 @@
       selectedTitle.textContent = `Събития за ${calendarSelectedDateTitle(mobileCalendarSelectedDate)}`;
       const selectedEvents = eventsByDate.get(mobileCalendarSelectedDate) || [];
       eventList.innerHTML = selectedEvents.length ? selectedEvents.map(event => `
-        <article class="mobile-calendar-event-card" data-calendar-mobile-event="${escapeHtml(event.id)}">
+        <article class="mobile-calendar-event-card" data-calendar-mobile-event="${escapeHtml(event.id)}" role="button" tabindex="0" aria-label="Отвори ${escapeHtml(event.title)}">
           <div class="mobile-calendar-event-copy">
             <strong>${escapeHtml(event.title)}</strong>
             ${event.time ? `<time datetime="${escapeHtml(event.time)}">${escapeHtml(event.time)}</time>` : ""}
             ${event.note ? `<p>${escapeHtml(event.note)}</p>` : ""}
           </div>
-          <div class="mobile-calendar-event-actions">
+          ${canManageCalendar ? `<div class="mobile-calendar-event-actions">
             <button type="button" data-calendar-mobile-edit="${escapeHtml(event.id)}" aria-label="Редактирай ${escapeHtml(event.title)}">Редактирай</button>
             <button type="button" data-calendar-mobile-delete="${escapeHtml(event.id)}" aria-label="Изтрий ${escapeHtml(event.title)}">Изтрий</button>
-          </div>
+          </div>` : ""}
         </article>
       `).join("") : '<div class="mobile-calendar-empty">Няма събития за този ден.</div>';
     }
@@ -3278,7 +3294,8 @@
       const grid = document.getElementById("calendarGrid");
       if (!grid) return;
       grid.innerHTML = "";
-      const events = personalCalendarEvents();
+      const events = clubCalendarEvents();
+      const canManageCalendar = canManageClubCalendar() && canEditOnlineCalendar();
       const firstDay = calendarLocalDate(`${calendarDisplayedMonth}-01`);
       if (!firstDay) return;
       const desktopTitle = document.getElementById("desktopCalendarMonthTitle");
@@ -3302,18 +3319,22 @@
         const cell = document.createElement("div");
         cell.className = "calendar-day";
         cell.dataset.date = date;
-        cell.setAttribute("role","button");
-        cell.setAttribute("tabindex","0");
-        cell.setAttribute("aria-label",`Добави събитие за ${calendarSelectedDateTitle(date)}`);
+        if (canManageCalendar) {
+          cell.setAttribute("role","button");
+          cell.setAttribute("tabindex","0");
+          cell.setAttribute("aria-label",`Добави събитие за ${calendarSelectedDateTitle(date)}`);
+        }
         cell.style.cssText = `min-height:112px;border:1px solid var(--line);border-radius:12px;padding:9px;background:${isToday?"#f0faf4":"#fff"};`;
         cell.innerHTML = `<div style="font-weight:900;font-size:12px;${isToday?"color:var(--accent)":""}">${day}</div>`;
-        cell.addEventListener("click",() => openCalendarEventModal(date));
-        cell.addEventListener("keydown",event => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            openCalendarEventModal(date);
-          }
-        });
+        if (canManageCalendar) {
+          cell.addEventListener("click",() => { if (canManageClubCalendar()) openCalendarEventModal(date); });
+          cell.addEventListener("keydown",event => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              if (canManageClubCalendar()) openCalendarEventModal(date);
+            }
+          });
+        }
         (eventsByDate.get(date) || []).forEach(event => {
           const tag = document.createElement("div");
           tag.className = "calendar-event";
@@ -3348,32 +3369,48 @@
     const calendarEventNote = document.getElementById("calendarEventNote");
     const deleteCalendarEvent = document.getElementById("deleteCalendarEvent");
     const saveCalendarEvent = document.getElementById("saveCalendarEvent");
+    const calendarEventEditableFields = document.getElementById("calendarEventEditableFields");
+    const calendarEventReadOnlyDetails = document.getElementById("calendarEventReadOnlyDetails");
     let activeCalendarEventId = null;
 
     function openCalendarEventModal(date,eventId=null) {
-      const event = eventId ? personalCalendarEvents().find(item => item.id === eventId) : null;
+      if (!eventId && !canManageClubCalendar()) return;
+      const event = eventId ? clubCalendarEvents().find(item => item.id === eventId) : null;
       if (eventId && !event) {
-        if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
+        if (typeof showToast === "function") showToast("Събитието не е намерено.");
         return;
       }
       const canEditCalendar = canEditOnlineCalendar() && !onlineCalendarMutationInProgress;
-      if (!event && calendarMigrationStateForCurrentMembership() && !canEditCalendar) {
-        if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
+      if (!event && !canEditCalendar) {
+        if (canManageClubCalendar() && typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
         return;
       }
+      const readOnly = Boolean(event) && !canEditCalendar;
       activeCalendarEventId = event?.id || null;
-      document.getElementById("calendarEventModalTitle").textContent = event ? "Редактиране на събитие" : "Ново събитие";
+      document.getElementById("calendarEventModalTitle").textContent = readOnly ? "Събитие" : event ? "Редактиране на събитие" : "Ново събитие";
+      document.getElementById("calendarEventModalDescription").textContent = readOnly ? "Информация за клубното събитие." : "Добавете събитие или важна дата за клуба.";
       calendarEventDate.value = event?.date || date || getLocalTodayDate();
       calendarEventTitle.value = event?.title || "";
       calendarEventTime.value = event?.time || "";
       calendarEventNote.value = event?.note || "";
-      [calendarEventDate,calendarEventTitle,calendarEventTime,calendarEventNote].forEach(control => { control.disabled = !canEditCalendar; });
+      calendarEventEditableFields.hidden = readOnly;
+      calendarEventReadOnlyDetails.hidden = !readOnly;
+      [calendarEventDate,calendarEventTitle,calendarEventTime,calendarEventNote].forEach(control => { control.disabled = readOnly; });
+      if (readOnly) {
+        document.getElementById("calendarReadOnlyTitle").textContent = event.title;
+        document.getElementById("calendarReadOnlyDate").textContent = calendarSelectedDateTitle(event.date);
+        document.getElementById("calendarReadOnlyTime").textContent = event.time;
+        document.getElementById("calendarReadOnlyTimeRow").hidden = !event.time;
+        document.getElementById("calendarReadOnlyNote").textContent = event.note;
+        document.getElementById("calendarReadOnlyNoteRow").hidden = !event.note;
+      }
       deleteCalendarEvent.hidden = !event || !canEditCalendar;
       saveCalendarEvent.hidden = !canEditCalendar;
       saveCalendarEvent.textContent = event ? "Запази промените" : "Запази";
+      document.getElementById("cancelCalendarEvent").textContent = readOnly ? "Затвори" : "Отказ";
       calendarEventModal.classList.add("show");
       calendarEventModal.setAttribute("aria-hidden","false");
-      calendarEventTitle.focus();
+      (readOnly ? document.getElementById("cancelCalendarEvent") : calendarEventTitle).focus();
     }
 
     function closeCalendarEventModal() {
@@ -3387,7 +3424,10 @@
       renderSettingsDataSummary();
     }
 
-    document.getElementById("newCalendarEvent")?.addEventListener("click", () => openCalendarEventModal(getLocalTodayDate()));
+    document.getElementById("newCalendarEvent")?.addEventListener("click", () => {
+      if (!canManageClubCalendar()) return;
+      openCalendarEventModal(getLocalTodayDate());
+    });
     document.getElementById("desktopCalendarPrevious")?.addEventListener("click",() => changeCalendarMonth(-1));
     document.getElementById("desktopCalendarNext")?.addEventListener("click",() => changeCalendarMonth(1));
     document.getElementById("mobileCalendarPrevious")?.addEventListener("click",() => changeCalendarMonth(-1));
@@ -3399,7 +3439,10 @@
     };
     document.getElementById("desktopCalendarToday")?.addEventListener("click",resetCalendarToCurrentMonth);
     document.getElementById("mobileCalendarToday")?.addEventListener("click",resetCalendarToCurrentMonth);
-    document.getElementById("mobileNewCalendarEvent")?.addEventListener("click",() => openCalendarEventModal(mobileCalendarSelectedDate));
+    document.getElementById("mobileNewCalendarEvent")?.addEventListener("click",() => {
+      if (!canManageClubCalendar()) return;
+      openCalendarEventModal(mobileCalendarSelectedDate);
+    });
     document.getElementById("mobileCalendarGrid")?.addEventListener("click",event => {
       const button = event.target.closest("[data-mobile-calendar-date]");
       if (!button) return;
@@ -3415,13 +3458,25 @@
         return;
       }
       const deleteButton = event.target.closest("[data-calendar-mobile-delete]");
-      if (!deleteButton) return;
-      deleteButton.disabled = true;
-      try {
-        await deleteCalendarEventById(deleteButton.dataset.calendarMobileDelete,{closeModal:false});
-      } finally {
-        if (deleteButton.isConnected) deleteButton.disabled = false;
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        try {
+          await deleteCalendarEventById(deleteButton.dataset.calendarMobileDelete,{closeModal:false});
+        } finally {
+          if (deleteButton.isConnected) deleteButton.disabled = false;
+        }
+        return;
       }
+      const eventCard = event.target.closest("[data-calendar-mobile-event]");
+      if (eventCard) openCalendarEventModal(null,eventCard.dataset.calendarMobileEvent);
+    });
+    document.getElementById("mobileCalendarEventList")?.addEventListener("keydown",event => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.target.closest("button")) return;
+      const eventCard = event.target.closest("[data-calendar-mobile-event]");
+      if (!eventCard) return;
+      event.preventDefault();
+      openCalendarEventModal(null,eventCard.dataset.calendarMobileEvent);
     });
     document.getElementById("closeCalendarEventModal")?.addEventListener("click", closeCalendarEventModal);
     document.getElementById("cancelCalendarEvent")?.addEventListener("click", closeCalendarEventModal);
@@ -3429,14 +3484,11 @@
 
     calendarEventForm?.addEventListener("submit", async event => {
       event.preventDefault();
+      if (!canManageClubCalendar()) return;
       const title = calendarEventTitle.value.trim();
       if (!calendarEventDate.value || !title) return;
       const events = calendarEvents();
       const existingIndex = activeCalendarEventId ? events.findIndex(item => item.id === activeCalendarEventId) : -1;
-      if (existingIndex >= 0 && events[existingIndex].ownerCoachId !== currentUserId()) {
-        if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
-        return;
-      }
       const isEditing = existingIndex >= 0;
       const previous = existingIndex >= 0 ? events[existingIndex] : {};
       const savedEvent = normalizedCalendarEvent({
@@ -3446,110 +3498,94 @@
         title,
         time:calendarEventTime.value,
         note:calendarEventNote.value.trim(),
-        ownerCoachId:previous.ownerCoachId || currentUserId(),
+        ownerMembershipId:previous.ownerMembershipId || window.clubdeskAuthenticatedUser?.membership?.id || "",
         createdAt:previous.createdAt || new Date().toISOString()
       },events.length);
-      if (calendarMigrationStateForCurrentMembership()) {
-        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress) {
-          if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
-          return;
-        }
-        const membership = window.clubdeskAuthenticatedUser?.membership;
-        if (!membership?.club_id || !membership?.id) {
-          if (typeof showToast === "function") showToast("Липсва активно членство в клуба.");
-          return;
-        }
-        const row = {
-          club_id:membership.club_id,
-          owner_membership_id:membership.id,
-          source_local_id:String(savedEvent.id),
-          title:savedEvent.title.trim(),
-          event_date:savedEvent.date,
-          event_time:savedEvent.time ? normalizeCalendarTime(savedEvent.time) : null,
-          note:savedEvent.note.trim() || null
-        };
-        onlineCalendarMutationInProgress = true;
-        saveCalendarEvent.disabled = true;
-        saveCalendarEvent.textContent = "Запазване...";
-        try {
-          const query = isEditing
-            ? window.clubdeskSupabase.from("calendar_events").update(row)
-                .eq("id",previous.supabaseId)
-                .eq("club_id",membership.club_id)
-                .eq("owner_membership_id",membership.id)
-            : window.clubdeskSupabase.from("calendar_events").insert(row);
-          const {data,error} = await query.select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note");
-          if (error) throw error;
-          if (!Array.isArray(data) || data.length !== 1 || String(data[0].owner_membership_id) !== String(membership.id)) throw new Error("Supabase calendar save verification failed");
-          const confirmed = mapRemoteCalendarEvent(data[0]);
-          if (isEditing) onlineCalendarEvents[existingIndex] = confirmed;
-          else onlineCalendarEvents.push(confirmed);
-          cacheOnlineCalendar();
-          closeCalendarEventModal();
-          refreshCalendarView();
-          if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено успешно.");
-        } catch (error) {
-          console.error("ClubDesk Supabase calendar save error",error);
-          if (typeof showToast === "function") showToast("Събитието не беше запазено. Опитайте отново.");
-        } finally {
-          onlineCalendarMutationInProgress = false;
-          saveCalendarEvent.disabled = false;
-          saveCalendarEvent.textContent = isEditing ? "Запази промените" : "Запази";
-        }
+      if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress) {
+        if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
         return;
       }
-      if (existingIndex >= 0) events[existingIndex] = savedEvent;
-      else events.push(savedEvent);
-      saveCalendarEvents(events);
-      closeCalendarEventModal();
-      refreshCalendarView();
-      if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено");
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership?.club_id || !membership?.id) {
+        if (typeof showToast === "function") showToast("Липсва активно членство в клуба.");
+        return;
+      }
+      const row = {
+        club_id:membership.club_id,
+        owner_membership_id:isEditing ? (previous.ownerMembershipId || membership.id) : membership.id,
+        source_local_id:String(savedEvent.id),
+        title:savedEvent.title.trim(),
+        event_date:savedEvent.date,
+        event_time:savedEvent.time ? normalizeCalendarTime(savedEvent.time) : null,
+        note:savedEvent.note.trim() || null
+      };
+      onlineCalendarMutationInProgress = true;
+      saveCalendarEvent.disabled = true;
+      saveCalendarEvent.textContent = "Запазване...";
+      try {
+        const query = isEditing
+          ? window.clubdeskSupabase.from("calendar_events").update(row)
+              .eq("id",previous.supabaseId)
+              .eq("club_id",membership.club_id)
+          : window.clubdeskSupabase.from("calendar_events").insert(row);
+        const {data,error} = await query.select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note");
+        if (error) throw error;
+        if (!Array.isArray(data) || data.length !== 1 || String(data[0].club_id) !== String(membership.club_id)) throw new Error("Supabase calendar save verification failed");
+        const confirmed = mapRemoteCalendarEvent(data[0]);
+        if (isEditing) onlineCalendarEvents[existingIndex] = confirmed;
+        else onlineCalendarEvents.push(confirmed);
+        onlineCalendarEvents.sort(compareCalendarEvents);
+        cacheOnlineCalendar();
+        closeCalendarEventModal();
+        refreshCalendarView();
+        if (typeof showToast === "function") showToast(isEditing ? "Промените са запазени" : "Събитието е добавено успешно.");
+      } catch (error) {
+        console.error("ClubDesk Supabase calendar save error",error);
+        if (typeof showToast === "function") showToast("Събитието не беше запазено. Опитайте отново.");
+      } finally {
+        onlineCalendarMutationInProgress = false;
+        saveCalendarEvent.disabled = false;
+        saveCalendarEvent.textContent = isEditing ? "Запази промените" : "Запази";
+      }
     });
 
     async function deleteCalendarEventById(eventId,{closeModal=true}={}) {
-      const calendarEvent = personalCalendarEvents().find(item => item.id === eventId);
+      const calendarEvent = clubCalendarEvents().find(item => item.id === eventId);
       if (!calendarEvent) {
-        if (typeof showToast === "function") showToast("Този профил е достъпен само за преглед.");
+        if (typeof showToast === "function") showToast("Събитието не е намерено.");
         return false;
       }
+      if (!canManageClubCalendar()) return false;
       if (!confirm("Сигурни ли сте, че искате да изтриете събитието?")) return false;
-      if (calendarMigrationStateForCurrentMembership()) {
-        if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress || !calendarEvent.supabaseId) {
-          if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
-          return false;
-        }
-        const membership = window.clubdeskAuthenticatedUser?.membership;
-        onlineCalendarMutationInProgress = true;
-        deleteCalendarEvent.disabled = true;
-        try {
-          const {data,error} = await window.clubdeskSupabase.from("calendar_events")
-            .delete()
-            .eq("id",calendarEvent.supabaseId)
-            .eq("club_id",membership.club_id)
-            .eq("owner_membership_id",membership.id)
-            .select("id");
-          if (error) throw error;
-          if (!Array.isArray(data) || data.length !== 1) throw new Error("Supabase calendar delete verification failed");
-          onlineCalendarEvents = onlineCalendarEvents.filter(item => item.id !== calendarEvent.id);
-          cacheOnlineCalendar();
-          if (closeModal) closeCalendarEventModal();
-          refreshCalendarView();
-          if (typeof showToast === "function") showToast("Събитието е изтрито");
-          return true;
-        } catch (error) {
-          console.error("ClubDesk Supabase calendar delete error",error);
-          if (typeof showToast === "function") showToast("Събитието не беше изтрито. Опитайте отново.");
-          return false;
-        } finally {
-          onlineCalendarMutationInProgress = false;
-          deleteCalendarEvent.disabled = false;
-        }
+      if (!canEditOnlineCalendar() || onlineCalendarMutationInProgress || !calendarEvent.supabaseId) {
+        if (typeof showToast === "function") showToast("Календарът е достъпен само за преглед без връзка със Supabase.");
+        return false;
       }
-      saveCalendarEvents(calendarEvents().filter(event => event.id !== calendarEvent.id));
-      if (closeModal) closeCalendarEventModal();
-      refreshCalendarView();
-      if (typeof showToast === "function") showToast("Събитието е изтрито");
-      return true;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      onlineCalendarMutationInProgress = true;
+      deleteCalendarEvent.disabled = true;
+      try {
+        const {data,error} = await window.clubdeskSupabase.from("calendar_events")
+          .delete()
+          .eq("id",calendarEvent.supabaseId)
+          .eq("club_id",membership.club_id)
+          .select("id");
+        if (error) throw error;
+        if (!Array.isArray(data) || data.length !== 1) throw new Error("Supabase calendar delete verification failed");
+        onlineCalendarEvents = onlineCalendarEvents.filter(item => item.id !== calendarEvent.id);
+        cacheOnlineCalendar();
+        if (closeModal) closeCalendarEventModal();
+        refreshCalendarView();
+        if (typeof showToast === "function") showToast("Събитието е изтрито");
+        return true;
+      } catch (error) {
+        console.error("ClubDesk Supabase calendar delete error",error);
+        if (typeof showToast === "function") showToast("Събитието не беше изтрито. Опитайте отново.");
+        return false;
+      } finally {
+        onlineCalendarMutationInProgress = false;
+        deleteCalendarEvent.disabled = false;
+      }
     }
 
     deleteCalendarEvent?.addEventListener("click", async () => {
@@ -4385,7 +4421,7 @@
     function renderAttendanceMigrationPreview() {
       const container = document.getElementById("settingsAttendanceMigrationPreview");
       const executeButton = document.getElementById("executeAttendanceMigration");
-      if (!container || !authenticatedMembershipIsAdmin()) return;
+      if (!container || !canManageClubCalendar()) return;
       const data = buildAttendanceMigrationPreviewData();
       currentAttendanceMigrationPreview = data;
       const completed = attendanceMigrationStateForCurrentClub();
@@ -5119,14 +5155,12 @@
       const {data:remote,error} = await window.clubdeskSupabase.from("calendar_events")
         .select("id,club_id,owner_membership_id,source_local_id,title,event_date,event_time,note")
         .eq("club_id",data.membership.club_id)
-        .eq("owner_membership_id",data.membership.id)
         .in("source_local_id",sourceIds);
       if (error) throw error;
       if (!Array.isArray(remote) || remote.length !== data.eligibleEventCount) throw new Error("Supabase calendar count mismatch");
       data.events.forEach(expected => {
         const matches = remote.filter(row => String(row.source_local_id) === expected.sourceLocalId);
         if (matches.length !== 1
-          || String(matches[0].owner_membership_id) !== String(data.membership.id)
           || String(matches[0].title || "").trim() !== expected.title
           || String(matches[0].event_date || "") !== expected.eventDate
           || (matches[0].event_time ? normalizeCalendarTime(matches[0].event_time) : null) !== expected.eventTime) throw new Error("Supabase calendar verification failed");
@@ -5261,7 +5295,7 @@
     }
 
     function athleteEdits() {
-      return {};
+      return readJson(STORAGE_ATHLETE_EDITS, {});
     }
 
     function migrateAthleteCoachAssignments() {
@@ -5329,20 +5363,44 @@
     }
 
     function initializeCoachScope() {
+      if (localStorage.getItem(STORAGE_CURRENT_USER) === null) {
+        localStorage.setItem(STORAGE_CURRENT_USER,CURRENT_COACH_ID);
+      }
       const user = currentUser();
-      if (user?.id) localStorage.setItem(STORAGE_CURRENT_USER,user.id);
-      const savedScope = String(localStorage.getItem(STORAGE_SELECTED_COACH_SCOPE) || "");
-      const validCoachScope = Boolean(coachById(savedScope));
       const isAdmin = currentUserIsAdmin();
-      const defaultScope = isAdmin ? "all" : (user?.id || "");
-      selectedCoachScope = (savedScope === "all" && isAdmin) || validCoachScope
-        ? savedScope
-        : defaultScope;
-      localStorage.setItem(STORAGE_SELECTED_COACH_SCOPE,selectedCoachScope);
+      const userScopeKey = selectedCoachScopeStorageKey();
+      const savedScope = String(localStorage.getItem(userScopeKey) || (isAdmin ? localStorage.getItem(STORAGE_SELECTED_COACH_SCOPE) : "") || "");
+      const validCoachScope = Boolean(coachById(savedScope));
+      if (isAdmin) {
+        selectedCoachScope = savedScope === "all" || validCoachScope ? savedScope : "all";
+      } else {
+        selectedCoachScope = user?.id && coachById(user.id) ? user.id : "all";
+      }
+      persistSelectedCoachScope();
+    }
+
+    function selectedCoachScopeStorageKey() {
+      const authUserId = String(window.clubdeskAuthenticatedUser?.authUser?.id || "").trim();
+      return authUserId ? `${STORAGE_SELECTED_COACH_SCOPE}:${authUserId}` : STORAGE_SELECTED_COACH_SCOPE;
+    }
+
+    function persistSelectedCoachScope() {
+      localStorage.setItem(selectedCoachScopeStorageKey(),selectedCoachScope);
+      if (currentUserIsAdmin()) localStorage.setItem(STORAGE_SELECTED_COACH_SCOPE,selectedCoachScope);
     }
 
     function currentUserId() {
-      return String(window.clubdeskAuthenticatedUser?.membership?.id || "").trim();
+      const authenticated = window.clubdeskAuthenticatedUser;
+      const authenticatedMembershipId = String(authenticated?.membership?.id || "").trim();
+      const membershipCoach = authenticatedMembershipId
+        ? coaches().find(coach => String(coach.supabaseMembershipId || "") === authenticatedMembershipId)
+        : null;
+      if (membershipCoach) return membershipCoach.id;
+      const linkedCoachId = String(authenticated?.membership?.coach_id || authenticated?.profile?.coach_id || "").trim();
+      if (linkedCoachId && coachById(linkedCoachId)) return linkedCoachId;
+      const authenticatedName = normalizeCoachName(authenticated?.profile?.full_name);
+      const matchedCoach = authenticatedName ? coaches().find(coach => normalizeCoachName(coach.name) === authenticatedName) : null;
+      return matchedCoach?.id || String(localStorage.getItem(STORAGE_CURRENT_USER) || CURRENT_COACH_ID);
     }
 
     function currentUser() {
@@ -5366,7 +5424,6 @@
 
     function canEditAttendanceRecords() {
       if (!canEditViewedScope()) return false;
-      if (!attendanceMigrationStateForCurrentClub()) return true;
       return onlineAttendanceAvailable
         && !onlineAttendanceLoading
         && !onlineAttendanceSaveInProgress
@@ -5452,6 +5509,11 @@
       const context = document.getElementById("coachScopeContext");
       if (!context) return;
       const viewedCoach = selectedCoachScope === "all" ? null : coachById(selectedCoachScope);
+      if (selectedCoachScope === "all") {
+        context.hidden = currentUserIsAdmin();
+        context.innerHTML = currentUserIsAdmin() ? "" : 'Преглед: Всички в клуба <span class="scope-readonly-badge">🔒 Само за преглед</span>';
+        return;
+      }
       if (!viewedCoach) {
         context.hidden = true;
         context.textContent = "";
@@ -5469,9 +5531,6 @@
         document.getElementById("currentUserAvatar").textContent = initials(name);
         document.getElementById("currentUserName").textContent = name;
         document.getElementById("currentUserAccessLabel").textContent = authenticated.membership?.access_role === "admin" ? "Главен администратор" : "Треньор";
-        if (document.getElementById("settings")?.classList.contains("active")) {
-          document.getElementById("pageSubheading").textContent = `${name} · ${views.settings.sub}`;
-        }
         return;
       }
       const user = currentUser();
@@ -5484,9 +5543,10 @@
     function renderAuthenticatedAccountMenu() {
       const authenticated = window.clubdeskAuthenticatedUser;
       const email = String(authenticated?.authUser?.email || "").trim();
+      const visibleIdentifier = email.toLowerCase().endsWith("@clubdesk.invalid") ? email.slice(0,-"@clubdesk.invalid".length) : email;
       const emailElement = document.getElementById("accountMenuEmail");
       const container = document.getElementById("testUserList");
-      if (emailElement) emailElement.textContent = email;
+      if (emailElement) emailElement.textContent = visibleIdentifier;
       if (container) container.innerHTML = '<button class="account-signout" id="clubdeskSignOutButton" type="button">Изход</button>';
     }
 
@@ -5527,7 +5587,7 @@
       } else {
         selectedCoachScope = user.id;
       }
-      localStorage.setItem(STORAGE_SELECTED_COACH_SCOPE,selectedCoachScope);
+      persistSelectedCoachScope();
       closeTestUserMenu();
       closeCalendarEventModal();
       refreshCoachScopeViews();
@@ -5574,10 +5634,10 @@
         if (coach.active) return true;
         return coach.id === selectedCoachScope || coach.id === user?.id || (currentUserIsAdmin() && (counts[coach.id] || 0) > 0);
       });
-      const allItem = currentUserIsAdmin() ? `
+      const allItem = `
         <button class="coach-scope-item ${selectedCoachScope === "all" ? "active" : ""}" type="button" data-coach-scope="all">
           <span class="coach-scope-avatar">ВС</span><span class="coach-scope-copy"><strong>Всички в клуба</strong><small>${allAthletes().filter(athlete => !athlete.archived && athlete.active).length} активни</small></span>
-        </button>` : "";
+        </button>`;
       container.innerHTML = allItem + visibleCoaches.map(coach => {
         const readOnly = !currentUserIsAdmin() && coach.id !== user?.id;
         return `
@@ -5593,6 +5653,7 @@
       const canEdit = canEditViewedScope();
       const isAdmin = currentUserIsAdmin();
       const canEditOnline = canEdit && canEditOnlineRecords();
+      window.clubdeskApplyAccessRoleUI?.();
       const quickAdd = document.getElementById("quickAdd");
       if (quickAdd) quickAdd.hidden = !canEditOnline;
       const dashboardAdd = document.getElementById("dashboardAddAthlete");
@@ -5614,13 +5675,19 @@
       document.getElementById("startExtraGroupAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
       document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
       if (attendanceNote) attendanceNote.disabled = !canEditAttendanceRecords();
-      document.getElementById("addGroupButton")?.toggleAttribute("hidden",!isAdmin || !canEditOnlineGroups());
+      document.getElementById("addGroupButton")?.toggleAttribute("hidden",!canManageGroup(null) || !canEditOnlineGroups());
       document.getElementById("addCoachButton")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("restoreClubDeskBackup")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("settingsArchiveCard")?.toggleAttribute("hidden",!isAdmin);
       renderOnlineSynchronizationStatus();
       document.querySelectorAll("#paymentTable .payment-month-input,#paymentMobileList .payment-month-input").forEach(input => { input.disabled = !canEdit || !canEditOnlinePayments(); });
-      document.getElementById("newCalendarEvent")?.toggleAttribute("disabled",!canEditOnlineCalendar());
+      const canManageCalendar = canManageClubCalendar() && canEditOnlineCalendar();
+      document.getElementById("newCalendarEvent")?.toggleAttribute("hidden",!canManageClubCalendar());
+      document.getElementById("newCalendarEvent")?.toggleAttribute("disabled",!canManageCalendar);
+      document.getElementById("mobileNewCalendarEvent")?.toggleAttribute("hidden",!canManageClubCalendar());
+      document.getElementById("mobileNewCalendarEvent")?.toggleAttribute("disabled",!canManageCalendar);
+      document.getElementById("calendarReadOnlyIndicator")?.toggleAttribute("hidden",canManageClubCalendar());
+      document.getElementById("calendar")?.classList.toggle("calendar-readonly",!canManageCalendar);
       if (!canEditOnline) clearBulkSelection();
     }
 
@@ -5636,6 +5703,7 @@
       renderCoachScopeSidebar();
       renderCurrentUserProfile();
       renderCoachScopeContext();
+      renderAthleteGroupFilter();
       renderAttendanceGroupSelectors();
       renderAthleteTable();
       renderAttendance();
@@ -5657,10 +5725,9 @@
       if (!button) return;
       const nextScope = button.dataset.coachScope;
       if (nextScope === selectedCoachScope) return;
-      if (nextScope === "all" && !currentUserIsAdmin()) return;
       if (nextScope !== "all" && !coachById(nextScope)) return;
       selectedCoachScope = nextScope;
-      localStorage.setItem(STORAGE_SELECTED_COACH_SCOPE,selectedCoachScope);
+      persistSelectedCoachScope();
       refreshCoachScopeViews();
     });
 
@@ -5679,11 +5746,42 @@
       else if (options.length) select.value = options[0].id;
     }
 
+    let athleteGroupFilterRenderedScope = null;
+
+    function athleteFilterGroupsForSelectedScope() {
+      const selectedCoach = selectedCoachScope === "all" ? null : coachById(selectedCoachScope);
+      const ownerMembershipId = String(selectedCoach?.supabaseMembershipId || "").trim();
+      const available = groups().filter(group => {
+        if (selectedCoachScope === "all") return true;
+        return Boolean(ownerMembershipId && String(group.leadCoachMembershipId || "") === ownerMembershipId);
+      });
+      const seenGroupUuids = new Set();
+      return available.filter(group => {
+        const groupUuid = String(group.supabaseId || "").trim();
+        if (!groupUuid || seenGroupUuids.has(groupUuid)) return false;
+        seenGroupUuids.add(groupUuid);
+        return true;
+      });
+    }
+
+    function renderAthleteGroupFilter() {
+      const select = document.getElementById("groupFilter");
+      if (!select) return;
+      const scopeChanged = athleteGroupFilterRenderedScope !== selectedCoachScope;
+      const previous = scopeChanged ? "all" : String(select.value || "all");
+      const available = athleteFilterGroupsForSelectedScope();
+      select.innerHTML = [
+        '<option value="all">Всички групи</option>',
+        ...available.map(group => `<option value="${escapeHtml(group.supabaseId)}">${escapeHtml(group.name)}</option>`)
+      ].join("");
+      select.value = available.some(group => String(group.supabaseId) === previous) ? previous : "all";
+      athleteGroupFilterRenderedScope = selectedCoachScope;
+    }
+
     function renderGroupSelectors() {
-      setGroupSelectOptions(document.getElementById("groupFilter"),{includeAll:true});
+      renderAthleteGroupFilter();
       setGroupSelectOptions(document.getElementById("newAthleteGroup"),{activeOnly:true});
       setGroupSelectOptions(document.getElementById("athleteEditGroup"));
-      setGroupSelectOptions(document.getElementById("moveAthleteGroup"),{activeOnly:true});
       setGroupSelectOptions(document.getElementById("attendanceGroup"),{includeAge:true});
       setGroupSelectOptions(document.getElementById("attendanceHistoryGroup"));
       setGroupSelectOptions(document.getElementById("paymentGroupFilter"));
@@ -5693,30 +5791,49 @@
     const groupModal = document.getElementById("groupModal");
     let editingGroupId = null;
 
+    function groupOwnedByAuthenticatedCoach(group) {
+      const membershipId = String(window.clubdeskAuthenticatedUser?.membership?.id || "").trim();
+      return Boolean(membershipId && String(group?.leadCoachMembershipId || "") === membershipId);
+    }
+
+    function canManageGroup(group=null) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership || membership.status !== "active") return false;
+      if (membership.access_role === "admin") return true;
+      if (membership.access_role !== "coach") return false;
+      return group ? groupOwnedByAuthenticatedCoach(group) : true;
+    }
+
+    function requireGroupManagementAccess(group=null) {
+      if (canManageGroup(group)) return true;
+      if (typeof showToast === "function") showToast("Тази група е достъпна само за преглед.");
+      return false;
+    }
+
     function renderSettingsGroups() {
       const container = document.getElementById("settingsGroupList");
       if (!container) return;
       const isAdmin = currentUserIsAdmin();
-      const canEditOnline = isAdmin && canEditOnlineGroups();
-      const user = currentUser();
+      const canEditOnline = canEditOnlineGroups();
       const counts = allAthletes().reduce((result,athlete) => {
         result[athlete.group] = (result[athlete.group] || 0) + 1;
         return result;
       },{});
-      const ownActiveGroupIds = new Set(allAthletes()
-        .filter(athlete => !athlete.archived && athlete.active && athletePrimaryCoachId(athlete) === user?.id)
-        .map(athlete => athlete.group));
-      const responsibleGroupIds = new Set((user?.responsibleGroupIds || []).map(normalizeGroupId));
-      const visibleGroups = isAdmin ? groups() : groups().filter(group => group.leadCoachId === user?.id || responsibleGroupIds.has(group.id) || ownActiveGroupIds.has(group.id));
+      const selectedScopeCoach = selectedCoachScope !== "all" ? coachById(selectedCoachScope) : null;
+      const visibleGroups = isAdmin
+        ? (selectedScopeCoach
+          ? groups().filter(group => String(group.leadCoachMembershipId || "") === String(selectedScopeCoach.supabaseMembershipId || ""))
+          : groups())
+        : groups().filter(group => groupOwnedByAuthenticatedCoach(group));
       document.getElementById("settingsGroupsTitle").textContent = isAdmin ? "Управление на групи" : "Моите групи";
       document.getElementById("settingsGroupsDescription").textContent = isAdmin
         ? "Настройки на тренировъчните групи и техните графици."
-        : "Групите и тренировъчните графици, с които работите.";
+        : "Групите, за които сте водещ треньор.";
       if (!visibleGroups.length) {
-        container.innerHTML = '<div class="empty">Няма свързани групи.</div>';
+        container.innerHTML = `<div class="empty">${isAdmin && selectedScopeCoach ? "Няма групи за избрания треньор." : isAdmin ? "Няма свързани групи." : "Все още нямате създадени групи."}</div>`;
         return;
       }
-      container.innerHTML = isAdmin ? `
+      container.innerHTML = `
         <div class="settings-group-header" aria-hidden="true">
           <span>Група</span><span>Възраст</span><span>График</span><span>Статус</span><span>Действия</span>
         </div>
@@ -5726,36 +5843,29 @@
           <div class="settings-group-value"><small class="settings-group-field-label">Възраст</small><span>${escapeHtml(group.ageRange || "—")}</span></div>
           <div class="settings-group-value"><small class="settings-group-field-label">График</small><span>${escapeHtml(formatGroupSchedule(group.id))}</span></div>
           <div class="settings-group-status"><small class="settings-group-field-label">Статус</small><span class="pill ${group.active ? "green" : "gray"}">${group.active ? "Активна" : "Неактивна"}</span></div>
-          ${canEditOnline ? `<button class="small-btn edit-group-button" type="button" data-group-id="${escapeHtml(group.id)}">Редактирай</button>` : '<span></span>'}
-        </div>
-      `).join("") : `
-        <div class="settings-group-header coach-view" aria-hidden="true">
-          <span>Група</span><span>Възраст</span><span>График</span><span>Статус</span>
-        </div>
-      ` + visibleGroups.map(group => `
-        <div class="settings-group-row coach-view">
-          <div class="settings-group-name"><strong>${escapeHtml(group.name)}</strong></div>
-          <div class="settings-group-value"><small class="settings-group-field-label">Възраст</small><span>${escapeHtml(group.ageRange || "—")}</span></div>
-          <div class="settings-group-value"><small class="settings-group-field-label">График</small><span>${escapeHtml(formatGroupSchedule(group.id))}</span></div>
-          <div class="settings-group-status"><small class="settings-group-field-label">Статус</small><span class="pill ${group.active ? "green" : "gray"}">${group.active ? "Активна" : "Неактивна"}</span></div>
+          ${canEditOnline && canManageGroup(group) ? `<button class="small-btn edit-group-button" type="button" data-group-id="${escapeHtml(group.id)}">Редактирай</button>` : '<span></span>'}
         </div>
       `).join("");
     }
 
     function openGroupModal(groupId=null) {
-      if (!requireAdminAccess() || !requireOnlineGroupEditAccess()) return;
       const group = groupId ? groupById(groupId) : null;
+      if (groupId && !group) return;
+      if (!requireGroupManagementAccess(group) || !requireOnlineGroupEditAccess()) return;
+      const isAdmin = currentUserIsAdmin();
       editingGroupId = group?.id || null;
       document.getElementById("groupModalTitle").textContent = group ? "Редактиране на група" : "Нова група";
       document.getElementById("groupNameInput").value = group?.name || "";
       document.getElementById("groupAgeRangeInput").value = group?.ageRange || "";
       document.getElementById("groupDefaultFeeInput").value = group?.defaultFee ?? 37;
       document.getElementById("groupActiveInput").value = group?.active === false ? "inactive" : "active";
+      const selectedScopeCoach = selectedCoachScope !== "all" ? coachById(selectedCoachScope) : null;
       setCoachSelectOptions(document.getElementById("groupLeadCoachInput"),{
-        selectedId:group?.leadCoachId || currentUserId(),
+        selectedId:group?.leadCoachId || (isAdmin && selectedScopeCoach ? selectedScopeCoach.id : currentUserId()),
         activeOnly:true,
         preserveCurrent:true
       });
+      document.getElementById("groupLeadCoachField").hidden = !isAdmin;
       const schedule = group ? normalizedGroupSchedule(group.id) : {days:[],time:""};
       document.getElementById("groupScheduleTime").value = schedule.time;
       document.querySelectorAll("#groupForm .group-schedule-days input").forEach(input => {
@@ -5799,8 +5909,14 @@
     groupModal?.addEventListener("click",event => { if (event.target === groupModal) closeGroupModal(); });
     document.getElementById("groupForm")?.addEventListener("submit",async event => {
       event.preventDefault();
-      if (!requireAdminAccess() || !requireOnlineGroupEditAccess()) return;
-      if (onlineGroupSaveInProgress) return;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const existingGroup = editingGroupId ? groupById(editingGroupId) : null;
+      if (editingGroupId && !existingGroup) {
+        if (typeof showToast === "function") showToast("Групата вече не е налична.");
+        return;
+      }
+      if (!requireGroupManagementAccess(existingGroup) || !requireOnlineGroupEditAccess()) return;
+      if (onlineGroupSaveInProgress || !membership?.id || !membership?.club_id) return;
       const name = document.getElementById("groupNameInput").value.trim();
       const ageRange = document.getElementById("groupAgeRangeInput").value.trim();
       const feeInput = document.getElementById("groupDefaultFeeInput");
@@ -5809,16 +5925,18 @@
         feeInput.reportValidity();
         return;
       }
-      const leadCoach = coachById(document.getElementById("groupLeadCoachInput").value);
-      if (!leadCoach?.hasOnlineAccount || !leadCoach.supabaseMembershipId) {
-        if (typeof showToast === "function") showToast("Този треньор все още няма онлайн акаунт.");
-        return;
-      }
-      const membership = window.clubdeskAuthenticatedUser?.membership;
-      const existingGroup = editingGroupId ? groupById(editingGroupId) : null;
       if (!membership?.club_id || (existingGroup && !existingGroup.supabaseId)) {
         if (typeof showToast === "function") showToast("Групата не е свързана със Supabase.");
         return;
+      }
+      let leadCoachMembershipId = String(membership.id);
+      if (currentUserIsAdmin()) {
+        const leadCoach = coachById(document.getElementById("groupLeadCoachInput").value);
+        if (!leadCoach?.hasOnlineAccount || !leadCoach.supabaseMembershipId) {
+          if (typeof showToast === "function") showToast("Този треньор все още няма онлайн акаунт.");
+          return;
+        }
+        leadCoachMembershipId = String(leadCoach.supabaseMembershipId);
       }
       const id = existingGroup?.id || createOnlineSourceLocalId("group");
       const scheduleDays = [...document.querySelectorAll("#groupForm .group-schedule-days input:checked")].map(input => input.value);
@@ -5828,7 +5946,7 @@
         age_range:ageRange || null,
         schedule_days:canonicalMigrationWeekdays(scheduleDays),
         start_time:/^([01]\d|2[0-3]):[0-5]\d$/.test(startTimeValue) ? startTimeValue : null,
-        lead_coach_membership_id:leadCoach.supabaseMembershipId,
+        lead_coach_membership_id:leadCoachMembershipId,
         status:document.getElementById("groupActiveInput").value === "active" ? "active" : "inactive"
       };
       const submitButton = document.querySelector('#groupForm button[type="submit"]');
@@ -6073,7 +6191,8 @@
     }
 
     function localMonthlyPayments() {
-      return {};
+      const records = readJson(STORAGE_MONTHLY_PAYMENTS, {});
+      return records && typeof records === "object" && !Array.isArray(records) ? records : {};
     }
 
     function monthlyPayments() {
@@ -6223,7 +6342,7 @@
         const groupLabel = a.groupConnectionMissing ? "Липсва свързана група" : (groupNames[a.group] || a.group);
         const coachLabel = a.coachConnectionMissing ? "Липсва свързан треньор" : athleteCoachName(a);
         return `
-        <tr class="${(!a.active || a.archived) ? "athlete-row-muted" : ""}" data-athlete-id="${escapeHtml(a.id)}" data-name="${escapeHtml(a.name.toLowerCase())}" data-group="${escapeHtml(a.group)}" data-status="${escapeHtml(a.status)}" data-active="${a.active}" data-archived="${a.archived}" role="button" tabindex="0">
+        <tr class="${(!a.active || a.archived) ? "athlete-row-muted" : ""}" data-athlete-id="${escapeHtml(a.id)}" data-name="${escapeHtml(a.name.toLowerCase())}" data-group="${escapeHtml(groupById(a.group)?.supabaseId || "")}" data-status="${escapeHtml(a.status)}" data-active="${a.active}" data-archived="${a.archived}" role="button" tabindex="0">
           <td class="athlete-select-cell">${canEditAthlete ? `<input class="athlete-select-checkbox" type="checkbox" data-athlete-id="${escapeHtml(a.id)}" aria-label="Избери ${escapeHtml(a.name)}" ${selectedAthleteIds.has(a.id) ? "checked" : ""} />` : ""}</td>
           <td class="athlete-person-cell">
             <div class="person">
@@ -6260,6 +6379,7 @@
     const paymentMonthShortNames = ["яну.","фев.","мар.","апр.","май.","юни.","юли.","авг.","сеп.","окт.","ное.","дек."];
     const paymentMonthLongNames = ["януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември"];
     let paymentPeriodOffset = 0;
+    let paymentPeriodInitialized = false;
     let paymentSaveStateTimer = null;
     const paymentMobileMedia = window.matchMedia("(max-width: 768px)");
 
@@ -6270,11 +6390,29 @@
     }
 
     function visiblePaymentMonths() {
-      return Array.from({length:10},(_,index) => shiftPaymentMonth(DEMO_CURRENT_MONTH,paymentPeriodOffset - 8 + index));
+      const offset = Math.max(0,Number(paymentPeriodOffset) || 0);
+      return Array.from({length:10},(_,index) => shiftPaymentMonth(CLUBDESK_FEES_START_MONTH,offset + index));
     }
 
     function selectedPaymentMonth() {
-      return shiftPaymentMonth(DEMO_CURRENT_MONTH,paymentPeriodOffset);
+      return shiftPaymentMonth(CLUBDESK_FEES_START_MONTH,Math.max(0,paymentPeriodOffset));
+    }
+
+    function feesCurrentMonthOffset() {
+      const current = getLocalMonthKey();
+      const [startYear,startMonth] = CLUBDESK_FEES_START_MONTH.split("-").map(Number);
+      const valid = current < CLUBDESK_FEES_START_MONTH ? CLUBDESK_FEES_START_MONTH : current;
+      const [year,month] = valid.split("-").map(Number);
+      return Math.max(0,(year-startYear)*12 + month-startMonth);
+    }
+
+    function updatePaymentPeriodControls() {
+      const previous = document.getElementById("paymentPreviousPeriod");
+      if (previous) {
+        const atStart = paymentPeriodOffset <= 0;
+        previous.disabled = atStart;
+        previous.setAttribute("aria-disabled",String(atStart));
+      }
     }
 
     function paymentMonthShortLabel(month) {
@@ -6321,7 +6459,7 @@
         if (cell) cell.textContent = formatPaymentTotal(paymentMonthTotal(month,athletes,records));
       });
       const summary = document.getElementById("paymentCurrentSummary");
-      const summaryMonth = paymentMobileMedia.matches ? selectedPaymentMonth() : DEMO_CURRENT_MONTH;
+      const summaryMonth = selectedPaymentMonth();
       if (summary) summary.textContent = `Събрано за ${paymentMonthLongLabel(summaryMonth)}: ${formatPaymentTotal(paymentMonthTotal(summaryMonth,athletes,records))}`;
     }
 
@@ -6353,6 +6491,11 @@
     function renderPaymentTable() {
       const table = document.getElementById("paymentTable");
       if (!table) return;
+      if (!paymentPeriodInitialized) {
+        paymentPeriodOffset = feesCurrentMonthOffset();
+        paymentPeriodInitialized = true;
+      }
+      paymentPeriodOffset = Math.max(0,Number(paymentPeriodOffset) || 0);
       const months = visiblePaymentMonths();
       const athletes = selectedPaymentAthletes();
       const records = monthlyPayments();
@@ -6368,6 +6511,7 @@
         renderMobilePaymentList(month,athletes,records);
         const periodLabel = document.getElementById("paymentPeriodLabel");
         if (periodLabel) periodLabel.textContent = paymentMonthLongLabel(month);
+        updatePaymentPeriodControls();
         updatePaymentSheetTotals();
         return;
       }
@@ -6375,7 +6519,8 @@
       const mobileList = document.getElementById("paymentMobileList");
       if (mobileList) mobileList.innerHTML = "";
 
-      thead.innerHTML = `<tr><th>Име</th><th>Тел. родител</th><th>Година</th>${months.map(month => `<th class="${month === DEMO_CURRENT_MONTH ? "current-month" : ""}">${paymentMonthShortLabel(month)}</th>`).join("")}</tr>`;
+      const currentMonth = getLocalMonthKey();
+      thead.innerHTML = `<tr><th>Име</th><th>Тел. родител</th><th>Година</th>${months.map(month => `<th class="${month === currentMonth ? "current-month" : ""}">${paymentMonthShortLabel(month)}</th>`).join("")}</tr>`;
       tbody.innerHTML = athletes.length ? athletes.map(athlete => `
         <tr class="${athlete.active === false ? "payment-athlete-paused" : "payment-athlete-active"}" data-athlete-id="${escapeHtml(athlete.id)}">
           <td>${escapeHtml(athlete.name)}</td>
@@ -6385,14 +6530,15 @@
             const amount = paymentRecordAmount(records[month]?.[athlete.id]);
             const value = amount == null ? "" : formatPaymentCellAmount(amount);
             const label = `${athlete.name}, ${paymentMonthLongLabel(month)}`;
-            return `<td class="payment-month-cell ${month === DEMO_CURRENT_MONTH ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
+            return `<td class="payment-month-cell ${month === currentMonth ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
           }).join("")}
         </tr>
       `).join("") : `<tr><td colspan="13" class="empty">${selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор."}</td></tr>`;
-      tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === DEMO_CURRENT_MONTH ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,athletes,records))}</td>`).join("")}</tr>`;
+      tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === currentMonth ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,athletes,records))}</td>`).join("")}</tr>`;
 
       const periodLabel = document.getElementById("paymentPeriodLabel");
       if (periodLabel) periodLabel.textContent = `${paymentMonthShortLabel(months[0])} – ${paymentMonthShortLabel(months[months.length - 1])}`;
+      updatePaymentPeriodControls();
       updatePaymentSheetTotals();
     }
 
@@ -6465,12 +6611,24 @@
     const closeAthleteDetailsButton = document.getElementById("closeAthleteDetails");
     const editAthleteDetailsButton = document.getElementById("editAthleteDetails");
     const cancelAthleteEditButton = document.getElementById("cancelAthleteEdit");
+    const athleteDeleteModal = document.getElementById("athleteDeleteModal");
     const athleteDetailsReadOnly = document.getElementById("athleteDetailsReadOnly");
     const athleteDetailsEditForm = document.getElementById("athleteDetailsEditForm");
     const athleteAttendanceSection = document.getElementById("athleteAttendanceSection");
     let athleteDetailsTrigger = null;
     let activeAthleteDetailsId = null;
     let athleteDetailsEditing = false;
+    let athleteDeleteCheckInProgress = false;
+    let athleteDeleteInProgress = false;
+    let pendingDeleteAthleteId = null;
+
+    function canPermanentlyDeleteAthlete(athlete) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership || membership.status !== "active") return false;
+      if (membership.access_role === "admin") return true;
+      return membership.access_role === "coach"
+        && String(athlete?.primaryCoachMembershipId || "") === String(membership.id || "");
+    }
 
     function setAthleteDetail(id, value) {
       document.getElementById(id).textContent = value;
@@ -6612,6 +6770,130 @@
       if (typeof showToast === "function") showToast("Промените са запазени");
     }
 
+    function safeAthleteDeleteError(error) {
+      console.error("ClubDesk Supabase athlete delete error",{
+        code:error?.code,
+        message:error?.message,
+        details:error?.details,
+        hint:error?.hint
+      });
+    }
+
+    async function athleteHasProtectedHistory(athlete) {
+      if (!athlete?.supabaseId) throw new Error("Missing Supabase athlete ID");
+      const [attendanceResult,paymentsResult] = await Promise.all([
+        window.clubdeskSupabase.from("attendance_records").select("id",{count:"exact",head:true}).eq("athlete_id",athlete.supabaseId),
+        window.clubdeskSupabase.from("payments").select("id",{count:"exact",head:true}).eq("athlete_id",athlete.supabaseId)
+      ]);
+      if (attendanceResult.error) throw attendanceResult.error;
+      if (paymentsResult.error) throw paymentsResult.error;
+      return Number(attendanceResult.count || 0) > 0 || Number(paymentsResult.count || 0) > 0;
+    }
+
+    function showAthleteDeleteModal(athlete,{blocked=false}={}) {
+      const confirmButton = document.getElementById("confirmDeleteAthlete");
+      document.getElementById("athleteDeleteConfirmation").hidden = blocked;
+      document.getElementById("athleteDeleteBlocked").hidden = !blocked;
+      confirmButton.hidden = blocked;
+      confirmButton.disabled = false;
+      confirmButton.textContent = "Изтрий";
+      document.getElementById("cancelAthleteDelete").textContent = blocked ? "Затвори" : "Отказ";
+      if (!blocked) document.getElementById("athleteDeleteQuestion").textContent = `Сигурни ли сте, че искате да изтриете ${athlete.name}?`;
+      athleteDeleteModal.classList.add("show");
+      athleteDeleteModal.setAttribute("aria-hidden","false");
+    }
+
+    function closeAthleteDeleteModal() {
+      if (athleteDeleteInProgress) return;
+      athleteDeleteModal?.classList.remove("show");
+      athleteDeleteModal?.setAttribute("aria-hidden","true");
+      const confirmButton = document.getElementById("confirmDeleteAthlete");
+      if (confirmButton) {
+        confirmButton.hidden = false;
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Изтрий";
+      }
+      pendingDeleteAthleteId = null;
+    }
+
+    async function preparePermanentAthleteDelete(actionButton) {
+      if (athleteDeleteCheckInProgress) return;
+      const athlete = allAthletes().find(item => item.id === activeActionAthleteId);
+      if (!athlete || !canPermanentlyDeleteAthlete(athlete)) {
+        if (typeof showToast === "function") showToast("Нямате право да изтриете този състезател.");
+        return;
+      }
+      if (!window.clubdeskSupabase || !window.clubdeskAuthenticatedUser?.membership?.club_id || !athlete.supabaseId) {
+        if (typeof showToast === "function") showToast("Състезателят не можа да бъде изтрит.");
+        return;
+      }
+      pendingDeleteAthleteId = null;
+      athleteDeleteCheckInProgress = true;
+      actionButton.disabled = true;
+      actionButton.textContent = "Проверка...";
+      try {
+        const hasHistory = await athleteHasProtectedHistory(athlete);
+        closeAthleteActionMenu();
+        if (hasHistory) {
+          pendingDeleteAthleteId = null;
+          showAthleteDeleteModal(athlete,{blocked:true});
+          return;
+        }
+        pendingDeleteAthleteId = athlete.id;
+        showAthleteDeleteModal(athlete);
+      } catch (error) {
+        safeAthleteDeleteError(error);
+        if (typeof showToast === "function") showToast("Състезателят не можа да бъде изтрит.");
+      } finally {
+        athleteDeleteCheckInProgress = false;
+        actionButton.disabled = false;
+        actionButton.textContent = "Изтрий състезателя";
+      }
+    }
+
+    async function confirmPermanentAthleteDelete() {
+      if (athleteDeleteInProgress) return;
+      const athlete = allAthletes().find(item => item.id === pendingDeleteAthleteId);
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const confirmButton = document.getElementById("confirmDeleteAthlete");
+      if (!athlete || !membership?.club_id || !athlete.supabaseId || !canPermanentlyDeleteAthlete(athlete)) {
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Изтрий";
+        if (typeof showToast === "function") showToast("Нямате право да изтриете този състезател.");
+        return;
+      }
+      athleteDeleteInProgress = true;
+      confirmButton.disabled = true;
+      confirmButton.textContent = "Изтриване...";
+      try {
+        if (!canPermanentlyDeleteAthlete(athlete)) throw new Error("Athlete delete permission changed");
+        const {data,error} = await window.clubdeskSupabase.from("athletes")
+          .delete()
+          .eq("id",athlete.supabaseId)
+          .eq("club_id",membership.club_id)
+          .select("id")
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error("Supabase did not confirm athlete deletion");
+        const index = onlineAthletes.findIndex(item => item.id === athlete.id);
+        if (index >= 0) onlineAthletes.splice(index,1);
+        cacheOnlineAthletes();
+        athleteDeleteInProgress = false;
+        closeAthleteDeleteModal();
+        closeAthleteDetails();
+        refreshAthleteViews();
+        renderSettingsDataSummary();
+        if (typeof showToast === "function") showToast("Състезателят е изтрит.");
+      } catch (error) {
+        safeAthleteDeleteError(error);
+        if (typeof showToast === "function") showToast("Състезателят не можа да бъде изтрит.");
+      } finally {
+        athleteDeleteInProgress = false;
+        confirmButton.disabled = false;
+        confirmButton.textContent = "Изтрий";
+      }
+    }
+
     function openAthleteDetails(athleteId, trigger) {
       const athlete = scopedAthletes().find(item => item.id === athleteId);
       if (!athlete) return;
@@ -6627,6 +6909,7 @@
     }
 
     function closeAthleteDetails() {
+      if (athleteDeleteModal?.classList.contains("show")) closeAthleteDeleteModal();
       exitAthleteEditMode();
       athleteDetailsBackdrop.classList.remove("show");
       athleteDetailsBackdrop.setAttribute("aria-hidden", "true");
@@ -6640,6 +6923,35 @@
     const archiveAthleteModal = document.getElementById("archiveAthleteModal");
     let activeActionAthleteId = null;
     let archiveActionMode = "archive";
+
+    function athletePrimaryCoachMembershipId(athlete) {
+      const directId = String(athlete?.primaryCoachMembershipId || "").trim();
+      if (directId) return directId;
+      return String(coachById(athletePrimaryCoachId(athlete))?.supabaseMembershipId || "").trim();
+    }
+
+    function athleteOwnedByAuthenticatedCoach(athlete) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return Boolean(membership?.id && athletePrimaryCoachMembershipId(athlete) === String(membership.id));
+    }
+
+    function transferDestinationGroups(athlete) {
+      if (!athlete) return [];
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const available = groups().filter(group => group.active && group.id !== athlete.group);
+      if (membership?.access_role === "admin") return available;
+      if (membership?.access_role !== "coach" || !athleteOwnedByAuthenticatedCoach(athlete)) return [];
+      return available.filter(group => String(group.leadCoachMembershipId || "") === String(membership.id));
+    }
+
+    function bulkTransferDestinationGroups(athletes) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const currentGroupIds = new Set(athletes.map(athlete => athlete.group));
+      const available = groups().filter(group => group.active && !currentGroupIds.has(group.id));
+      if (membership?.access_role === "admin") return available;
+      if (membership?.access_role !== "coach" || athletes.some(athlete => !athleteOwnedByAuthenticatedCoach(athlete))) return [];
+      return available.filter(group => String(group.leadCoachMembershipId || "") === String(membership.id));
+    }
 
     function athleteOnlinePayload(athlete) {
       const group = groupById(athlete.group);
@@ -6706,6 +7018,59 @@
       }
     }
 
+    async function saveAthleteGroupTransfer(athlete,destinationGroup,{changePrimaryCoach=false}={}) {
+      if (!requireEditPermission() || !requireOnlineEditAccess()) return null;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership?.id || !membership?.club_id || !athlete?.supabaseId || !destinationGroup?.supabaseId) {
+        if (typeof showToast === "function") showToast("Състезателят или групата не са свързани със Supabase.");
+        return null;
+      }
+      const isAdmin = membership.access_role === "admin";
+      if (!isAdmin) {
+        if (!athleteOwnedByAuthenticatedCoach(athlete)) {
+          if (typeof showToast === "function") showToast("Нямате право да преместите този състезател.");
+          return null;
+        }
+        if (String(destinationGroup.leadCoachMembershipId || "") !== String(membership.id)) {
+          if (typeof showToast === "function") showToast("Нямате право да преместите състезателя в тази група.");
+          return null;
+        }
+        changePrimaryCoach = false;
+      }
+      if (destinationGroup.id === athlete.group) return null;
+      const destinationCoachMembershipId = String(destinationGroup.leadCoachMembershipId || "").trim();
+      if (changePrimaryCoach && (!isAdmin || !destinationCoachMembershipId)) return null;
+      if (onlineAthleteMutations.has(athlete.id)) return null;
+      onlineAthleteMutations.add(athlete.id);
+      try {
+        const payload = {group_id:destinationGroup.supabaseId};
+        if (changePrimaryCoach) payload.primary_coach_membership_id = destinationCoachMembershipId;
+        const {data,error} = await window.clubdeskSupabase.from("athletes")
+          .update(payload)
+          .eq("id",athlete.supabaseId)
+          .eq("club_id",membership.club_id)
+          .select(SUPABASE_ATHLETE_FIELDS)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data) throw new Error("Supabase did not return the transferred athlete");
+        const groupIdBySupabaseId = new Map(groups().map(group => [group.supabaseId,group.id]));
+        const mapped = mapSupabaseAthlete(data,groupIdBySupabaseId,[athlete]);
+        mapped.defaultMonthlyFee=athlete.defaultMonthlyFee;
+        mapped.defaultFeeCustomized=athlete.defaultFeeCustomized;
+        const index = onlineAthletes.findIndex(item => item.id === mapped.id);
+        if (index < 0) throw new Error("Transferred athlete is missing from the online collection");
+        onlineAthletes[index] = mapped;
+        cacheOnlineAthletes();
+        return mapped;
+      } catch (error) {
+        console.error("ClubDesk Supabase athlete transfer error",error);
+        if (typeof showToast === "function") showToast("Състезателят не беше преместен. Опитайте отново.");
+        return null;
+      } finally {
+        onlineAthleteMutations.delete(athlete.id);
+      }
+    }
+
     function refreshAthleteViews() {
       renderCoachScopeSidebar();
       renderAttendanceGroupSelectors();
@@ -6733,10 +7098,22 @@
 
       activeActionAthleteId = athlete.id;
       const archiveButton = athleteActionMenu.querySelector('[data-action="archive"]');
+      const moveButton = athleteActionMenu.querySelector('[data-action="move"]');
+      const deleteButton = athleteActionMenu.querySelector('[data-action="delete"]');
+      const moveMessage = document.getElementById("moveAthleteUnavailableMessage");
       const inactive = athlete.status === "inactive";
       archiveButton.textContent = inactive ? "Възстанови" : "Направи неактивен";
       archiveButton.dataset.mode = inactive ? "restore" : "archive";
       archiveButton.style.color = inactive ? "var(--accent)" : "var(--danger)";
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const canMoveAthlete = membership?.access_role === "admin" || athleteOwnedByAuthenticatedCoach(athlete);
+      const destinations = canMoveAthlete ? transferDestinationGroups(athlete) : [];
+      moveButton.hidden = !canMoveAthlete;
+      moveButton.disabled = canMoveAthlete && !destinations.length;
+      moveMessage.hidden = !(membership?.access_role === "coach" && canMoveAthlete && !destinations.length);
+      deleteButton.hidden = !canPermanentlyDeleteAthlete(athlete);
+      deleteButton.disabled = false;
+      deleteButton.textContent = "Изтрий състезателя";
       athleteActionMenu.hidden = false;
 
       const rect = button.getBoundingClientRect();
@@ -6752,14 +7129,30 @@
     function closeMoveAthleteModal() {
       moveAthleteModal.classList.remove("show");
       moveAthleteModal.setAttribute("aria-hidden","true");
+      document.getElementById("moveAthleteSelection").hidden = false;
+      document.getElementById("moveAthleteCrossCoachConfirmation").hidden = true;
+      document.getElementById("confirmMoveAthlete").hidden = false;
+      document.getElementById("moveGroupOnly").hidden = true;
+      document.getElementById("moveGroupAndCoach").hidden = true;
     }
 
     function openMoveAthleteModal() {
       if (!requireEditPermission()) return;
       const athlete = allAthletes().find(item => item.id === activeActionAthleteId);
       if (!athlete) return;
+      const destinations = transferDestinationGroups(athlete);
+      if (!destinations.length) {
+        if (typeof showToast === "function") showToast("Няма друга ваша група, в която да преместите състезателя.");
+        closeAthleteActionMenu();
+        return;
+      }
       document.getElementById("moveAthleteName").textContent = athlete.name;
-      document.getElementById("moveAthleteGroup").value = athlete.group;
+      document.getElementById("moveAthleteGroup").innerHTML = destinations.map(group => `<option value="${escapeHtml(group.id)}">${escapeHtml(group.name)}</option>`).join("");
+      document.getElementById("moveAthleteSelection").hidden = false;
+      document.getElementById("moveAthleteCrossCoachConfirmation").hidden = true;
+      document.getElementById("confirmMoveAthlete").hidden = false;
+      document.getElementById("moveGroupOnly").hidden = true;
+      document.getElementById("moveGroupAndCoach").hidden = true;
       moveAthleteModal.classList.add("show");
       moveAthleteModal.setAttribute("aria-hidden","false");
       closeAthleteActionMenu();
@@ -6835,6 +7228,12 @@
     function openBulkActionModal(mode) {
       if (!requireEditPermission()) return;
       if (!selectedAthleteIds.size) return;
+      const selectedAthletes = selectedVisibleAthletes();
+      const groupOptions = bulkTransferDestinationGroups(selectedAthletes).map(group => ({value:group.id,text:group.name}));
+      if (mode === "group" && !groupOptions.length) {
+        if (typeof showToast === "function") showToast("Няма друга ваша група, в която да преместите състезателя.");
+        return;
+      }
       bulkActionMode = mode;
       const selectField = document.getElementById("bulkSelectField");
       const feeField = document.getElementById("bulkFeeField");
@@ -6842,7 +7241,7 @@
       const configurations = {
         coach:{title:"Задай треньор",label:"Основен треньор",options:coaches().filter(coach => coach.active).map(coach => ({value:coach.id,text:coach.name}))},
         status:{title:"Промени статус",label:"Нов статус",options:[{value:"active",text:"Активен"},{value:"paused",text:"В пауза"},{value:"inactive",text:"Неактивен"}]},
-        group:{title:"Премести в група",label:"Нова група",options:groups().filter(group => group.active).map(group => ({value:group.id,text:group.name}))},
+        group:{title:"Премести в група",label:"Нова група",options:groupOptions},
         fee:{title:"Промени такса",label:"",options:[]}
       };
       const config = configurations[mode];
@@ -6955,19 +7354,48 @@
       }
       if (action === "move") openMoveAthleteModal();
       if (action === "archive") openArchiveAthleteModal(event.target.closest("button").dataset.mode);
+      if (action === "delete") preparePermanentAthleteDelete(event.target.closest("button"));
     });
 
-    document.getElementById("confirmMoveAthlete")?.addEventListener("click", async () => {
-      if (!requireEditPermission()) return;
+    function selectedAthleteTransferContext() {
       const athlete = allAthletes().find(item => item.id === activeActionAthleteId);
-      if (!athlete) return;
-      const newGroup = document.getElementById("moveAthleteGroup").value;
-      const savedAthlete = await saveAthleteOverride({...athlete,group:normalizeGroupId(newGroup),defaultMonthlyFee:athlete.defaultFeeCustomized ? athlete.defaultMonthlyFee : groupDefaultFee(newGroup)});
+      const destinationGroup = groupById(document.getElementById("moveAthleteGroup").value);
+      return {athlete,destinationGroup};
+    }
+
+    async function completeAthleteGroupTransfer(changePrimaryCoach=false) {
+      const {athlete,destinationGroup} = selectedAthleteTransferContext();
+      if (!athlete || !destinationGroup) return;
+      const savedAthlete = await saveAthleteGroupTransfer(athlete,destinationGroup,{changePrimaryCoach});
       if (!savedAthlete) return;
       closeMoveAthleteModal();
       refreshAthleteViews();
       if (typeof showToast === "function") showToast("Състезателят е преместен");
+    }
+
+    document.getElementById("confirmMoveAthlete")?.addEventListener("click", async () => {
+      if (!requireEditPermission()) return;
+      const {athlete,destinationGroup} = selectedAthleteTransferContext();
+      if (!athlete || !destinationGroup) return;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role !== "admin") {
+        await completeAthleteGroupTransfer(false);
+        return;
+      }
+      const destinationCoachMembershipId = String(destinationGroup.leadCoachMembershipId || "").trim();
+      const currentCoachMembershipId = athletePrimaryCoachMembershipId(athlete);
+      if (!destinationCoachMembershipId || destinationCoachMembershipId === currentCoachMembershipId) {
+        await completeAthleteGroupTransfer(false);
+        return;
+      }
+      document.getElementById("moveAthleteSelection").hidden = true;
+      document.getElementById("moveAthleteCrossCoachConfirmation").hidden = false;
+      document.getElementById("confirmMoveAthlete").hidden = true;
+      document.getElementById("moveGroupOnly").hidden = false;
+      document.getElementById("moveGroupAndCoach").hidden = false;
     });
+    document.getElementById("moveGroupOnly")?.addEventListener("click",() => completeAthleteGroupTransfer(false));
+    document.getElementById("moveGroupAndCoach")?.addEventListener("click",() => completeAthleteGroupTransfer(true));
 
     document.getElementById("confirmArchiveAthlete")?.addEventListener("click", async () => {
       if (!requireEditPermission()) return;
@@ -7043,6 +7471,23 @@
         if (!group?.supabaseId) {
           if (typeof showToast === "function") showToast("Избраната група не е свързана със Supabase.");
           return;
+        }
+        const membership = window.clubdeskAuthenticatedUser?.membership;
+        if (membership?.access_role !== "admin") {
+          const ownsAllAthletes = athletes.every(athlete => athleteOwnedByAuthenticatedCoach(athlete));
+          const ownsDestination = String(group.leadCoachMembershipId || "") === String(membership?.id || "");
+          if (!ownsAllAthletes || !ownsDestination) {
+            if (typeof showToast === "function") showToast("Нямате право да преместите състезателя в тази група.");
+            return;
+          }
+        } else {
+          const destinationCoachMembershipId = String(group.leadCoachMembershipId || "").trim();
+          const crossesCoachOwnership = destinationCoachMembershipId
+            && athletes.some(athlete => athletePrimaryCoachMembershipId(athlete) !== destinationCoachMembershipId);
+          if (crossesCoachOwnership) {
+            if (typeof showToast === "function") showToast("За група на друг треньор използвайте индивидуалното преместване.");
+            return;
+          }
         }
         remotePayload = {group_id:group.supabaseId};
         toastMessage = "Състезателите са преместени";
@@ -7127,6 +7572,10 @@
     });
 
     closeAthleteDetailsButton?.addEventListener("click", closeAthleteDetails);
+    document.getElementById("confirmDeleteAthlete")?.addEventListener("click",confirmPermanentAthleteDelete);
+    document.getElementById("cancelAthleteDelete")?.addEventListener("click",closeAthleteDeleteModal);
+    document.getElementById("closeAthleteDeleteModal")?.addEventListener("click",closeAthleteDeleteModal);
+    athleteDeleteModal?.addEventListener("click",event => { if (event.target === athleteDeleteModal) closeAthleteDeleteModal(); });
     athleteDetailsEditForm?.addEventListener("change", event => {
       if (event.target.matches('input[name="athleteScheduleMode"]')) syncAthleteScheduleModeFields(event.target.value);
     });
@@ -7144,6 +7593,11 @@
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
       closeAthleteActionMenu();
+      if (athleteDeleteModal?.classList.contains("show")) {
+        event.preventDefault();
+        closeAthleteDeleteModal();
+        return;
+      }
       if (moveAthleteModal?.classList.contains("show")) closeMoveAthleteModal();
       if (archiveAthleteModal?.classList.contains("show")) closeArchiveAthleteModal();
       if (bulkActionModal?.classList.contains("show")) closeBulkActionModal();
@@ -7196,7 +7650,7 @@
         return false;
       }
 
-      if (paymentsMigrationStateForCurrentClub()) {
+      {
         if (!onlinePaymentsAvailable || window.clubdeskPaymentsDataSource !== "supabase") {
           input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
           if (typeof showToast === "function") showToast("Таксите са достъпни само за преглед без връзка със Supabase.");
@@ -7281,67 +7735,33 @@
         }
       }
 
-      setPaymentSaveState("Запазване...");
-      const localRecords = localMonthlyPayments();
-      localRecords[month] ||= {};
-      const localExistingRecord = localRecords[month][athleteId];
-      if (parsed.empty) {
-        if (localExistingRecord) {
-          const clearedRecord = {...localExistingRecord,status:"unpaid",paidAt:null};
-          if (Object.prototype.hasOwnProperty.call(localExistingRecord,"paid")) clearedRecord.paid = false;
-          delete clearedRecord.amount;
-          delete clearedRecord.amountCustomized;
-          delete clearedRecord.paymentAmountEntered;
-          localRecords[month][athleteId] = clearedRecord;
-        }
-        input.value = "";
-      } else {
-        const isPaid = parsed.amount > 0;
-        const nextRecord = {
-          ...(localExistingRecord || {}),
-          status:isPaid ? "paid" : "unpaid",
-          amount:parsed.amount,
-          paidAt:isPaid ? (localExistingRecord?.paidAt || new Date().toISOString()) : null,
-          amountCustomized:true,
-          paymentAmountEntered:true
-        };
-        if (Object.prototype.hasOwnProperty.call(localExistingRecord || {},"paid")) nextRecord.paid = isPaid;
-        localRecords[month][athleteId] = nextRecord;
-        input.value = formatPaymentCellAmount(parsed.amount);
-      }
-      localStorage.setItem(STORAGE_MONTHLY_PAYMENTS,JSON.stringify(localRecords));
-      input.dataset.originalValue = input.value;
-      input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",!parsed.empty);
-      updatePaymentSheetTotals();
-      if (month === DEMO_CURRENT_MONTH) updateDashboardStats();
-      setTimeout(() => setPaymentSaveState("Запазено","saved"),100);
-      return true;
+      return false;
     }
 
     function focusAdjacentPaymentInput(input,direction) {
       const container = input.closest("#paymentMobileList") || document.getElementById("paymentTable");
-      const inputs = [...container.querySelectorAll(`.payment-month-input[data-month="${input.dataset.month}"]`)];
+      const inputs = [...(container?.querySelectorAll(`.payment-month-input[data-month="${input.dataset.month}"]`) || [])];
       const nextInput = inputs[inputs.indexOf(input) + direction];
       if (nextInput) nextInput.focus();
     }
 
     const paymentTable = document.getElementById("paymentTable");
     const paymentMobileList = document.getElementById("paymentMobileList");
-
     function bindPaymentInputContainer(container) {
-      container?.addEventListener("click",event => {
+      if (!container) return;
+      container.addEventListener("click",event => {
         const cell = event.target.closest(".payment-month-cell");
         if (!cell || event.target.closest(".payment-month-input")) return;
         cell.querySelector(".payment-month-input")?.focus();
       });
-      container?.addEventListener("focusin",event => {
+      container.addEventListener("focusin",event => {
         const input = event.target.closest(".payment-month-input");
         if (!input) return;
         input.dataset.originalValue = input.value;
         input.dataset.cancelled = "false";
         requestAnimationFrame(() => input.select());
       });
-      container?.addEventListener("keydown",async event => {
+      container.addEventListener("keydown",async event => {
         const input = event.target.closest(".payment-month-input");
         if (!input) return;
         if (event.key === "Escape") {
@@ -7356,7 +7776,7 @@
           if (await savePaymentSheetInput(input)) focusAdjacentPaymentInput(input,event.shiftKey ? -1 : 1);
         }
       });
-      container?.addEventListener("focusout",async event => {
+      container.addEventListener("focusout",async event => {
         const input = event.target.closest(".payment-month-input");
         if (!input) return;
         if (input.dataset.saving === "true") return;
@@ -7369,13 +7789,12 @@
         }
       });
     }
-
     bindPaymentInputContainer(paymentTable);
     bindPaymentInputContainer(paymentMobileList);
     document.getElementById("paymentGroupFilter")?.addEventListener("change",renderPaymentTable);
-    document.getElementById("paymentPreviousPeriod")?.addEventListener("click",() => { paymentPeriodOffset -= paymentMobileMedia.matches ? 1 : 10; renderPaymentTable(); });
+    document.getElementById("paymentPreviousPeriod")?.addEventListener("click",() => { paymentPeriodOffset = Math.max(0,paymentPeriodOffset - (paymentMobileMedia.matches ? 1 : 10)); renderPaymentTable(); });
     document.getElementById("paymentNextPeriod")?.addEventListener("click",() => { paymentPeriodOffset += paymentMobileMedia.matches ? 1 : 10; renderPaymentTable(); });
-    document.getElementById("paymentCurrentMonth")?.addEventListener("click",() => { paymentPeriodOffset = 0; renderPaymentTable(); });
+    document.getElementById("paymentCurrentMonth")?.addEventListener("click",() => { paymentPeriodOffset = feesCurrentMonthOffset(); renderPaymentTable(); });
     document.getElementById("downloadPaymentReport")?.addEventListener("click",downloadPaymentReport);
     paymentMobileMedia.addEventListener("change",renderPaymentTable);
 
@@ -7698,7 +8117,7 @@
     }
 
     function localAttendanceStore() {
-      return {};
+      return readJson(STORAGE_ATTENDANCE, {});
     }
 
     function attendanceStore() {
@@ -7980,7 +8399,6 @@
         renderSettingsDataSummary();
         renderSettingsGroups();
         renderSettingsCoaches();
-        if (authenticatedMembershipIsAdmin() && attendanceMigrationStateForCurrentClub()) renderAttendanceMigrationPreview();
       }
     });
     document.getElementById("attendanceHistoryGroup")?.addEventListener("change", renderAttendanceHistory);
@@ -8087,20 +8505,7 @@
     }
 
     function persistTodayAttendanceRoster(draft) {
-      if (!draft?.existing || draft.date !== getLocalTodayDate()) return;
-      if (attendanceMigrationStateForCurrentClub()) return;
-      const store = localAttendanceStore();
-      const storageKey = attendanceRecordStorageKey(draft.date,draft.group,store);
-      const record = store[storageKey];
-      if (!record || typeof record !== "object") return;
-      const nextRoster = [...new Set(draft.rosterAthleteIds.map(String))];
-      const nextGuests = [...new Set(draft.guestAthleteIds.map(String))];
-      const currentRoster = Array.isArray(record.rosterAthleteIds) ? record.rosterAthleteIds.map(String) : [];
-      const currentGuests = Array.isArray(record.guestAthleteIds) ? record.guestAthleteIds.map(String) : [];
-      if (JSON.stringify(currentRoster) === JSON.stringify(nextRoster)
-        && JSON.stringify(currentGuests) === JSON.stringify(nextGuests)) return;
-      store[storageKey] = {...record,rosterAthleteIds:nextRoster,guestAthleteIds:nextGuests};
-      localStorage.setItem(STORAGE_ATTENDANCE,JSON.stringify(store));
+      return;
     }
 
     function reconcileTodaySavedAttendanceRoster(draft) {
@@ -8436,6 +8841,7 @@
 
     document.getElementById("dashboardAddAthlete")?.addEventListener("click", () => document.getElementById("quickAdd")?.click());
     document.getElementById("dashboardOpenAthletes")?.addEventListener("click", () => openView("athletes"));
+    document.getElementById("dashboardOpenFees")?.addEventListener("click", () => openView("payments"));
     document.getElementById("dashboardDownloadBackup")?.addEventListener("click", () => document.getElementById("downloadClubDeskBackup")?.click());
 
     async function saveAttendanceToSupabase(draft,savedRecord) {
@@ -8534,13 +8940,12 @@
       };
       const saveButton = document.getElementById("saveAttendance");
       const originalText = saveButton?.textContent || "Запази присъствието";
-      onlineAttendanceSaveInProgress = attendanceMigrationStateForCurrentClub() !== null;
+      onlineAttendanceSaveInProgress = true;
       if (saveButton) {
         saveButton.disabled = true;
         saveButton.textContent = "Запазване...";
       }
       try {
-        if (!attendanceMigrationStateForCurrentClub()) throw new Error("Missing authenticated attendance context");
         await saveAttendanceToSupabase(draft,savedRecord);
         attendanceSessionDraft = {...draft,existing:true,statuses:{...statuses},statusSources:{...statusSources},note:savedRecord.note};
         renderAttendanceHistory();
@@ -8592,6 +8997,7 @@
     renderCurrentUserProfile();
     renderCoachScopeContext();
     updatePermissionUI();
+    renderOnlineSynchronizationStatus();
     window.clubdeskAppReady = true;
     return true;
   };
