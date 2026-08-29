@@ -101,7 +101,12 @@
 
     .coach-scope-panel{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;margin:18px 2px 12px;overflow:hidden}
     .coach-scope-title{margin:0 8px 8px;color:#778397;font-size:9px;font-weight:900;letter-spacing:.12em}
-    .coach-scope-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:4px;width:100%;max-width:100%;min-width:0;max-height:100%;overflow-x:hidden;overflow-y:auto;padding-right:2px}
+    .coach-scope-list{display:grid;grid-template-columns:minmax(0,1fr);align-content:start;gap:4px;width:100%;max-width:100%;min-width:0;max-height:100%;overflow-x:hidden;overflow-y:auto;padding-right:2px;scrollbar-width:thin;scrollbar-color:rgba(190,200,215,.32) transparent}
+    .coach-scope-list::-webkit-scrollbar{width:6px;height:0}
+    .coach-scope-list::-webkit-scrollbar-track{background:transparent}
+    .coach-scope-list::-webkit-scrollbar-thumb{border-radius:999px;background:rgba(190,200,215,.28)}
+    .coach-scope-list::-webkit-scrollbar-thumb:hover{background:rgba(190,200,215,.46)}
+    .coach-scope-list::-webkit-scrollbar-button{display:none;width:0;height:0}
     .coach-scope-item{width:100%;max-width:100%;min-width:0;min-height:44px;box-sizing:border-box;padding:6px 8px;border:0;border-radius:10px;background:transparent;color:#aeb7c5;display:flex;align-items:center;gap:9px;overflow:hidden;text-align:left}
     .coach-scope-item:hover{background:rgba(255,255,255,.05);color:#fff}
     .coach-scope-item.active{background:rgba(31,194,105,.14);color:#fff;box-shadow:inset 3px 0 0 #28cf75}
@@ -668,6 +673,8 @@
     }
     #athleteForm .form-field-error{display:block;margin-top:5px;color:var(--danger);font-size:10px;font-weight:700;line-height:1.35}
     #athleteForm .form-field-error[hidden]{display:none}
+    #athleteForm .form-context-note{display:block;margin-top:5px;color:var(--muted);font-size:11px;font-weight:700;line-height:1.4}
+    #athleteForm .form-context-note[hidden]{display:none}
     .modal-actions{
       display:flex;justify-content:flex-end;gap:9px;padding:16px 22px 20px;
       border-top:1px solid var(--line)
@@ -938,7 +945,7 @@
           <div class="test-user-list" id="testUserList"></div>
         </div>
         <button class="user-row" id="currentUserMenuButton" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Отвори менюто на акаунта" title="Отвори менюто на акаунта">
-          <div class="avatar" id="currentUserAvatar">СТ</div>
+          <div class="avatar" id="currentUserAvatar">CD</div>
           <div>
             <strong id="currentUserName">ClubDesk</strong>
             <span id="currentUserAccessLabel">Главен администратор</span>
@@ -1163,9 +1170,7 @@
                   <option value="14+">14+ години</option>
                 </select>
                 <select class="filter-select" id="attendanceHistoryMonth">
-                  <option value="2026-06">Юни 2026</option>
-                  <option value="2026-07" selected>Юли 2026</option>
-                  <option value="2026-08">Август 2026</option>
+                  <option value="2026-09">Септември 2026</option>
                 </select>
               </div>
             </div>
@@ -1195,7 +1200,7 @@
           <div class="section-toolbar payment-sheet-toolbar">
             <div class="toolbar-left">
               <select class="filter-select" id="paymentGroupFilter">
-                <option value="kids">Детска атлетика</option>
+                <option value="">Няма създадени групи.</option>
               </select>
               <div class="payment-period-nav" aria-label="Навигация по периоди">
                 <button id="paymentPreviousPeriod" type="button" aria-label="Предишен период">‹</button>
@@ -1689,14 +1694,13 @@
             <div class="form-field">
               <label for="newAthleteGroup">Група</label>
               <select id="newAthleteGroup" required>
-                <option value="14+">14+ години</option>
-                <option value="multievent">Многобой</option>
-                <option value="kids">Детска атлетика</option>
+                <option value="">Изберете група</option>
               </select>
               <small class="form-field-error" id="newAthleteGroupError" hidden>Моля, изберете група.</small>
+              <small class="form-context-note" id="newAthleteScopeMessage" hidden></small>
             </div>
 
-            <div class="form-field">
+            <div class="form-field" id="newAthleteCoachField">
               <label for="newAthleteCoach">Основен треньор</label>
               <select id="newAthleteCoach"></select>
             </div>
@@ -1719,7 +1723,7 @@
 
         <div class="modal-actions">
           <button class="ghost-btn" id="cancelAthleteModal" type="button">Отказ</button>
-          <button class="primary-btn" type="submit">Добави състезателя</button>
+          <button class="primary-btn" id="addAthleteSubmit" type="submit">Добави състезателя</button>
         </div>
       </form>
     </div>
@@ -1754,6 +1758,8 @@
       let authLoadUserId = "";
       let authLoadPromise = null;
       let authRequestVersion = 0;
+      let authenticatedAppUserId = "";
+      let loginRequestPromise = null;
 
       function showLoginError(message="") {
         loginError.textContent = message;
@@ -1789,6 +1795,7 @@
         authRequestVersion += 1;
         authLoadUserId = "";
         authLoadPromise = null;
+        authenticatedAppUserId = "";
         window.clubdeskAuthenticatedUser = null;
       }
 
@@ -1806,18 +1813,21 @@
           handleSignedOut();
           return Promise.resolve(false);
         }
-        if (window.clubdeskAuthenticatedUser?.authUser?.id === userId) {
+        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
+        if (authenticatedAppUserId === userId && window.clubdeskAuthenticatedUser?.authUser?.id === userId) {
           window.clubdeskApplyAccessRoleUI?.();
           window.ClubDeskRouter?.applyCurrentRoute({force:true});
           showAuthScreen("authenticated");
           window.clubdeskRefreshAuthenticatedProfile?.();
           return Promise.resolve(true);
         }
-        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
 
         const requestVersion = ++authRequestVersion;
         authLoadUserId = userId;
         authLoadPromise = (async () => {
+          showLoginError();
+          showAuthScreen("loading");
+          setLoginSubmitting(true);
           try {
             const [profileResult,membershipResult] = await Promise.all([
               window.clubdeskSupabase.from("profiles").select("*").eq("id",userId).maybeSingle(),
@@ -1841,21 +1851,24 @@
             window.clubdeskApplyAccessRoleUI?.();
             window.ClubDeskRouter?.applyCurrentRoute({force:true});
             if (window.clubdeskAppInitialized) await window.clubdeskReloadOnlineDataForAuthenticatedUser?.();
-            else window.clubdeskInitializeApp?.();
+            else await window.clubdeskInitializeApp?.();
+            if (requestVersion !== authRequestVersion) return false;
+            authenticatedAppUserId = userId;
             window.clubdeskRefreshAuthenticatedProfile?.();
             showAuthScreen("authenticated");
             return true;
           } catch (error) {
             if (requestVersion !== authRequestVersion) return false;
             console.error("ClubDesk authenticated profile error",error);
-            window.clubdeskAuthenticatedUser = null;
-            showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
+            authenticatedAppUserId = "";
+            showAuthScreen("login","Профилът на клуба не можа да бъде зареден.");
             return false;
           } finally {
             if (authLoadUserId === userId) {
               authLoadUserId = "";
               authLoadPromise = null;
             }
+            if (!loginRequestPromise) setLoginSubmitting(false);
           }
         })();
         return authLoadPromise;
@@ -1863,6 +1876,7 @@
 
       loginForm.addEventListener("submit",async event => {
         event.preventDefault();
+        if (loginRequestPromise) return;
         const login = emailInput.value.trim();
         const password = passwordInput.value;
         showLoginError();
@@ -1872,25 +1886,35 @@
         }
         const email = normalizedLoginEmail(login);
         if (!email) {
-          showLoginError("Невалиден потребител или парола.");
+          showLoginError("Въведете валиден потребител или имейл.");
           return;
         }
 
         setLoginSubmitting(true);
-        try {
-          const { data,error } = await window.clubdeskSupabase.auth.signInWithPassword({email,password});
-          if (error) {
-            const invalidCredentials = error.code === "invalid_credentials" || String(error.message || "").toLowerCase().includes("invalid login credentials");
-            showLoginError(invalidCredentials ? "Невалиден потребител или парола." : "Входът не беше успешен. Опитайте отново.");
-            return;
+        loginRequestPromise = (async () => {
+          try {
+            const { data,error } = await window.clubdeskSupabase.auth.signInWithPassword({email,password});
+            if (error) {
+              const invalidCredentials = error.code === "invalid_credentials" || String(error.message || "").toLowerCase().includes("invalid login credentials");
+              showAuthScreen("login",invalidCredentials ? "Невалиден потребител или парола." : "Входът не беше успешен. Опитайте отново.");
+              return;
+            }
+            localStorage.setItem(LAST_LOGIN_EMAIL_KEY,login);
+            passwordInput.value = "";
+            showLoginError();
+            showAuthScreen("loading");
+            await loadAuthenticatedSession(data.session);
+          } catch (error) {
+            console.error("ClubDesk login error",error);
+            if (!authLoadPromise && !window.clubdeskAuthenticatedUser?.authUser?.id) {
+              showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
+            }
           }
-          localStorage.setItem(LAST_LOGIN_EMAIL_KEY,login);
-          await loadAuthenticatedSession(data.session);
-          passwordInput.value = "";
-        } catch (error) {
-          console.error("ClubDesk login error",error);
-          showLoginError("Входът не беше успешен. Опитайте отново.");
+        })();
+        try {
+          await loginRequestPromise;
         } finally {
+          loginRequestPromise = null;
           setLoginSubmitting(false);
         }
       });
@@ -1908,6 +1932,7 @@
       const { data:authStateData } = window.clubdeskSupabase.auth.onAuthStateChange((event,session) => {
         if (event === "INITIAL_SESSION" && !initialSessionCheckComplete) return;
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+          if (event === "SIGNED_IN" && loginRequestPromise) return;
           window.setTimeout(() => { void loadAuthenticatedSession(session); },0);
         } else if (event === "SIGNED_OUT") {
           window.setTimeout(handleSignedOut,0);
@@ -2021,6 +2046,8 @@
       const requestedRoute=canonicalRoute(route)||"dashboard";
       const validRoute=routeAllowedForAuthenticatedUser(requestedRoute);
       if(validRoute!==requestedRoute&&window.location.hash!==`#${validRoute}`) replaceRouteHash(validRoute);
+      if(validRoute==="dashboard") window.clubdeskEnsurePrivateDashboardScope?.();
+      if(validRoute==="fees") window.clubdeskEnsurePrivateFeesScope?.();
       if (!force&&currentClubDeskRoute===validRoute) return;
       const config=routeConfig[validRoute];
       renderView(config.view);
@@ -2457,7 +2484,7 @@
       onlineGroups = cachedArray(STORAGE_SUPABASE_GROUPS_CACHE);
       onlineAthletes = cachedArray(STORAGE_SUPABASE_ATHLETES_CACHE);
       onlineCoachAccounts = cachedArray(STORAGE_SUPABASE_COACHES_CACHE);
-      onlinePaymentsStore = cachedOnlinePaymentsStore() || {};
+      onlinePaymentsStore = paymentStoreWithinOperationalRange(cachedOnlinePaymentsStore() || {});
       onlineCalendarEvents = cachedOnlineCalendarEvents() || [];
       window.clubdeskGroupsDataSource = onlineGroups.length ? "supabase-cache" : "unavailable";
       window.clubdeskAthletesDataSource = onlineAthletes.length ? "supabase-cache" : "unavailable";
@@ -2639,15 +2666,17 @@
     function cachedOnlineAttendanceStore() {
       const value = readJson(STORAGE_SUPABASE_ATTENDANCE_CACHE,null);
       const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
-      return value && typeof value === "object" && !Array.isArray(value)
+      const store = value && typeof value === "object" && !Array.isArray(value)
         && String(value.clubId || "") === clubId
         && value.store && typeof value.store === "object" && !Array.isArray(value.store)
         ? value.store
         : null;
+      return store ? attendanceStoreWithinOperationalRange(store) : null;
     }
 
     function cacheOnlineAttendance() {
       const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
+      onlineAttendanceStore = attendanceStoreWithinOperationalRange(onlineAttendanceStore);
       localStorage.setItem(STORAGE_SUPABASE_ATTENDANCE_CACHE,JSON.stringify({
         clubId,
         loadedAt:new Date().toISOString(),
@@ -2667,7 +2696,7 @@
       (Array.isArray(sessionRows) ? sessionRows : []).forEach(session => {
         const group = maps.groupUuidToLocal.get(String(session?.group_id || ""));
         const date = String(session?.session_date || "");
-        if (!group || !isValidAttendanceDate(date)) return;
+        if (!group || !isValidAttendanceDate(date) || date < CLUBDESK_ATTENDANCE_START_DATE) return;
         const sourceLocalId = String(session?.source_local_id || `${date}|${group}`);
         const statuses = {};
         (recordsBySession[String(session.id)] || []).forEach(record => {
@@ -2698,7 +2727,8 @@
           if (!membership?.club_id) throw new Error("Missing authenticated club context");
           const {data:sessions,error:sessionsError} = await window.clubdeskSupabase.from("attendance_sessions")
             .select("id,club_id,group_id,session_date,note,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids")
-            .eq("club_id",membership.club_id);
+            .eq("club_id",membership.club_id)
+            .gte("session_date",CLUBDESK_ATTENDANCE_START_DATE);
           if (sessionsError) throw sessionsError;
           const sessionIds = (sessions || []).map(session => String(session.id || "")).filter(Boolean);
           let records = [];
@@ -2713,6 +2743,7 @@
           onlineAttendanceAvailable = true;
           window.clubdeskAttendanceDataSource = "supabase";
           cacheOnlineAttendance();
+          updateDashboardStats();
           setOnlineDataNotice();
           return true;
         } catch (error) {
@@ -2721,6 +2752,7 @@
           onlineAttendanceStore = cached || {};
           onlineAttendanceAvailable = false;
           window.clubdeskAttendanceDataSource = cached ? "supabase-cache" : "unavailable";
+          updateDashboardStats();
           setOnlineDataNotice("Няма връзка със Supabase. Показват се последно заредените присъствия.",true);
           return false;
         } finally {
@@ -2734,11 +2766,12 @@
     function cachedOnlinePaymentsStore() {
       const value = readJson(STORAGE_SUPABASE_PAYMENTS_CACHE,null);
       const clubId = String(window.clubdeskAuthenticatedUser?.membership?.club_id || "");
-      return value && typeof value === "object" && !Array.isArray(value)
+      const store = value && typeof value === "object" && !Array.isArray(value)
         && String(value.clubId || "") === clubId
         && value.store && typeof value.store === "object" && !Array.isArray(value.store)
         ? value.store
         : null;
+      return store ? paymentStoreWithinOperationalRange(store) : null;
     }
 
     function cacheOnlinePayments() {
@@ -2757,7 +2790,7 @@
         const athleteId = maps.athleteUuidToLocal.get(String(row?.athlete_id || ""));
         const month = paymentMonthKey(row?.payment_month);
         const amount = Number(row?.amount);
-        if (!athleteId || !month || !Number.isFinite(amount) || amount < 0) return;
+        if (!athleteId || !month || month < CLUBDESK_FEES_START_MONTH || !Number.isFinite(amount) || amount < 0) return;
         store[month] ||= {};
         store[month][athleteId] = {
           status:amount > 0 ? "paid" : "unpaid",
@@ -2788,6 +2821,7 @@
           onlinePaymentsAvailable = true;
           window.clubdeskPaymentsDataSource = "supabase";
           cacheOnlinePayments();
+          updateDashboardStats();
           setOnlineDataNotice();
           return true;
         } catch (error) {
@@ -2796,6 +2830,7 @@
           onlinePaymentsStore = cached || {};
           onlinePaymentsAvailable = false;
           window.clubdeskPaymentsDataSource = cached ? "supabase-cache" : "unavailable";
+          updateDashboardStats();
           setOnlineDataNotice("Няма връзка със Supabase. Показват се последно заредените такси.",true);
           return false;
         } finally {
@@ -3184,10 +3219,31 @@
       return `${year}-${month}-${day}`;
     }
 
-    const CLUBDESK_FEES_START_MONTH = "2026-08";
+    const CLUBDESK_ATTENDANCE_START_DATE = "2026-09-01";
+    const CLUBDESK_FEES_START_MONTH = "2026-09";
     function getLocalMonthKey(value = new Date()) {
       const date = value instanceof Date ? value : new Date(value);
       return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}`;
+    }
+
+    function paymentStoreWithinOperationalRange(store) {
+      if (!store || typeof store !== "object" || Array.isArray(store)) return {};
+      return Object.fromEntries(Object.entries(store).filter(([month,records]) =>
+        /^\d{4}-\d{2}$/.test(month)
+        && month >= CLUBDESK_FEES_START_MONTH
+        && records && typeof records === "object" && !Array.isArray(records)
+      ));
+    }
+
+    function attendanceStoreWithinOperationalRange(store) {
+      if (!store || typeof store !== "object" || Array.isArray(store)) return {};
+      return Object.fromEntries(Object.entries(store).filter(([key,record]) => {
+        const separator = key.indexOf("|");
+        const date = separator > 0 ? key.slice(0,separator) : "";
+        return date >= CLUBDESK_ATTENDANCE_START_DATE
+          && isValidAttendanceDate(date)
+          && record && typeof record === "object" && !Array.isArray(record);
+      }));
     }
 
     function isValidAttendanceDate(value) {
@@ -3200,7 +3256,12 @@
     }
 
     function isEligibleAttendanceEntry(entry,eligibleIds=null) {
-      return Boolean(entry && entry.date <= getLocalTodayDate() && attendanceRecordHasStatus(entry,eligibleIds));
+      return Boolean(
+        entry
+        && entry.date >= CLUBDESK_ATTENDANCE_START_DATE
+        && entry.date <= getLocalTodayDate()
+        && attendanceRecordHasStatus(entry,eligibleIds)
+      );
     }
 
     let calendarDisplayedMonth = getLocalTodayDate().slice(0,7);
@@ -5634,11 +5695,21 @@
         if (coach.active) return true;
         return coach.id === selectedCoachScope || coach.id === user?.id || (currentUserIsAdmin() && (counts[coach.id] || 0) > 0);
       });
+      const authenticatedMembershipId = String(window.clubdeskAuthenticatedUser?.membership?.id || "").trim();
+      const authenticatedCoach = visibleCoaches.find(coach =>
+        authenticatedMembershipId && String(coach.supabaseMembershipId || "") === authenticatedMembershipId
+      ) || visibleCoaches.find(coach => coach.id === user?.id) || null;
+      const orderedCoaches = authenticatedCoach
+        ? [authenticatedCoach,...visibleCoaches.filter(coach =>
+          coach.id !== authenticatedCoach.id
+          && (!authenticatedMembershipId || String(coach.supabaseMembershipId || "") !== authenticatedMembershipId)
+        )]
+        : visibleCoaches;
       const allItem = `
         <button class="coach-scope-item ${selectedCoachScope === "all" ? "active" : ""}" type="button" data-coach-scope="all">
           <span class="coach-scope-avatar">ВС</span><span class="coach-scope-copy"><strong>Всички в клуба</strong><small>${allAthletes().filter(athlete => !athlete.archived && athlete.active).length} активни</small></span>
         </button>`;
-      container.innerHTML = allItem + visibleCoaches.map(coach => {
+      container.innerHTML = allItem + orderedCoaches.map(coach => {
         const readOnly = !currentUserIsAdmin() && coach.id !== user?.id;
         return `
           <button class="coach-scope-item ${selectedCoachScope === coach.id ? "active" : ""} ${coach.active ? "" : "muted"}" type="button" data-coach-scope="${escapeHtml(coach.id)}">
@@ -5692,6 +5763,7 @@
     }
 
     function refreshCoachScopeViews() {
+      if (currentClubDeskRoute === "dashboard" || currentClubDeskRoute === "fees") ensureAuthenticatedCoachOwnScope();
       clearBulkSelection();
       closeAthleteActionMenu();
       if (!canEditViewedScope()) {
@@ -5704,6 +5776,7 @@
       renderCurrentUserProfile();
       renderCoachScopeContext();
       renderAthleteGroupFilter();
+      renderNewAthleteScopeFields({resetGroup:true});
       renderAttendanceGroupSelectors();
       renderAthleteTable();
       renderAttendance();
@@ -5719,6 +5792,29 @@
       }
       updatePermissionUI();
     }
+
+    function ensureAuthenticatedCoachOwnScope() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role !== "coach") return false;
+      const membershipId = String(membership.id || "").trim();
+      const authenticatedCoach = membershipId
+        ? coaches().find(coach => String(coach.supabaseMembershipId || "").trim() === membershipId)
+        : null;
+      if (!authenticatedCoach || selectedCoachScope === authenticatedCoach.id) return false;
+      selectedCoachScope = authenticatedCoach.id;
+      persistSelectedCoachScope();
+      return true;
+    }
+
+    window.clubdeskEnsurePrivateDashboardScope = function() {
+      if (!ensureAuthenticatedCoachOwnScope()) return;
+      refreshCoachScopeViews();
+    };
+
+    window.clubdeskEnsurePrivateFeesScope = function() {
+      if (!ensureAuthenticatedCoachOwnScope()) return;
+      refreshCoachScopeViews();
+    };
 
     document.getElementById("coachScopeList")?.addEventListener("click",event => {
       const button = event.target.closest("[data-coach-scope]");
@@ -5778,13 +5874,104 @@
       athleteGroupFilterRenderedScope = selectedCoachScope;
     }
 
+    let paymentGroupFilterRenderedScope = null;
+
+    function feesGroupsForSelectedScope() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const allGroupsForAdmin = selectedCoachScope === "all" && membership?.access_role === "admin";
+      const ownerMembershipId = effectiveFeesCoachMembershipId();
+      if (!allGroupsForAdmin && !ownerMembershipId) return [];
+      const seenGroupUuids = new Set();
+      return groups().filter(group => {
+        const groupUuid = String(group.supabaseId || "").trim();
+        if (!groupUuid || seenGroupUuids.has(groupUuid)) return false;
+        if (!allGroupsForAdmin && String(group.leadCoachMembershipId || "") !== ownerMembershipId) return false;
+        seenGroupUuids.add(groupUuid);
+        return true;
+      });
+    }
+
+    function renderPaymentGroupFilter({reset=false}={}) {
+      const select = document.getElementById("paymentGroupFilter");
+      if (!select) return;
+      const scopeChanged = paymentGroupFilterRenderedScope !== selectedCoachScope;
+      const previousGroupUuid = reset || scopeChanged ? "" : String(select.value || "");
+      const available = feesGroupsForSelectedScope();
+      select.innerHTML = available.length
+        ? available.map(group => `<option value="${escapeHtml(group.supabaseId)}">${escapeHtml(group.name)}</option>`).join("")
+        : '<option value="">Няма създадени групи.</option>';
+      select.value = available.some(group => String(group.supabaseId) === previousGroupUuid)
+        ? previousGroupUuid
+        : String(available[0]?.supabaseId || "");
+      select.disabled = !available.length;
+      document.getElementById("downloadPaymentReport")?.toggleAttribute("disabled",!available.length);
+      paymentGroupFilterRenderedScope = selectedCoachScope;
+    }
+
+    function newAthleteCreationContext() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership) return {coach:null,groups:[],reason:"missing-membership"};
+      let coach = null;
+      if (membership.access_role === "coach") {
+        const membershipId = String(membership.id || "").trim();
+        coach = coaches().find(item => String(item.supabaseMembershipId || "") === membershipId) || currentUser();
+      } else if (membership.access_role === "admin" && selectedCoachScope !== "all") {
+        coach = coachById(selectedCoachScope);
+      }
+      const coachMembershipId = String(coach?.supabaseMembershipId || "").trim();
+      const ownedGroups = coachMembershipId
+        ? groups().filter(group => group.active && String(group.leadCoachMembershipId || "") === coachMembershipId)
+        : [];
+      return {
+        coach,
+        coachMembershipId,
+        groups:ownedGroups,
+        reason:coach ? (coachMembershipId ? (ownedGroups.length ? "ready" : "no-groups") : "offline-coach") : "select-coach"
+      };
+    }
+
+    function renderNewAthleteScopeFields({resetGroup=false}={}) {
+      const groupSelect = document.getElementById("newAthleteGroup");
+      const coachSelect = document.getElementById("newAthleteCoach");
+      const coachField = document.getElementById("newAthleteCoachField");
+      const scopeMessage = document.getElementById("newAthleteScopeMessage");
+      const submitButton = document.getElementById("addAthleteSubmit");
+      if (!groupSelect || !coachSelect || !coachField || !scopeMessage || !submitButton) return;
+      const context = newAthleteCreationContext();
+      const previousGroupId = resetGroup ? "" : normalizeGroupId(groupSelect.value);
+      const isAdmin = currentUserIsAdmin();
+
+      coachField.hidden = !isAdmin;
+      coachSelect.disabled = true;
+      coachSelect.innerHTML = context.coach
+        ? `<option value="${escapeHtml(context.coach.id)}">${escapeHtml(context.coach.name)}</option>`
+        : '<option value="">Изберете треньор от прегледа</option>';
+      coachSelect.value = context.coach?.id || "";
+
+      groupSelect.innerHTML = context.groups.length
+        ? context.groups.map(group => `<option value="${escapeHtml(group.id)}">${escapeHtml(groupOptionLabel(group,true))}</option>`).join("")
+        : '<option value="">Няма създадени групи</option>';
+      if (previousGroupId && context.groups.some(group => group.id === previousGroupId)) groupSelect.value = previousGroupId;
+      else groupSelect.value = context.groups[0]?.id || "";
+      groupSelect.disabled = !context.groups.length;
+
+      let message = "";
+      if (context.reason === "select-coach") message = "Изберете треньор, преди да добавите състезател.";
+      else if (context.reason === "offline-coach") message = "Този треньор все още няма онлайн акаунт.";
+      else if (context.reason === "no-groups") message = "Нямате създадена група. Първо създайте група от Настройки.";
+      scopeMessage.textContent = message;
+      scopeMessage.hidden = !message;
+      submitButton.disabled = onlineAthleteCreateInProgress || context.reason !== "ready";
+      updateNewAthleteGroupDefaults();
+    }
+
     function renderGroupSelectors() {
       renderAthleteGroupFilter();
-      setGroupSelectOptions(document.getElementById("newAthleteGroup"),{activeOnly:true});
+      renderNewAthleteScopeFields();
       setGroupSelectOptions(document.getElementById("athleteEditGroup"));
       setGroupSelectOptions(document.getElementById("attendanceGroup"),{includeAge:true});
       setGroupSelectOptions(document.getElementById("attendanceHistoryGroup"));
-      setGroupSelectOptions(document.getElementById("paymentGroupFilter"));
+      renderPaymentGroupFilter();
       if (selectedCoachScope) renderAttendanceGroupSelectors();
     }
 
@@ -6082,8 +6269,7 @@
       renderCoachScopeContext();
       renderSettingsCoaches();
       renderAthleteTable();
-      const newCoachSelect = document.getElementById("newAthleteCoach");
-      setCoachSelectOptions(newCoachSelect,{selectedId:newCoachSelect?.value || currentUserId(),activeOnly:true});
+      renderNewAthleteScopeFields({resetGroup:true});
       if (activeAthleteDetailsId) {
         const athlete = allAthletes().find(item => item.id === activeAthleteDetailsId);
         if (athlete) {
@@ -6308,7 +6494,7 @@
       localStorage.setItem(STORAGE_KIDS_FEE_MIGRATION, "done");
     }
 
-    function monthlyFeeState(athlete, month = DEMO_CURRENT_MONTH) {
+    function monthlyFeeState(athlete, month = CLUBDESK_FEES_START_MONTH) {
       if (athlete.archived) return {text:"Не се дължи",pill:"gray",owesFee:false};
       if (!athlete.active) return {text:"Не се дължи",pill:"gray",owesFee:false};
       if (athlete.feeExempt) return {text:"Без такса",pill:"gray",owesFee:false};
@@ -6442,9 +6628,41 @@
       return `${normalized.toLocaleString("bg-BG",{minimumFractionDigits:0,maximumFractionDigits:2})} €`;
     }
 
+    function selectedPaymentGroup() {
+      const selectedGroupUuid = String(document.getElementById("paymentGroupFilter")?.value || "").trim();
+      return selectedGroupUuid ? groups().find(group => String(group.supabaseId || "") === selectedGroupUuid) || null : null;
+    }
+
+    function effectiveFeesCoachMembershipId() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role === "coach") return String(membership.id || "").trim();
+      if (membership?.access_role === "admin" && selectedCoachScope !== "all") {
+        return String(coachById(selectedCoachScope)?.supabaseMembershipId || "").trim();
+      }
+      return "";
+    }
+
+    function paymentAthletesForSelectedScope() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role === "admin" && selectedCoachScope === "all") return allAthletes();
+      const effectiveCoachMembershipId = effectiveFeesCoachMembershipId();
+      if (!effectiveCoachMembershipId) return [];
+      return allAthletes().filter(athlete => athletePrimaryCoachMembershipId(athlete) === effectiveCoachMembershipId);
+    }
+
     function selectedPaymentAthletes() {
-      const selectedGroup = normalizeGroupId(document.getElementById("paymentGroupFilter")?.value || groups()[0]?.id);
-      return scopedAthletes().filter(athlete => !athlete.archived && athlete.group === selectedGroup);
+      const selectedGroup = selectedPaymentGroup();
+      if (!selectedGroup?.supabaseId) return [];
+      const selectedGroupUuid = String(selectedGroup.supabaseId);
+      return paymentAthletesForSelectedScope().filter(athlete =>
+        !athlete.archived && String(groupById(athlete.group)?.supabaseId || "") === selectedGroupUuid
+      );
+    }
+
+    function paymentEmptyStateMessage() {
+      return selectedPaymentGroup()
+        ? (selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор.")
+        : "Няма създадени групи.";
     }
 
     function paymentMonthTotal(month,athletes=selectedPaymentAthletes(),records=monthlyPayments()) {
@@ -6485,12 +6703,13 @@
               <span class="payment-mobile-currency" aria-hidden="true">€</span>
             </div>
           </div>`;
-      }).join("") : `<div class="payment-mobile-empty">${selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор."}</div>`;
+      }).join("") : `<div class="payment-mobile-empty">${paymentEmptyStateMessage()}</div>`;
     }
 
     function renderPaymentTable() {
       const table = document.getElementById("paymentTable");
       if (!table) return;
+      renderPaymentGroupFilter();
       if (!paymentPeriodInitialized) {
         paymentPeriodOffset = feesCurrentMonthOffset();
         paymentPeriodInitialized = true;
@@ -6533,7 +6752,7 @@
             return `<td class="payment-month-cell ${month === currentMonth ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
           }).join("")}
         </tr>
-      `).join("") : `<tr><td colspan="13" class="empty">${selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор."}</td></tr>`;
+      `).join("") : `<tr><td colspan="13" class="empty">${paymentEmptyStateMessage()}</td></tr>`;
       tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === currentMonth ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,athletes,records))}</td>`).join("")}</tr>`;
 
       const periodLabel = document.getElementById("paymentPeriodLabel");
@@ -6575,8 +6794,12 @@
     }
 
     function downloadPaymentReport() {
-      const groupId = normalizeGroupId(document.getElementById("paymentGroupFilter")?.value || groups()[0]?.id);
-      const groupName = groupById(groupId)?.name || groupId;
+      const selectedGroup = selectedPaymentGroup();
+      if (!selectedGroup?.supabaseId) {
+        if (typeof showToast === "function") showToast("Няма създадени групи.");
+        return;
+      }
+      const groupName = selectedGroup.name;
       const months = visiblePaymentMonths();
       const athletes = selectedPaymentAthletes();
       const records = monthlyPayments();
@@ -7643,6 +7866,19 @@
       const records = monthlyPayments();
       const existingRecord = records[month]?.[athleteId];
       const previousAmount = paymentRecordAmount(existingRecord);
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const athlete = allAthletes().find(item => item.id === athleteId);
+      if (membership?.access_role === "coach") {
+        const membershipId = String(membership.id || "").trim();
+        const athleteGroup = groupById(athlete?.group);
+        const ownsAthlete = athletePrimaryCoachMembershipId(athlete) === membershipId;
+        const ownsGroup = String(athleteGroup?.leadCoachMembershipId || "").trim() === membershipId;
+        if (!ownsAthlete || !ownsGroup) {
+          input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
+          if (typeof showToast === "function") showToast("Нямате право да променяте това плащане.");
+          return false;
+        }
+      }
 
       if (parsed.empty && previousAmount != null && !window.confirm("Сигурни ли сте, че искате да премахнете записаното плащане?")) {
         input.value = formatPaymentCellAmount(previousAmount);
@@ -7656,8 +7892,6 @@
           if (typeof showToast === "function") showToast("Таксите са достъпни само за преглед без връзка със Supabase.");
           return false;
         }
-        const membership = window.clubdeskAuthenticatedUser?.membership;
-        const athlete = allAthletes().find(item => item.id === athleteId);
         const athleteUuid = String(athlete?.supabaseId || attendanceUuidMaps().athleteLocalToUuid.get(athleteId) || "");
         const paymentMonth = normalizePaymentMonth(month);
         if (!membership?.club_id || !membership?.id || !athleteUuid || !paymentMonth) {
@@ -7717,7 +7951,7 @@
           input.dataset.originalValue = input.value;
           input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",!parsed.empty);
           updatePaymentSheetTotals();
-          if (month === DEMO_CURRENT_MONTH) updateDashboardStats();
+          if (month === getLocalMonthKey()) updateDashboardStats();
           setPaymentSaveState("Запазено","saved");
           return true;
         } catch (error) {
@@ -7799,14 +8033,39 @@
     paymentMobileMedia.addEventListener("change",renderPaymentTable);
 
     function updateDashboardStats() {
-      const athletes = scopedAthletes();
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const selectedDashboardCoach = selectedCoachScope === "all" ? null : coachById(selectedCoachScope);
+      const effectiveCoachMembershipId = membership?.access_role === "coach"
+        ? String(membership.id || "").trim()
+        : String(selectedDashboardCoach?.supabaseMembershipId || "").trim();
+      const athletes = membership?.access_role === "admin" && selectedCoachScope === "all"
+        ? allAthletes()
+        : allAthletes().filter(athlete =>
+          Boolean(effectiveCoachMembershipId)
+          && athletePrimaryCoachMembershipId(athlete) === effectiveCoachMembershipId
+        );
       const active = athletes.filter(a => !a.archived && a.active).length;
-      const monthRecords = monthlyPayments()[DEMO_CURRENT_MONTH] || {};
+      const dashboardPaymentMonth = getLocalMonthKey();
+      const dashboardMonthIsOperational = dashboardPaymentMonth >= CLUBDESK_FEES_START_MONTH;
+      const monthRecords = dashboardMonthIsOperational
+        && onlinePaymentsAvailable
+        && window.clubdeskPaymentsDataSource === "supabase"
+        ? (onlinePaymentsStore[dashboardPaymentMonth] || {})
+        : {};
       const scopedIds = new Set(athletes.filter(athlete => !athlete.archived).map(athlete => athlete.id));
       const collected = Object.entries(monthRecords).reduce((sum,[athleteId,record]) => scopedIds.has(athleteId) ? sum + (paymentRecordAmount(record) ?? 0) : sum,0);
-      const savedSessions = attendanceEntries().filter(entry =>
-        entry.date.startsWith(DEMO_CURRENT_MONTH) && isEligibleAttendanceEntry(entry,scopedIds)
-      ).length;
+      const dashboardAttendanceMonth = getLocalMonthKey();
+      const attendanceMonthIsOperational = `${dashboardAttendanceMonth}-01` >= CLUBDESK_ATTENDANCE_START_DATE;
+      const savedSessions = attendanceMonthIsOperational
+        && onlineAttendanceAvailable
+        && window.clubdeskAttendanceDataSource === "supabase"
+        ? attendanceEntries().filter(entry =>
+          entry.date.slice(0,7) === dashboardAttendanceMonth
+          && entry.date <= getLocalTodayDate()
+          && (membership?.access_role === "admin" && selectedCoachScope === "all"
+            || historicalAttendanceRosterIds(entry).some(athleteId => scopedIds.has(athleteId)))
+        ).length
+        : 0;
 
       const activeEl = document.getElementById("dashboardActiveAthletes");
       const collectedEl = document.getElementById("dashboardCollectedAmount");
@@ -7820,7 +8079,6 @@
     const modal = document.getElementById("athleteModal");
     const form = document.getElementById("athleteForm");
     const groupInput = document.getElementById("newAthleteGroup");
-    const coachInput = document.getElementById("newAthleteCoach");
 
     function resetNewAthleteValidation() {
       ["newAthleteName","newAthleteYear","newAthleteGroup"].forEach(fieldId => {
@@ -7839,24 +8097,13 @@
     }
 
     function resetNewAthleteForm() {
-      const selectedGroup = normalizeGroupId(groupInput.value);
       form.reset();
-      if ([...groupInput.options].some(option => option.value === selectedGroup)) groupInput.value = selectedGroup;
       ["newAthleteName","newAthleteYear","newAthleteEvents","newAthletePhone"].forEach(id => {
         document.getElementById(id).value = "";
       });
       document.getElementById("newAthleteFeeExempt").checked = false;
       resetNewAthleteValidation();
-      const user = currentUser();
-      if (currentUserIsAdmin()) {
-        coachInput.disabled = false;
-        setCoachSelectOptions(coachInput,{selectedId:user?.id || CURRENT_COACH_ID,activeOnly:true});
-      } else {
-        coachInput.innerHTML = user ? `<option value="${escapeHtml(user.id)}">${escapeHtml(user.name)}</option>` : '<option value="">Не е определен</option>';
-        coachInput.value = user?.id || "";
-        coachInput.disabled = true;
-      }
-      updateNewAthleteGroupDefaults();
+      renderNewAthleteScopeFields({resetGroup:true});
     }
 
     function openModal() {
@@ -7917,6 +8164,15 @@
       const athleteName = nameInput.value.trim();
       const selectedGroup = normalizeGroupId(groupInput.value);
       const yearValue = yearInput.value.trim();
+      const creationContext = newAthleteCreationContext();
+      if (!creationContext.coach) {
+        if (typeof showToast === "function") showToast("Изберете треньор, преди да добавите състезател.");
+        return;
+      }
+      if (!creationContext.groups.length) {
+        if (typeof showToast === "function") showToast("Нямате създадена група. Първо създайте група от Настройки.");
+        return;
+      }
       let firstInvalidField = null;
       if (!athleteName) firstInvalidField = showNewAthleteFieldError("newAthleteName");
       if (!selectedGroup) firstInvalidField ||= showNewAthleteFieldError("newAthleteGroup");
@@ -7928,8 +8184,8 @@
         return;
       }
       const enteredDefaultFee = Number(document.getElementById("newAthleteDefaultFee").value);
-      const primaryCoachId = currentUserIsAdmin() ? coachInput.value : currentUserId();
-      const primaryCoach = coachById(primaryCoachId);
+      const primaryCoachId = creationContext.coach.id;
+      const primaryCoach = creationContext.coach;
       if (!primaryCoach) {
         if (typeof showToast === "function") showToast("Не е определен основен треньор.");
         return;
@@ -7945,6 +8201,15 @@
       }
       const membership = window.clubdeskAuthenticatedUser?.membership;
       if (!membership?.club_id) return;
+      const primaryCoachMembershipId = String(primaryCoach.supabaseMembershipId || "");
+      const groupOwnerMembershipId = String(selectedOnlineGroup.leadCoachMembershipId || "");
+      const coachOwnsSelection = primaryCoachMembershipId && groupOwnerMembershipId === primaryCoachMembershipId;
+      const authenticatedCoachMatches = membership.access_role !== "coach" || primaryCoachMembershipId === String(membership.id || "");
+      if (!coachOwnsSelection || !authenticatedCoachMatches) {
+        if (typeof showToast === "function") showToast("Избраната група не принадлежи на този треньор.");
+        renderNewAthleteScopeFields({resetGroup:true});
+        return;
+      }
       const sourceLocalId = createOnlineSourceLocalId("athlete");
       const athlete = {
         id:sourceLocalId,
@@ -7989,7 +8254,7 @@
         if (typeof showToast === "function") showToast(error.userMessage || "Състезателят не беше добавен. Опитайте отново.");
       } finally {
         onlineAthleteCreateInProgress = false;
-        if (submitButton) submitButton.disabled = false;
+        renderNewAthleteScopeFields();
       }
     });
 
@@ -8125,6 +8390,7 @@
     }
 
     function attendanceRecord(date,group) {
+      if (!isValidAttendanceDate(date) || date < CLUBDESK_ATTENDANCE_START_DATE) return null;
       const store = attendanceStore();
       const normalizedGroup = normalizeGroupId(group);
       return store[`${date}|${normalizedGroup}`]
@@ -8149,7 +8415,7 @@
         const date = key.slice(0,separator);
         const rawGroup = key.slice(separator + 1);
         const group = normalizeGroupId(rawGroup);
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !group) return;
+        if (!isValidAttendanceDate(date) || date < CLUBDESK_ATTENDANCE_START_DATE || !group) return;
         const normalizedKey = `${date}|${group}`;
         if (!normalizedEntries.has(normalizedKey) || rawGroup === group) {
           normalizedEntries.set(normalizedKey,{
@@ -8211,10 +8477,27 @@
     }
 
     function formatAttendanceMonth(month) {
-      const labels = {"2026-06":"юни 2026","2026-07":"юли 2026","2026-08":"август 2026"};
-      if (labels[month]) return labels[month];
       const date = new Date(`${month}-01T12:00:00`);
       return new Intl.DateTimeFormat("bg-BG",{month:"long",year:"numeric"}).format(date);
+    }
+
+    function attendanceHistoryMonths() {
+      const startMonth = CLUBDESK_ATTENDANCE_START_DATE.slice(0,7);
+      const currentMonth = getLocalMonthKey();
+      const endMonth = currentMonth < startMonth ? startMonth : currentMonth;
+      const [startYear,startNumber] = startMonth.split("-").map(Number);
+      const [endYear,endNumber] = endMonth.split("-").map(Number);
+      const count = (endYear-startYear)*12 + endNumber-startNumber + 1;
+      return Array.from({length:Math.max(1,count)},(_,index) => shiftPaymentMonth(startMonth,index));
+    }
+
+    function syncAttendanceHistoryMonthOptions() {
+      const select = document.getElementById("attendanceHistoryMonth");
+      if (!select) return;
+      const months = attendanceHistoryMonths();
+      const previous = String(select.value || "");
+      select.innerHTML = months.map(month => `<option value="${month}">${escapeHtml(formatAttendanceMonth(month))}</option>`).join("");
+      select.value = months.includes(previous) ? previous : months.at(-1);
     }
 
     function athleteLatestAttendanceStats(athleteId) {
@@ -8298,6 +8581,7 @@
     }
 
     function renderAttendanceHistory() {
+      syncAttendanceHistoryMonthOptions();
       const group = document.getElementById("attendanceHistoryGroup")?.value;
       const month = document.getElementById("attendanceHistoryMonth")?.value;
       const tbody = document.querySelector("#attendanceHistoryTable tbody");
@@ -8845,6 +9129,9 @@
     document.getElementById("dashboardDownloadBackup")?.addEventListener("click", () => document.getElementById("downloadClubDeskBackup")?.click());
 
     async function saveAttendanceToSupabase(draft,savedRecord) {
+      if (!isValidAttendanceDate(draft?.date) || draft.date < CLUBDESK_ATTENDANCE_START_DATE) {
+        throw new Error("Attendance date is before the ClubDesk operational start");
+      }
       const membership = window.clubdeskAuthenticatedUser?.membership;
       const maps = attendanceUuidMaps();
       const groupUuid = maps.groupLocalToUuid.get(normalizeGroupId(draft.group));
@@ -8914,6 +9201,10 @@
 
     document.getElementById("saveAttendance")?.addEventListener("click", async () => {
       if (!requireAttendanceEditAccess()) return;
+      if (!isValidAttendanceDate(attendanceDate.value) || attendanceDate.value < CLUBDESK_ATTENDANCE_START_DATE) {
+        if (typeof showToast === "function") showToast("Присъствията в ClubDesk започват от септември 2026.");
+        return;
+      }
       const draft = initializeAttendanceSessionDraft();
       if (!draft.sessionMode) return;
       if (draft.sessionMode === "selected-athletes" && !draft.rosterAthleteIds.length) {
