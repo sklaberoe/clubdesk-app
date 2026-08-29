@@ -231,7 +231,7 @@
     tbody tr:hover{background:#fafcfd}
     #athleteTable tbody tr{cursor:pointer;transition:background .18s ease,box-shadow .18s ease}
     #athleteTable tbody tr:hover{background:#f7f9fb;box-shadow:inset 3px 0 0 #d5dbe3}
-    #athleteTable{table-layout:fixed;min-width:900px}
+    #athleteTable{table-layout:fixed;min-width:960px}
     #athleteTable col.athlete-col-select{width:4%}
     #athleteTable col.athlete-col-person{width:27%}
     #athleteTable col.athlete-col-group{width:16%}
@@ -241,6 +241,18 @@
     #athleteTable col.athlete-col-actions{width:7%}
     #athleteTable th{font-size:12px;font-weight:700;letter-spacing:.04em}
     #athleteTable th,#athleteTable td{vertical-align:middle}
+    @media(min-width:769px){
+      #athleteTable{display:table}
+      #athleteTable colgroup{display:table-column-group}
+      #athleteTable thead{display:table-header-group}
+      #athleteTable tbody{display:table-row-group}
+      #athleteTable tr{display:table-row}
+      #athleteTable th,#athleteTable td{display:table-cell;position:static}
+      #athleteTable th{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #athleteTable th.athlete-person-cell{padding-right:24px}
+      #athleteTable th.athlete-group-cell{padding-left:20px}
+      #athleteTable th.athlete-action-cell{padding-right:4px;padding-left:4px;text-align:right}
+    }
     #athleteTable tbody tr{height:68px}
     #athleteTable .person strong{font-size:15px;font-weight:700}
     #athleteTable .person span{margin-top:3px;font-size:12px;line-height:1.4}
@@ -1067,12 +1079,12 @@
                 <thead>
                   <tr>
                     <th class="athlete-select-cell"><input class="athlete-select-all" id="selectAllVisibleAthletes" type="checkbox" aria-label="Избери всички видими състезатели" /></th>
-                    <th>Състезател</th>
-                    <th>Група</th>
-                    <th>Треньор</th>
-                    <th>Телефон на родител</th>
-                    <th>Статус</th>
-                    <th>Действия</th>
+                    <th class="athlete-person-cell">Състезател</th>
+                    <th class="athlete-group-cell">Група</th>
+                    <th class="athlete-coach-cell">Треньор</th>
+                    <th class="athlete-phone-cell">Телефон на родител</th>
+                    <th class="athlete-status-cell">Статус</th>
+                    <th class="athlete-action-cell">Действия</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
@@ -1760,6 +1772,56 @@
       let authRequestVersion = 0;
       let authenticatedAppUserId = "";
       let loginRequestPromise = null;
+      let loginInProgress = false;
+      let currentLoginAttemptId = 0;
+      let successfulLoginAttemptId = 0;
+      let logoutPromise = null;
+      let logoutInProgress = false;
+      let ignoreSignedInAfterLogout = false;
+
+      function authDebug(event,details) {
+        if (details) console.debug(`[ClubDesk Auth] ${event}`,details);
+        else console.debug(`[ClubDesk Auth] ${event}`);
+      }
+
+      function safeAuthErrorDetails(error) {
+        return {
+          code:String(error?.code || "unknown"),
+          status:Number.isFinite(Number(error?.status)) ? Number(error.status) : null
+        };
+      }
+
+      function signInErrorType(error) {
+        const code = String(error?.code || "").toLowerCase();
+        const status = Number(error?.status);
+        const message = String(error?.message || "").trim().toLowerCase();
+        const isInvalidCredentials = code === "invalid_credentials"
+          || (status === 400 && message === "invalid login credentials");
+        return isInvalidCredentials ? "invalid-credentials" : "network";
+      }
+
+      function isCurrentLoginAttempt(attemptId) {
+        return loginInProgress && attemptId === currentLoginAttemptId;
+      }
+
+      async function successfulSessionWon(attemptId) {
+        if (!isCurrentLoginAttempt(attemptId)) return true;
+        if (successfulLoginAttemptId === attemptId || window.clubdeskAuthenticatedUser?.authUser?.id) {
+          if (authLoadPromise) await authLoadPromise;
+          return true;
+        }
+        try {
+          const { data } = await window.clubdeskSupabase.auth.getSession();
+          if (!isCurrentLoginAttempt(attemptId) || !data?.session?.user?.id) return !isCurrentLoginAttempt(attemptId);
+          successfulLoginAttemptId = attemptId;
+          showLoginError();
+          showAuthScreen("loading");
+          await loadAuthenticatedSession(data.session);
+          return true;
+        } catch {
+          return !isCurrentLoginAttempt(attemptId);
+        }
+      }
 
       function showLoginError(message="") {
         loginError.textContent = message;
@@ -1801,6 +1863,7 @@
 
       function handleSignedOut() {
         resetAuthenticatedRuntime();
+        successfulLoginAttemptId = 0;
         passwordInput.value = "";
         document.getElementById("testUserMenu")?.setAttribute("hidden","");
         document.getElementById("currentUserMenuButton")?.setAttribute("aria-expanded","false");
@@ -1813,8 +1876,12 @@
           handleSignedOut();
           return Promise.resolve(false);
         }
-        if (authLoadUserId === userId && authLoadPromise) return authLoadPromise;
+        if (authLoadUserId === userId && authLoadPromise) {
+          authDebug("INIT_REUSED");
+          return authLoadPromise;
+        }
         if (authenticatedAppUserId === userId && window.clubdeskAuthenticatedUser?.authUser?.id === userId) {
+          authDebug("INIT_REUSED");
           window.clubdeskApplyAccessRoleUI?.();
           window.ClubDeskRouter?.applyCurrentRoute({force:true});
           showAuthScreen("authenticated");
@@ -1825,6 +1892,7 @@
         const requestVersion = ++authRequestVersion;
         authLoadUserId = userId;
         authLoadPromise = (async () => {
+          authDebug("INIT_START");
           showLoginError();
           showAuthScreen("loading");
           setLoginSubmitting(true);
@@ -1856,6 +1924,7 @@
             authenticatedAppUserId = userId;
             window.clubdeskRefreshAuthenticatedProfile?.();
             showAuthScreen("authenticated");
+            authDebug("INIT_SUCCESS");
             return true;
           } catch (error) {
             if (requestVersion !== authRequestVersion) return false;
@@ -1876,7 +1945,7 @@
 
       loginForm.addEventListener("submit",async event => {
         event.preventDefault();
-        if (loginRequestPromise) return;
+        if (loginInProgress || loginRequestPromise) return;
         const login = emailInput.value.trim();
         const password = passwordInput.value;
         showLoginError();
@@ -1890,51 +1959,93 @@
           return;
         }
 
+        const attemptId = ++currentLoginAttemptId;
+        loginInProgress = true;
+        successfulLoginAttemptId = 0;
+        ignoreSignedInAfterLogout = false;
+        authDebug("LOGIN_SUBMIT");
         setLoginSubmitting(true);
         loginRequestPromise = (async () => {
           try {
             const { data,error } = await window.clubdeskSupabase.auth.signInWithPassword({email,password});
+            if (!isCurrentLoginAttempt(attemptId)) return;
             if (error) {
-              const invalidCredentials = error.code === "invalid_credentials" || String(error.message || "").toLowerCase().includes("invalid login credentials");
-              showAuthScreen("login",invalidCredentials ? "Невалиден потребител или парола." : "Входът не беше успешен. Опитайте отново.");
+              authDebug("SIGN_IN_ERROR",safeAuthErrorDetails(error));
+              if (await successfulSessionWon(attemptId)) return;
+              const errorType = signInErrorType(error);
+              showAuthScreen("login",errorType === "invalid-credentials"
+                ? "Невалиден потребител или парола."
+                : "Връзката със сървъра не можа да бъде установена. Опитайте отново.");
               return;
             }
+            successfulLoginAttemptId = attemptId;
+            authDebug("SIGN_IN_SUCCESS");
             localStorage.setItem(LAST_LOGIN_EMAIL_KEY,login);
             passwordInput.value = "";
             showLoginError();
             showAuthScreen("loading");
             await loadAuthenticatedSession(data.session);
           } catch (error) {
-            console.error("ClubDesk login error",error);
-            if (!authLoadPromise && !window.clubdeskAuthenticatedUser?.authUser?.id) {
-              showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
+            if (!isCurrentLoginAttempt(attemptId)) return;
+            authDebug("SIGN_IN_ERROR",safeAuthErrorDetails(error));
+            if (await successfulSessionWon(attemptId)) return;
+            if (!authLoadPromise) {
+              showAuthScreen("login","Връзката със сървъра не можа да бъде установена. Опитайте отново.");
             }
           }
         })();
         try {
           await loginRequestPromise;
         } finally {
-          loginRequestPromise = null;
-          setLoginSubmitting(false);
+          if (attemptId === currentLoginAttemptId) {
+            loginRequestPromise = null;
+            loginInProgress = false;
+            if (!document.body.classList.contains("auth-pending")) setLoginSubmitting(false);
+          }
         }
       });
 
       window.clubdeskSignOut = async () => {
-        try {
-          const { error } = await window.clubdeskSupabase.auth.signOut({scope:"local"});
-          if (error) throw error;
-          handleSignedOut();
-        } catch (error) {
-          console.error("ClubDesk logout error",error);
-        }
+        if (logoutPromise) return logoutPromise;
+        logoutInProgress = true;
+        ignoreSignedInAfterLogout = true;
+        currentLoginAttemptId += 1;
+        loginInProgress = false;
+        loginRequestPromise = null;
+        showLoginError();
+        setLoginSubmitting(false);
+        authDebug("LOGOUT");
+        logoutPromise = (async () => {
+          try {
+            const { error } = await window.clubdeskSupabase.auth.signOut({scope:"local"});
+            if (error) throw error;
+            handleSignedOut();
+          } catch (error) {
+            ignoreSignedInAfterLogout = false;
+            console.error("ClubDesk logout error",safeAuthErrorDetails(error));
+          } finally {
+            logoutInProgress = false;
+            logoutPromise = null;
+          }
+        })();
+        return logoutPromise;
       };
 
       const { data:authStateData } = window.clubdeskSupabase.auth.onAuthStateChange((event,session) => {
+        if (event === "INITIAL_SESSION") authDebug("INITIAL_SESSION");
+        if (event === "SIGNED_IN") authDebug("SIGNED_IN");
         if (event === "INITIAL_SESSION" && !initialSessionCheckComplete) return;
         if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-          if (event === "SIGNED_IN" && loginRequestPromise) return;
+          if (logoutInProgress || ignoreSignedInAfterLogout) return;
+          if (event === "SIGNED_IN" && loginInProgress) {
+            successfulLoginAttemptId = currentLoginAttemptId;
+            showLoginError();
+            showAuthScreen("loading");
+          }
           window.setTimeout(() => { void loadAuthenticatedSession(session); },0);
         } else if (event === "SIGNED_OUT") {
+          if (logoutInProgress) return;
+          if (loginInProgress) return;
           window.setTimeout(handleSignedOut,0);
         }
       });
@@ -1950,8 +2061,8 @@
           await loadAuthenticatedSession(data.session);
         } catch (error) {
           initialSessionCheckComplete = true;
-          console.error("ClubDesk Supabase connection error",error);
-          showAuthScreen("login","Входът не беше успешен. Опитайте отново.");
+          console.error("ClubDesk Supabase connection error",safeAuthErrorDetails(error));
+          showAuthScreen("login","Връзката със сървъра не можа да бъде установена. Опитайте отново.");
         }
       },{once:true});
     })();
