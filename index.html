@@ -521,6 +521,15 @@
     .payment-summary-item strong{font-size:16px}
     .payment-sheet-toolbar{align-items:center}
     .payment-sheet-toolbar .toolbar-left{width:100%}
+    .payment-athlete-search{position:relative;display:flex;align-items:center;width:250px;min-width:220px;max-width:280px;height:40px;border:1px solid var(--line);border-radius:9px;background:#fff;box-sizing:border-box;transition:border-color .18s ease,box-shadow .18s ease}
+    .payment-athlete-search:focus-within{border-color:rgba(217,164,65,.68);box-shadow:0 0 0 3px rgba(217,164,65,.12)}
+    .payment-athlete-search-icon{display:grid;place-items:center;flex:0 0 34px;color:var(--muted);font-size:13px;pointer-events:none}
+    .payment-athlete-search input{flex:1;min-width:0;width:100%;height:100%;padding:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit;font-size:13px}
+    .payment-athlete-search input::placeholder{color:#98a2b3}
+    .payment-search-clear{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;margin:0 2px 0 0;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:19px;line-height:1;cursor:pointer}
+    .payment-search-clear:hover{background:#f1f4f7;color:var(--text)}
+    .payment-search-clear[hidden]{display:none}
+    .payment-search-mobile{display:none}
     .payment-period-nav{display:flex;align-items:center;gap:7px}
     .payment-period-nav button{width:36px;height:36px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:17px;font-weight:900}
     .payment-period-nav span{min-width:132px;text-align:center;color:var(--muted);font-size:10px;font-weight:900}
@@ -802,6 +811,9 @@
       #payments #paymentCurrentMonth,#payments #downloadPaymentReport{width:100%;min-height:44px;padding:0 10px}
       #payments .payment-current-summary{align-items:flex-start;flex-direction:column;gap:5px;padding:2px 1px 12px;font-size:13px}
       #payments .payment-save-state{min-width:0;text-align:left}
+      #payments .payment-search-desktop{display:none}
+      #payments .payment-search-mobile{display:flex;width:100%;min-width:0;max-width:none;min-height:44px;margin:0 0 12px}
+      #payments .payment-search-mobile input{font-size:16px}
       .payment-desktop-view{display:none}
       .payment-mobile-view{display:block;min-width:0}
       #calendar{min-width:0;padding-bottom:72px}
@@ -1214,6 +1226,11 @@
               <select class="filter-select" id="paymentGroupFilter">
                 <option value="">Няма създадени групи.</option>
               </select>
+              <div class="payment-athlete-search payment-search-desktop" role="search">
+                <span class="payment-athlete-search-icon" aria-hidden="true">⌕</span>
+                <input id="paymentAthleteSearchDesktop" data-payment-athlete-search type="text" inputmode="search" autocomplete="off" aria-label="Търси състезател" placeholder="Търси състезател...">
+                <button class="payment-search-clear" data-payment-search-clear type="button" aria-label="Изчисти търсенето" title="Изчисти търсенето" hidden>×</button>
+              </div>
               <div class="payment-period-nav" aria-label="Навигация по периоди">
                 <button id="paymentPreviousPeriod" type="button" aria-label="Предишен период">‹</button>
                 <span id="paymentPeriodLabel"></span>
@@ -1227,6 +1244,12 @@
           <div class="payment-current-summary">
             <span id="paymentCurrentSummary">Събрано за юли 2026: 0 €</span>
             <span class="payment-save-state" id="paymentSaveState" aria-live="polite"></span>
+          </div>
+
+          <div class="payment-athlete-search payment-search-mobile" role="search">
+            <span class="payment-athlete-search-icon" aria-hidden="true">⌕</span>
+            <input id="paymentAthleteSearchMobile" data-payment-athlete-search type="text" inputmode="search" autocomplete="off" aria-label="Търси състезател" placeholder="Търси състезател...">
+            <button class="payment-search-clear" data-payment-search-clear type="button" aria-label="Изчисти търсенето" title="Изчисти търсенето" hidden>×</button>
           </div>
 
           <div class="card table-card payment-desktop-view">
@@ -5986,6 +6009,7 @@
     }
 
     let paymentGroupFilterRenderedScope = null;
+    let paymentAthleteSearch = "";
 
     function feesGroupsForSelectedScope() {
       const membership = window.clubdeskAuthenticatedUser?.membership;
@@ -6006,6 +6030,7 @@
       const select = document.getElementById("paymentGroupFilter");
       if (!select) return;
       const scopeChanged = paymentGroupFilterRenderedScope !== selectedCoachScope;
+      if (scopeChanged && paymentAthleteSearch) setPaymentAthleteSearch("",{render:false});
       const previousGroupUuid = reset || scopeChanged ? "" : String(select.value || "");
       const available = feesGroupsForSelectedScope();
       select.innerHTML = available.length
@@ -6770,10 +6795,41 @@
       );
     }
 
+    function normalizePaymentAthleteSearch(value) {
+      return String(value || "").trim().normalize("NFC").toLocaleLowerCase("bg-BG");
+    }
+
+    function filteredPaymentAthletes(athletes=selectedPaymentAthletes()) {
+      const query = normalizePaymentAthleteSearch(paymentAthleteSearch);
+      if (!query) return athletes;
+      return athletes.filter(athlete => normalizePaymentAthleteSearch(athlete.name).includes(query));
+    }
+
+    function syncPaymentAthleteSearchControls() {
+      document.querySelectorAll("[data-payment-athlete-search]").forEach(input => {
+        if (input.value !== paymentAthleteSearch) input.value = paymentAthleteSearch;
+      });
+      document.querySelectorAll("[data-payment-search-clear]").forEach(button => {
+        button.hidden = !paymentAthleteSearch;
+      });
+    }
+
+    function setPaymentAthleteSearch(value,{render=true}={}) {
+      paymentAthleteSearch = String(value ?? "");
+      syncPaymentAthleteSearchControls();
+      if (render) renderPaymentTable();
+    }
+
     function paymentEmptyStateMessage() {
       return selectedPaymentGroup()
         ? (selectedCoachScope === "all" ? "Няма състезатели в избраната група." : "Няма състезатели, свързани с този треньор.")
         : "Няма създадени групи.";
+    }
+
+    function visiblePaymentEmptyStateMessage() {
+      return normalizePaymentAthleteSearch(paymentAthleteSearch)
+        ? "Няма намерен състезател."
+        : paymentEmptyStateMessage();
     }
 
     function paymentMonthTotal(month,athletes=selectedPaymentAthletes(),records=monthlyPayments()) {
@@ -6814,7 +6870,7 @@
               <span class="payment-mobile-currency" aria-hidden="true">€</span>
             </div>
           </div>`;
-      }).join("") : `<div class="payment-mobile-empty">${paymentEmptyStateMessage()}</div>`;
+      }).join("") : `<div class="payment-mobile-empty">${visiblePaymentEmptyStateMessage()}</div>`;
     }
 
     function renderPaymentTable() {
@@ -6827,11 +6883,13 @@
       }
       paymentPeriodOffset = Math.max(0,Number(paymentPeriodOffset) || 0);
       const months = visiblePaymentMonths();
-      const athletes = selectedPaymentAthletes();
+      const groupAthletes = selectedPaymentAthletes();
+      const athletes = filteredPaymentAthletes(groupAthletes);
       const records = monthlyPayments();
       const thead = table.querySelector("thead");
       const tbody = table.querySelector("tbody");
       const tfoot = table.querySelector("tfoot");
+      syncPaymentAthleteSearchControls();
 
       if (paymentMobileMedia.matches) {
         thead.innerHTML = "";
@@ -6863,8 +6921,8 @@
             return `<td class="payment-month-cell ${month === currentMonth ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
           }).join("")}
         </tr>
-      `).join("") : `<tr><td colspan="13" class="empty">${paymentEmptyStateMessage()}</td></tr>`;
-      tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === currentMonth ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,athletes,records))}</td>`).join("")}</tr>`;
+      `).join("") : `<tr><td colspan="13" class="empty">${visiblePaymentEmptyStateMessage()}</td></tr>`;
+      tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === currentMonth ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,groupAthletes,records))}</td>`).join("")}</tr>`;
 
       const periodLabel = document.getElementById("paymentPeriodLabel");
       if (periodLabel) periodLabel.textContent = `${paymentMonthShortLabel(months[0])} – ${paymentMonthShortLabel(months[months.length - 1])}`;
@@ -8136,7 +8194,19 @@
     }
     bindPaymentInputContainer(paymentTable);
     bindPaymentInputContainer(paymentMobileList);
-    document.getElementById("paymentGroupFilter")?.addEventListener("change",renderPaymentTable);
+    document.getElementById("paymentGroupFilter")?.addEventListener("change",() => {
+      setPaymentAthleteSearch("",{render:false});
+      renderPaymentTable();
+    });
+    document.querySelectorAll("[data-payment-athlete-search]").forEach(input => {
+      input.addEventListener("input",() => setPaymentAthleteSearch(input.value));
+    });
+    document.querySelectorAll("[data-payment-search-clear]").forEach(button => {
+      button.addEventListener("click",() => {
+        setPaymentAthleteSearch("");
+        button.closest(".payment-athlete-search")?.querySelector("[data-payment-athlete-search]")?.focus();
+      });
+    });
     document.getElementById("paymentPreviousPeriod")?.addEventListener("click",() => { paymentPeriodOffset = Math.max(0,paymentPeriodOffset - (paymentMobileMedia.matches ? 1 : 10)); renderPaymentTable(); });
     document.getElementById("paymentNextPeriod")?.addEventListener("click",() => { paymentPeriodOffset += paymentMobileMedia.matches ? 1 : 10; renderPaymentTable(); });
     document.getElementById("paymentCurrentMonth")?.addEventListener("click",() => { paymentPeriodOffset = feesCurrentMonthOffset(); renderPaymentTable(); });
