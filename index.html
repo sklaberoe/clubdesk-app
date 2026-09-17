@@ -2127,19 +2127,24 @@
     };
     let currentClubDeskRoute = "";
 
+    function canAccessAttendanceModule(){
+      const accessRole = window.clubdeskAuthenticatedUser?.membership?.access_role;
+      return accessRole === "admin" || accessRole === "coach";
+    }
+
     function authenticatedUserIsCoach(){
       return window.clubdeskAuthenticatedUser?.membership?.access_role === "coach";
     }
 
     function routeAllowedForAuthenticatedUser(route){
-      return authenticatedUserIsCoach() && (route === "attendance/marking" || route === "attendance/history")
+      return !canAccessAttendanceModule() && (route === "attendance/marking" || route === "attendance/history")
         ? "dashboard"
         : route;
     }
 
     window.clubdeskApplyAccessRoleUI = function(){
       const coachMode = authenticatedUserIsCoach();
-      document.getElementById("attendanceNavItem")?.toggleAttribute("hidden",coachMode);
+      document.getElementById("attendanceNavItem")?.toggleAttribute("hidden",!canAccessAttendanceModule());
       document.getElementById("dashboardAttendanceAction")?.toggleAttribute("hidden",coachMode);
       document.getElementById("dashboardAttendanceSummary")?.toggleAttribute("hidden",coachMode);
       document.getElementById("dashboardOpenFees")?.toggleAttribute("hidden",!coachMode);
@@ -2182,6 +2187,7 @@
       if(validRoute!==requestedRoute&&window.location.hash!==`#${validRoute}`) replaceRouteHash(validRoute);
       if(validRoute==="dashboard") window.clubdeskEnsurePrivateDashboardScope?.();
       if(validRoute==="fees") window.clubdeskEnsurePrivateFeesScope?.();
+      if(validRoute==="attendance/marking"||validRoute==="attendance/history") window.clubdeskEnsurePrivateAttendanceScope?.();
       if (!force&&currentClubDeskRoute===validRoute) return;
       const config=routeConfig[validRoute];
       renderView(config.view);
@@ -2818,6 +2824,42 @@
       }));
     }
 
+    function authenticatedUserIsAttendanceCoach() {
+      return window.clubdeskAuthenticatedUser?.membership?.access_role === "coach";
+    }
+
+    function attendanceOwnedGroups() {
+      if (!authenticatedUserIsAttendanceCoach()) return [];
+      const membershipId = String(window.clubdeskAuthenticatedUser?.membership?.id || "");
+      return groups().filter(group => String(group.leadCoachMembershipId || "") === membershipId);
+    }
+
+    function attendanceCoachOwnsGroup(groupId) {
+      if (!authenticatedUserIsAttendanceCoach()) return false;
+      const group = groupById(groupId);
+      const membershipId = String(window.clubdeskAuthenticatedUser?.membership?.id || "");
+      return Boolean(group?.supabaseId && String(group.leadCoachMembershipId || "") === membershipId);
+    }
+
+    function attendanceAllowedAthletes(groupId) {
+      if (!attendanceCoachOwnsGroup(groupId)) return [];
+      const membershipId = String(window.clubdeskAuthenticatedUser?.membership?.id || "");
+      const selectedGroupUuid = String(groupById(groupId)?.supabaseId || "");
+      return allAthletes().filter(athlete => {
+        const athleteGroupUuid = String(groupById(athlete.group)?.supabaseId || "");
+        return !athlete.archived
+          && athlete.status === "active"
+          && athleteGroupUuid === selectedGroupUuid
+          && athletePrimaryCoachMembershipId(athlete) === membershipId;
+      });
+    }
+
+    function attendanceAthletesForGroupRoster(groupId) {
+      return authenticatedUserIsAttendanceCoach()
+        ? attendanceAllowedAthletes(groupId)
+        : activeClubAthletes().filter(athlete => athlete.group === groupId);
+    }
+
     function mapRemoteAttendanceStore(sessionRows,recordRows) {
       const maps = attendanceUuidMaps();
       const recordsBySession = (Array.isArray(recordRows) ? recordRows : []).reduce((result,row) => {
@@ -2838,14 +2880,18 @@
           if (athleteId && ATTENDANCE_STATUS_VALUES.includes(record?.status)) statuses[athleteId] = record.status;
         });
         const mapAthleteArray = values => [...new Set((Array.isArray(values) ? values : []).map(uuid => maps.athleteUuidToLocal.get(String(uuid || ""))).filter(Boolean))];
+        const preserveAthleteUuids = values => [...new Set((Array.isArray(values) ? values : []).map(uuid => String(uuid || "")).filter(Boolean))];
         store[`${date}|${group}`] = {
           supabaseId:String(session.id || ""),
           sourceLocalId,
+          createdByMembershipId:String(session?.created_by_membership_id || "") || null,
           statuses,
           statusSources:{},
           sessionMode:["scheduled","extra-group","selected-athletes"].includes(session?.session_mode) ? session.session_mode : "scheduled",
           rosterAthleteIds:mapAthleteArray(session?.roster_athlete_ids),
           guestAthleteIds:mapAthleteArray(session?.guest_athlete_ids),
+          rosterAthleteUuids:preserveAthleteUuids(session?.roster_athlete_ids),
+          guestAthleteUuids:preserveAthleteUuids(session?.guest_athlete_ids),
           note:typeof session?.note === "string" ? session.note : ""
         };
       });
@@ -2859,10 +2905,24 @@
       onlineAttendanceLoadPromise = (async () => {
         try {
           if (!membership?.club_id) throw new Error("Missing authenticated club context");
-          const {data:sessions,error:sessionsError} = await window.clubdeskSupabase.from("attendance_sessions")
+          let sessionsQuery = window.clubdeskSupabase.from("attendance_sessions")
             .select("id,club_id,group_id,session_date,note,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids")
             .eq("club_id",membership.club_id)
             .gte("session_date",CLUBDESK_ATTENDANCE_START_DATE);
+          if (authenticatedUserIsAttendanceCoach()) {
+            const ownedGroupUuids = attendanceOwnedGroups().map(group => String(group.supabaseId || "")).filter(Boolean);
+            if (!ownedGroupUuids.length) {
+              onlineAttendanceStore = {};
+              onlineAttendanceAvailable = true;
+              window.clubdeskAttendanceDataSource = "supabase";
+              cacheOnlineAttendance();
+              updateDashboardStats();
+              setOnlineDataNotice();
+              return true;
+            }
+            sessionsQuery = sessionsQuery.in("group_id",ownedGroupUuids);
+          }
+          const {data:sessions,error:sessionsError} = await sessionsQuery;
           if (sessionsError) throw sessionsError;
           const sessionIds = (sessions || []).map(session => String(session.id || "")).filter(Boolean);
           let records = [];
@@ -5618,7 +5678,14 @@
     }
 
     function canEditAttendanceRecords() {
-      if (!canEditViewedScope()) return false;
+      if (!canAccessAttendanceModule()) return false;
+      if (authenticatedUserIsAttendanceCoach()) {
+        if (selectedCoachScope !== currentUserId()) return false;
+        const selectedGroupId = normalizeGroupId(document.getElementById("attendanceGroup")?.value);
+        if (!attendanceCoachOwnsGroup(selectedGroupId)) return false;
+      } else if (!canEditViewedScope()) {
+        return false;
+      }
       return onlineAttendanceAvailable
         && !onlineAttendanceLoading
         && !onlineAttendanceSaveInProgress
@@ -5683,16 +5750,20 @@
     }
 
     function renderAttendanceGroupSelectors() {
-      const relevantGroupIds = scopedGroupIds();
-      const allowedGroups = groups().filter(group => relevantGroupIds.has(group.id));
+      const allowedGroups = authenticatedUserIsAttendanceCoach()
+        ? attendanceOwnedGroups()
+        : (() => {
+            const relevantGroupIds = scopedGroupIds();
+            return groups().filter(group => relevantGroupIds.has(group.id));
+          })();
       [
         {select:document.getElementById("attendanceGroup"),includeAge:true},
-        {select:document.getElementById("attendanceHistoryGroup"),includeAge:false}
+        {select:document.getElementById("attendanceHistoryGroup"),includeAge:true}
       ].forEach(({select,includeAge}) => {
         if (!select) return;
         const previous = normalizeGroupId(select.value);
         if (!allowedGroups.length) {
-          select.innerHTML = '<option value="">Няма групи със състезатели за този треньор.</option>';
+          select.innerHTML = `<option value="">${authenticatedUserIsAttendanceCoach() ? "Нямате създадени групи за отбелязване на присъствие." : "Няма групи със състезатели за този треньор."}</option>`;
           return;
         }
         select.innerHTML = allowedGroups.map(group => `<option value="${escapeHtml(group.id)}">${escapeHtml(groupOptionLabel(group,includeAge))}</option>`).join("");
@@ -5869,16 +5940,18 @@
       if (editAthleteDetailsButton) editAthleteDetailsButton.hidden = !canEditOnline;
       const markAll = document.getElementById("markAllAttendancePresent");
       const saveAttendanceButton = document.getElementById("saveAttendance");
-      if (markAll) markAll.hidden = !canEdit;
-      if (saveAttendanceButton) saveAttendanceButton.hidden = !canEdit;
+      const canUseAttendance = canAccessAttendanceModule() && canEdit;
+      const canUseAdvancedAttendance = currentUserIsAdmin() && canEdit;
+      if (markAll) markAll.hidden = !canUseAttendance;
+      if (saveAttendanceButton) saveAttendanceButton.hidden = !canUseAttendance;
       if (markAll) markAll.disabled = !canEditAttendanceRecords();
       if (saveAttendanceButton) saveAttendanceButton.disabled = !canEditAttendanceRecords();
-      document.getElementById("addAttendanceGuests")?.toggleAttribute("hidden",!canEdit);
-      document.getElementById("startExtraGroupAttendance")?.toggleAttribute("hidden",!canEdit);
-      document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("hidden",!canEdit);
-      document.getElementById("addAttendanceGuests")?.toggleAttribute("disabled",!canEditAttendanceRecords());
-      document.getElementById("startExtraGroupAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
-      document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("disabled",!canEditAttendanceRecords());
+      document.getElementById("addAttendanceGuests")?.toggleAttribute("hidden",!canUseAdvancedAttendance);
+      document.getElementById("startExtraGroupAttendance")?.toggleAttribute("hidden",!canUseAdvancedAttendance);
+      document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("hidden",!canUseAdvancedAttendance);
+      document.getElementById("addAttendanceGuests")?.toggleAttribute("disabled",!canUseAdvancedAttendance || !canEditAttendanceRecords());
+      document.getElementById("startExtraGroupAttendance")?.toggleAttribute("disabled",!canUseAdvancedAttendance || !canEditAttendanceRecords());
+      document.getElementById("startSelectedAthletesAttendance")?.toggleAttribute("disabled",!canUseAdvancedAttendance || !canEditAttendanceRecords());
       if (attendanceNote) attendanceNote.disabled = !canEditAttendanceRecords();
       document.getElementById("addGroupButton")?.toggleAttribute("hidden",!canManageGroup(null) || !canEditOnlineGroups());
       document.getElementById("addCoachButton")?.toggleAttribute("hidden",!isAdmin);
@@ -5898,6 +5971,7 @@
 
     function refreshCoachScopeViews() {
       if (currentClubDeskRoute === "dashboard" || currentClubDeskRoute === "fees") ensureAuthenticatedCoachOwnScope();
+      if ((currentClubDeskRoute === "attendance/marking" || currentClubDeskRoute === "attendance/history") && authenticatedUserIsAttendanceCoach()) ensureAuthenticatedCoachOwnScope();
       clearBulkSelection();
       closeAthleteActionMenu();
       if (!canEditViewedScope()) {
@@ -5946,6 +6020,12 @@
     };
 
     window.clubdeskEnsurePrivateFeesScope = function() {
+      if (!ensureAuthenticatedCoachOwnScope()) return;
+      refreshCoachScopeViews();
+    };
+
+    window.clubdeskEnsurePrivateAttendanceScope = function() {
+      if (!authenticatedUserIsAttendanceCoach()) return;
       if (!ensureAuthenticatedCoachOwnScope()) return;
       refreshCoachScopeViews();
     };
@@ -8697,6 +8777,9 @@
     }
 
     function buildAttendanceReport(group,month) {
+      if (authenticatedUserIsAttendanceCoach() && !attendanceCoachOwnsGroup(group)) {
+        return {rows:[],dates:[],sessions:0,averageRate:null,presentTotal:0,absentTotal:0,competitionTotal:0,restTotal:0};
+      }
       const athletesById = new Map(allAthletes().map(athlete => [athlete.id,athlete]));
       const monthEntries = attendanceEntries()
         .filter(entry => entry.group === group && entry.date.startsWith(month))
@@ -8708,7 +8791,9 @@
           ...entry,
           eligibleRosterIds:historicalAttendanceRosterIds(entry).filter(athleteId => {
             const athlete = athletesById.get(athleteId);
-            return athlete && athleteMatchesSelectedCoach(athlete);
+            if (!athlete || !athleteMatchesSelectedCoach(athlete)) return false;
+            if (!authenticatedUserIsAttendanceCoach()) return true;
+            return attendanceAllowedAthletes(entry.group).some(allowed => allowed.id === athlete.id);
           })
         }));
       const reportAthleteIds = [...new Set(conducted.flatMap(entry => entry.eligibleRosterIds))];
@@ -8773,7 +8858,7 @@
         document.getElementById("historyPresentTotal").textContent = "0";
         document.getElementById("historyAbsentTotal").textContent = "0";
         document.getElementById("attendanceHistoryTableCard").hidden = true;
-        document.getElementById("attendanceTrainingDates").innerHTML = '<div class="empty">Няма групи със състезатели за този треньор.</div>';
+        document.getElementById("attendanceTrainingDates").innerHTML = `<div class="empty">${authenticatedUserIsAttendanceCoach() ? "Нямате създадени групи за отбелязване на присъствие." : "Няма групи със състезатели за този треньор."}</div>`;
         tbody.innerHTML = "";
         return;
       }
@@ -8818,6 +8903,7 @@
 
     function openAttendanceSessionModal(date) {
       const group = document.getElementById("attendanceHistoryGroup").value;
+      if (authenticatedUserIsAttendanceCoach() && !attendanceCoachOwnsGroup(group)) return;
       const record = attendanceRecord(date,group) || {};
       const statuses = record.statuses && typeof record.statuses === "object" ? record.statuses : {};
       const statusSources = record.statusSources && typeof record.statusSources === "object" ? record.statusSources : {};
@@ -8833,9 +8919,14 @@
       const rosterAthleteIds = historicalAttendanceRosterIds(entry);
       const guestAthleteIds = new Set(resolved.guestAthleteIds);
       const athletesById = new Map(allAthletes().map(athlete => [athlete.id,athlete]));
+      const coachAllowedIds = authenticatedUserIsAttendanceCoach()
+        ? new Set(attendanceAllowedAthletes(group).map(athlete => athlete.id))
+        : null;
       const athletes = rosterAthleteIds
         .map(athleteId => athletesById.get(athleteId) || {id:athleteId,name:"Неизвестен състезател"})
-        .filter(athlete => guestAthleteIds.has(athlete.id) || athleteMatchesSelectedCoach(athlete));
+        .filter(athlete => coachAllowedIds
+          ? coachAllowedIds.has(athlete.id)
+          : guestAthleteIds.has(athlete.id) || athleteMatchesSelectedCoach(athlete));
       const statusColors = {present:"green",absent:"red",injured:"orange",competition:"blue",rest:"gray",missing:"gray"};
 
       document.getElementById("attendanceSessionTitle").textContent = `Тренировка · ${formatBgDate(date)}`;
@@ -8937,9 +9028,7 @@
       const activeIds = new Set(activeAthletes.map(athlete => athlete.id));
 
       if (["scheduled","extra-group"].includes(draft.sessionMode)) {
-        draft.rosterAthleteIds = activeAthletes
-          .filter(athlete => athlete.group === draft.group)
-          .map(athlete => athlete.id);
+        draft.rosterAthleteIds = attendanceAthletesForGroupRoster(draft.group).map(athlete => athlete.id);
       } else if (draft.sessionMode === "selected-athletes") {
         draft.rosterAthleteIds = draft.rosterAthleteIds.filter(id => activeIds.has(id));
       }
@@ -8995,8 +9084,8 @@
       });
 
       if (["scheduled","extra-group"].includes(draft.sessionMode)) {
-        activeClubAthletes()
-          .filter(athlete => athlete.group === draft.group && athleteMatchesSelectedCoach(athlete))
+        attendanceAthletesForGroupRoster(draft.group)
+          .filter(athlete => athleteMatchesSelectedCoach(athlete))
           .forEach(athlete => {
             if (!draft.rosterAthleteIds.includes(athlete.id)) draft.rosterAthleteIds.push(athlete.id);
           });
@@ -9034,13 +9123,21 @@
           guestAthleteIds:saved.guestAthleteIds,
           sessionMode:saved.sessionMode
         });
+        const coachAllowedIds = authenticatedUserIsAttendanceCoach()
+          ? new Set(attendanceAllowedAthletes(group).map(athlete => athlete.id))
+          : null;
+        const filterCoachIds = ids => coachAllowedIds ? ids.filter(id => coachAllowedIds.has(String(id))) : ids;
+        const filterCoachMap = values => coachAllowedIds
+          ? Object.fromEntries(Object.entries(values || {}).filter(([athleteId]) => coachAllowedIds.has(String(athleteId))))
+          : {...(values || {})};
         attendanceSessionDraft = reconcileTodaySavedAttendanceRoster({
           key,date,group,existing:true,
+          createdByMembershipId:String(saved.createdByMembershipId || "") || null,
           sessionMode:resolved.sessionMode,
-          rosterAthleteIds:[...resolved.rosterAthleteIds],
-          guestAthleteIds:[...resolved.guestAthleteIds],
-          statuses:{...(saved.statuses && typeof saved.statuses === "object" ? saved.statuses : {})},
-          statusSources:{...(saved.statusSources && typeof saved.statusSources === "object" ? saved.statusSources : {})},
+          rosterAthleteIds:filterCoachIds([...resolved.rosterAthleteIds]),
+          guestAthleteIds:filterCoachIds([...resolved.guestAthleteIds]),
+          statuses:filterCoachMap(saved.statuses && typeof saved.statuses === "object" ? saved.statuses : {}),
+          statusSources:filterCoachMap(saved.statusSources && typeof saved.statusSources === "object" ? saved.statusSources : {}),
           note:typeof saved.note === "string" ? saved.note : ""
         });
         return attendanceSessionDraft;
@@ -9048,10 +9145,11 @@
 
       const scheduled = isScheduledGroupAttendanceDate(date,group);
       const rosterAthleteIds = scheduled
-        ? activeClubAthletes().filter(athlete => athlete.group === group).map(athlete => athlete.id)
+        ? attendanceAthletesForGroupRoster(group).map(athlete => athlete.id)
         : [];
       attendanceSessionDraft = refreshUnsavedAttendanceRoster({
         key,date,group,existing:false,
+        createdByMembershipId:null,
         sessionMode:scheduled ? "scheduled" : null,
         rosterAthleteIds,
         guestAthleteIds:[],
@@ -9068,9 +9166,13 @@
 
     function visibleAttendanceDraftAthleteIds(draft) {
       const athletesById = new Map(allAthletes().map(athlete => [athlete.id,athlete]));
+      const coachAllowedIds = authenticatedUserIsAttendanceCoach()
+        ? new Set(attendanceAllowedAthletes(draft.group).map(athlete => athlete.id))
+        : null;
       return attendanceDraftAthleteIds(draft).filter(id => {
         const athlete = athletesById.get(id);
-        return athlete && athleteMatchesSelectedCoach(athlete);
+        if (!athlete || !athleteMatchesSelectedCoach(athlete)) return false;
+        return !coachAllowedIds || coachAllowedIds.has(athlete.id);
       });
     }
 
@@ -9080,7 +9182,13 @@
       const noGroupsNotice = document.getElementById("attendanceNoGroupsNotice");
       const unscheduledNotice = document.getElementById("attendanceUnscheduledNotice");
       const attendanceLayout = document.getElementById("attendanceLayout");
-      if (!attendanceGroup.value) {
+      const noGroupsMessage = noGroupsNotice?.querySelector("p");
+      if (noGroupsMessage) {
+        noGroupsMessage.textContent = authenticatedUserIsAttendanceCoach()
+          ? "Нямате създадени групи за отбелязване на присъствие."
+          : "Няма групи със състезатели за този треньор.";
+      }
+      if (!attendanceGroup.value || (authenticatedUserIsAttendanceCoach() && !attendanceCoachOwnsGroup(attendanceGroup.value))) {
         attendanceSessionDraft = null;
         attendanceTitle.textContent = `Присъствие · ${formatBgDate(attendanceDate.value)}`;
         attendanceList.innerHTML = "";
@@ -9172,8 +9280,16 @@
       count.textContent = `Избрани: ${attendanceAthletePickerSelection.size}`;
     }
 
+    function requireAdvancedAttendanceAccess() {
+      if (!currentUserIsAdmin()) {
+        if (typeof showToast === "function") showToast("Добавянето на гости и извънредни тренировки е достъпно само за администратор.");
+        return false;
+      }
+      return requireAttendanceEditAccess();
+    }
+
     function openAttendanceAthletePicker() {
-      if (!requireAttendanceEditAccess()) return;
+      if (!requireAdvancedAttendanceAccess()) return;
       attendanceAthletePickerSelection = new Set();
       const search = document.getElementById("attendanceAthletePickerSearch");
       if (search) search.value = "";
@@ -9222,7 +9338,7 @@
       updateDynamicAttendanceSummary();
     });
     document.getElementById("startExtraGroupAttendance")?.addEventListener("click", () => {
-      if (!requireAttendanceEditAccess()) return;
+      if (!requireAdvancedAttendanceAccess()) return;
       if (!window.confirm("Да се създаде ли извънредна тренировка за цялата група?")) return;
       const draft = initializeAttendanceSessionDraft();
       draft.sessionMode = "extra-group";
@@ -9233,7 +9349,7 @@
       renderAttendance();
     });
     document.getElementById("startSelectedAthletesAttendance")?.addEventListener("click", () => {
-      if (!requireAttendanceEditAccess()) return;
+      if (!requireAdvancedAttendanceAccess()) return;
       const draft = initializeAttendanceSessionDraft();
       draft.sessionMode = "selected-athletes";
       draft.rosterAthleteIds = [];
@@ -9253,6 +9369,10 @@
       document.getElementById("attendanceAthletePickerCount").textContent = `Избрани: ${attendanceAthletePickerSelection.size}`;
     });
     document.getElementById("confirmAttendanceAthletePicker")?.addEventListener("click", () => {
+      if (!requireAdvancedAttendanceAccess()) {
+        closeAttendanceAthletePicker();
+        return;
+      }
       const draft = initializeAttendanceSessionDraft();
       draft.note = attendanceNote?.value || draft.note;
       const athletesById = new Map(allAthletes().map(athlete => [athlete.id,athlete]));
@@ -9309,17 +9429,77 @@
     document.getElementById("dashboardOpenFees")?.addEventListener("click", () => openView("payments"));
     document.getElementById("dashboardDownloadBackup")?.addEventListener("click", () => document.getElementById("downloadClubDeskBackup")?.click());
 
+    function validateCoachAttendanceSave(draft,savedRecord,{notify=false}={}) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role === "admin") return true;
+      const reject = () => {
+        if (notify && typeof showToast === "function") {
+          showToast("Присъствието не може да бъде запазено: групата или състезателят не принадлежи на вашия профил.");
+        }
+        return false;
+      };
+      if (membership?.access_role !== "coach" || membership?.status !== "active") return reject();
+      if (selectedCoachScope !== currentUserId()) return reject();
+      if (!attendanceCoachOwnsGroup(draft?.group)) return reject();
+      if (draft?.existing && draft.createdByMembershipId
+        && String(draft.createdByMembershipId) !== String(membership.id)) return reject();
+
+      const allowedIds = new Set(attendanceAllowedAthletes(draft.group).map(athlete => athlete.id));
+      const visibleEditableIds = new Set(visibleAttendanceDraftAthleteIds(draft));
+      const recordIdsToWrite = Object.entries(savedRecord?.statuses || {})
+        .filter(([athleteId,status]) => visibleEditableIds.has(String(athleteId)) && ATTENDANCE_STATUS_VALUES.includes(status))
+        .map(([athleteId]) => String(athleteId));
+      if (recordIdsToWrite.some(athleteId => !allowedIds.has(athleteId))) return reject();
+
+      if (!draft.existing) {
+        const newSessionIds = [...new Set([...(savedRecord?.rosterAthleteIds || []),...(savedRecord?.guestAthleteIds || [])].map(String))];
+        if ((savedRecord?.guestAthleteIds || []).length || newSessionIds.some(athleteId => !allowedIds.has(athleteId))) return reject();
+      }
+      return true;
+    }
+
     async function saveAttendanceToSupabase(draft,savedRecord) {
       if (!isValidAttendanceDate(draft?.date) || draft.date < CLUBDESK_ATTENDANCE_START_DATE) {
         throw new Error("Attendance date is before the ClubDesk operational start");
       }
+      if (!validateCoachAttendanceSave(draft,savedRecord)) throw new Error("Attendance coach ownership validation failed");
       const membership = window.clubdeskAuthenticatedUser?.membership;
       const maps = attendanceUuidMaps();
       const groupUuid = maps.groupLocalToUuid.get(normalizeGroupId(draft.group));
       if (!membership?.club_id || !membership?.id || !groupUuid) throw new Error("Missing attendance Supabase mapping");
       const mapAthleteIds = ids => [...new Set((ids || []).map(String).map(id => maps.athleteLocalToUuid.get(id)).filter(Boolean))];
       const currentRecord = attendanceRecord(draft.date,draft.group);
+      const coachUser = authenticatedUserIsAttendanceCoach();
+      if (coachUser && currentRecord && !currentRecord.supabaseId) throw new Error("Existing attendance session has no safe Supabase identity");
+      let latestRemoteSession = null;
+      if (coachUser && currentRecord?.supabaseId) {
+        const {data,error} = await window.clubdeskSupabase.from("attendance_sessions")
+          .select("id,club_id,group_id,session_date,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note")
+          .eq("id",currentRecord.supabaseId)
+          .eq("club_id",membership.club_id)
+          .eq("group_id",groupUuid)
+          .eq("session_date",draft.date)
+          .maybeSingle();
+        if (error) throw error;
+        if (!data?.id) throw new Error("Existing attendance session could not be verified safely");
+        if (String(data.created_by_membership_id || "") !== String(membership.id)) {
+          throw new Error("Existing attendance session belongs to another creator");
+        }
+        latestRemoteSession = data;
+      }
       const sourceLocalId = String(currentRecord?.sourceLocalId || attendanceKey());
+      const sessionRosterAthleteIds = coachUser && currentRecord
+        ? [...new Set([...(currentRecord.rosterAthleteIds || []),...(savedRecord.rosterAthleteIds || [])].map(String))]
+        : [...new Set((savedRecord.rosterAthleteIds || []).map(String))];
+      const sessionGuestAthleteIds = coachUser && currentRecord
+        ? [...new Set([...(currentRecord.guestAthleteIds || []),...(savedRecord.guestAthleteIds || [])].map(String))]
+        : [...new Set((savedRecord.guestAthleteIds || []).map(String))];
+      const sessionRosterAthleteUuids = coachUser && currentRecord
+        ? [...new Set([...(latestRemoteSession?.roster_athlete_ids || currentRecord.rosterAthleteUuids || []),...mapAthleteIds(savedRecord.rosterAthleteIds)].map(String).filter(Boolean))]
+        : mapAthleteIds(sessionRosterAthleteIds);
+      const sessionGuestAthleteUuids = coachUser && currentRecord
+        ? [...new Set([...(latestRemoteSession?.guest_athlete_ids || currentRecord.guestAthleteUuids || []),...mapAthleteIds(savedRecord.guestAthleteIds)].map(String).filter(Boolean))]
+        : mapAthleteIds(sessionGuestAthleteIds);
       const sessionRow = {
         club_id:membership.club_id,
         group_id:groupUuid,
@@ -9328,12 +9508,29 @@
         created_by_membership_id:membership.id,
         source_local_id:sourceLocalId,
         session_mode:savedRecord.sessionMode,
-        roster_athlete_ids:mapAthleteIds(savedRecord.rosterAthleteIds),
-        guest_athlete_ids:mapAthleteIds(savedRecord.guestAthleteIds)
+        roster_athlete_ids:sessionRosterAthleteUuids,
+        guest_athlete_ids:sessionGuestAthleteUuids
       };
-      const {data:sessionRows,error:sessionError} = await window.clubdeskSupabase.from("attendance_sessions")
-        .upsert([sessionRow],{onConflict:"group_id,session_date"})
-        .select("id,group_id,session_date,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+      let sessionResult;
+      if (coachUser && currentRecord?.supabaseId) {
+        const {created_by_membership_id,...sessionUpdateRow} = sessionRow;
+        sessionResult = await window.clubdeskSupabase.from("attendance_sessions")
+          .update(sessionUpdateRow)
+          .eq("id",currentRecord.supabaseId)
+          .eq("club_id",membership.club_id)
+          .eq("group_id",groupUuid)
+          .eq("session_date",draft.date)
+          .select("id,group_id,session_date,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+      } else if (coachUser) {
+        sessionResult = await window.clubdeskSupabase.from("attendance_sessions")
+          .insert(sessionRow)
+          .select("id,group_id,session_date,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+      } else {
+        sessionResult = await window.clubdeskSupabase.from("attendance_sessions")
+          .upsert([sessionRow],{onConflict:"group_id,session_date"})
+          .select("id,group_id,session_date,created_by_membership_id,source_local_id,session_mode,roster_athlete_ids,guest_athlete_ids,note");
+      }
+      const {data:sessionRows,error:sessionError} = sessionResult;
       if (sessionError) throw sessionError;
       if (!Array.isArray(sessionRows) || sessionRows.length !== 1 || !sessionRows[0]?.id) throw new Error("Attendance session was not returned");
       const session = sessionRows[0];
@@ -9373,8 +9570,19 @@
       if ((confirmedRows || []).some(row => visibleEditableUuids.has(String(row.athlete_id)) && !retainedAthleteUuids.has(String(row.athlete_id)))) throw new Error("Unmarked attendance record was not removed");
       onlineAttendanceStore[`${draft.date}|${normalizeGroupId(draft.group)}`] = {
         ...savedRecord,
+        statuses:coachUser && currentRecord
+          ? {...(currentRecord.statuses || {}),...(savedRecord.statuses || {})}
+          : {...(savedRecord.statuses || {})},
+        statusSources:coachUser && currentRecord
+          ? {...(currentRecord.statusSources || {}),...(savedRecord.statusSources || {})}
+          : {...(savedRecord.statusSources || {})},
         supabaseId:String(session.id),
-        sourceLocalId
+        sourceLocalId,
+        createdByMembershipId:String(session.created_by_membership_id || currentRecord?.createdByMembershipId || membership.id),
+        rosterAthleteIds:sessionRosterAthleteIds,
+        guestAthleteIds:sessionGuestAthleteIds,
+        rosterAthleteUuids:sessionRosterAthleteUuids,
+        guestAthleteUuids:sessionGuestAthleteUuids
       };
       cacheOnlineAttendance();
       return onlineAttendanceStore[`${draft.date}|${normalizeGroupId(draft.group)}`];
@@ -9410,6 +9618,7 @@
         note: attendanceNote.value.trim(),
         savedAt: new Date().toISOString()
       };
+      if (!validateCoachAttendanceSave(draft,savedRecord,{notify:true})) return;
       const saveButton = document.getElementById("saveAttendance");
       const originalText = saveButton?.textContent || "Запази присъствието";
       onlineAttendanceSaveInProgress = true;
