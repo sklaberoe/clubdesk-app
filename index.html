@@ -7216,12 +7216,14 @@
       const customTrainingDays = groupScheduleDayOrder.filter(day =>
         [...document.querySelectorAll("#athleteCustomTrainingDays input:checked")].some(input => input.value === day)
       );
+      const disciplines = migrationDisciplines(document.getElementById("athleteEditEvents").value);
 
       const updatedAthlete = {
         ...currentAthlete,
         name:document.getElementById("athleteEditName").value.trim(),
         year:Number(document.getElementById("athleteEditYear").value),
-        events:document.getElementById("athleteEditEvents").value.trim(),
+        events:disciplines.join(" / "),
+        disciplines,
         group:normalizeGroupId(document.getElementById("athleteEditGroup").value),
         primaryCoachId,
         coach:primaryCoach?.name || currentAthlete.coach,
