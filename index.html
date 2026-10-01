@@ -815,6 +815,7 @@
       #payments .payment-sheet-toolbar{margin-bottom:12px}
       #payments .payment-sheet-toolbar .toolbar-left{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:100%}
       #payments #paymentGroupFilter{grid-column:1/-1;width:100%;min-height:44px}
+      #payments #paymentStatusFilter{grid-column:1/-1;width:100%;min-height:44px}
       #payments .payment-period-nav{grid-column:1/-1;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;width:100%;gap:8px}
       #payments .payment-period-nav button{width:44px;height:44px}
       #payments .payment-period-nav span{min-width:0;font-size:13px;color:var(--text)}
@@ -1235,6 +1236,13 @@
             <div class="toolbar-left">
               <select class="filter-select" id="paymentGroupFilter">
                 <option value="">Няма създадени групи.</option>
+              </select>
+              <select class="filter-select" id="paymentStatusFilter" aria-label="Статус на състезателите">
+                <option value="active">Активни</option>
+                <option value="paused">В пауза</option>
+                <option value="inactive">Неактивни</option>
+                <option value="all">Всички</option>
+                <option value="archived">Архивирани</option>
               </select>
               <div class="payment-athlete-search payment-search-desktop" role="search">
                 <span class="payment-athlete-search-icon" aria-hidden="true">⌕</span>
@@ -2272,6 +2280,15 @@
     const athleteSearch=document.getElementById("athleteSearch");
     const groupFilter=document.getElementById("groupFilter");
     const athleteStatusFilter=document.getElementById("athleteStatusFilter");
+    function athleteMatchesStatusFilter(athlete,status){
+      const isArchived=athlete?.archived===true;
+      const athleteStatus=athlete?.status|| (athlete?.active===true ? "active" : "paused");
+      return status==="archived" ? isArchived :
+        status==="active" ? !isArchived&&athleteStatus==="active" :
+        status==="paused" ? !isArchived&&athleteStatus==="paused" :
+        status==="inactive" ? !isArchived&&athleteStatus==="inactive" :
+        !isArchived;
+    }
     function filterAthletes(){
       const q=athleteSearch.value.trim().toLowerCase();
       const g=groupFilter.value;
@@ -2283,14 +2300,11 @@
         }
         const matchName=row.dataset.name.includes(q);
         const matchGroup=g==="all"||row.dataset.group===g;
-        const isArchived=row.dataset.archived==="true";
-        const athleteStatus=row.dataset.status|| (row.dataset.active==="true" ? "active" : "paused");
-        const matchStatus=
-          status==="archived" ? isArchived :
-          status==="active" ? !isArchived&&athleteStatus==="active" :
-          status==="paused" ? !isArchived&&athleteStatus==="paused" :
-          status==="inactive" ? !isArchived&&athleteStatus==="inactive" :
-          !isArchived;
+        const matchStatus=athleteMatchesStatusFilter({
+          archived:row.dataset.archived==="true",
+          status:row.dataset.status,
+          active:row.dataset.active==="true"
+        },status);
         row.style.display=matchName&&matchGroup&&matchStatus?"":"none";
       });
       document.dispatchEvent(new CustomEvent("athlete-visibility-changed"));
@@ -6114,6 +6128,7 @@
 
     let paymentGroupFilterRenderedScope = null;
     let paymentAthleteSearch = "";
+    let paymentStatusFilter = "active";
 
     function feesGroupsForSelectedScope() {
       const membership = window.clubdeskAuthenticatedUser?.membership;
@@ -6919,6 +6934,15 @@
       );
     }
 
+    function paymentCurrentRosterCandidates() {
+      const selectedGroup = selectedPaymentGroup();
+      if (!selectedGroup?.supabaseId) return [];
+      const selectedGroupUuid = String(selectedGroup.supabaseId);
+      return paymentAthletesForSelectedScope().filter(athlete =>
+        String(groupById(athlete.group)?.supabaseId || "") === selectedGroupUuid
+      );
+    }
+
     function paymentAthletesForMonths(months,records=monthlyPayments()) {
       const visibleMonths = [...new Set((Array.isArray(months) ? months : [months]).map(String).filter(Boolean))];
       const currentIds = new Set(selectedPaymentAthletes().map(athlete => athlete.id));
@@ -6948,6 +6972,20 @@
         const payment = records?.[month]?.[athlete.id];
         return paymentHasOwnershipSnapshot(payment) && paymentMatchesSelectedFeesScope(payment,athlete);
       });
+    }
+
+    function paymentAthletesForStatusView(months,records=monthlyPayments()) {
+      const historicalIds = new Set(allAthletes()
+        .filter(athlete => paymentAthleteIsMovedForFeesScope(athlete,months,records))
+        .map(athlete => athlete.id));
+      const candidates = [...paymentCurrentRosterCandidates()];
+      const candidateIds = new Set(candidates.map(athlete => athlete.id));
+      allAthletes().forEach(athlete => {
+        if (historicalIds.has(athlete.id) && !candidateIds.has(athlete.id)) candidates.push(athlete);
+      });
+      return candidates.filter(athlete =>
+        historicalIds.has(athlete.id) || athleteMatchesStatusFilter(athlete,paymentStatusFilter)
+      );
     }
 
     function paymentRecordForSelectedFeesScope(records,month,athlete) {
@@ -7102,7 +7140,8 @@
       const records = monthlyPayments();
       const renderedMonths = paymentMobileMedia.matches ? [selectedPaymentMonth()] : months;
       const groupAthletes = paymentAthletesForMonths(renderedMonths,records);
-      const athletes = filteredPaymentAthletes(groupAthletes);
+      const statusAthletes = paymentAthletesForStatusView(renderedMonths,records);
+      const athletes = filteredPaymentAthletes(statusAthletes);
       const thead = table.querySelector("thead");
       const tbody = table.querySelector("tbody");
       const tfoot = table.querySelector("tfoot");
@@ -8436,6 +8475,10 @@
     bindPaymentInputContainer(paymentMobileList);
     document.getElementById("paymentGroupFilter")?.addEventListener("change",() => {
       setPaymentAthleteSearch("",{render:false});
+      renderPaymentTable();
+    });
+    document.getElementById("paymentStatusFilter")?.addEventListener("change",event => {
+      paymentStatusFilter = String(event.currentTarget.value || "active");
       renderPaymentTable();
     });
     document.querySelectorAll("[data-payment-athlete-search]").forEach(input => {
