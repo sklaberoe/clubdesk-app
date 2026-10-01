@@ -553,17 +553,23 @@
     .payment-sheet tbody tr.payment-athlete-active td:nth-child(-n+3){color:var(--text);opacity:1;font-weight:400}
     .payment-sheet tbody tr.payment-athlete-paused{color:#8a929d;background:#fafbfc;opacity:.68;font-weight:400}
     .payment-sheet tbody tr.payment-athlete-paused td:nth-child(-n+3){background:#fafbfc;color:inherit;font-weight:400}
+    .payment-sheet tbody tr.payment-athlete-moved{opacity:1}
+    .payment-sheet tbody tr.payment-athlete-moved td:nth-child(-n+3){background:#f6f8fa;color:#697482}
+    .payment-sheet tbody tr.payment-athlete-moved .payment-month-cell:not(.recorded-payment):not(.current-month){background:#fafbfc}
+    .payment-moved-badge{display:inline-flex;align-items:center;margin-left:7px;padding:2px 6px;border-radius:999px;background:#e8edf2;color:#657180;font-size:9px;font-weight:800;line-height:1.25;vertical-align:middle;white-space:nowrap}
     .payment-month-cell{width:78px;min-width:78px;max-width:78px;text-align:center;padding:6px 5px!important;background:#fff;cursor:text;transition:background-color .15s ease,box-shadow .15s ease}
     .payment-month-cell.current-month{background:#f3f8f5}
     .payment-month-cell.recorded-payment{background:#eef8f2}
     .payment-month-cell:hover{background:#f7faf8;box-shadow:inset 0 0 0 1px #d8e3dc}
     .payment-month-cell.recorded-payment:hover{background:#e8f5ed}
     .payment-month-cell.saving{background:#f4f7f5;box-shadow:inset 0 0 0 1px #b9cbbf}
+    .payment-month-cell.payment-scope-conflict{background:#f5f6f8;cursor:not-allowed}
     .payment-month-cell:focus-within{background:#fff;box-shadow:none}
     .payment-month-input{width:100%;height:31px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--text);padding:5px;text-align:center;font:inherit;font-size:11px;font-weight:500;outline:0;cursor:text}
     .payment-month-cell.recorded-payment .payment-month-input{font-size:14px;font-weight:700}
     .payment-month-input:hover{border-color:#d8e3dc;background:rgba(255,255,255,.72)}
     .payment-month-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(20,138,74,.12)}
+    .payment-scope-conflict-note{display:block;margin-top:1px;color:#7c8693;font-size:8px;font-weight:700;line-height:1.15;white-space:normal}
     .payment-sheet tfoot td{position:sticky;bottom:0;z-index:5;background:#f5f7f9;border-top:2px solid var(--line);border-bottom:0;font-weight:900}
     .payment-sheet tfoot td:nth-child(-n+3){z-index:7;background:#f5f7f9}
     .payment-sheet tfoot td.current-month{background:#eaf4ee}
@@ -572,6 +578,8 @@
     .payment-mobile-list{display:grid;gap:10px}
     .payment-mobile-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
     .payment-mobile-row.payment-athlete-paused{background:#fafbfc;color:#7f8793;opacity:.76}
+    .payment-mobile-row.payment-athlete-moved{background:#f7f9fb;color:var(--text);opacity:1}
+    .payment-mobile-row.payment-athlete-moved .payment-mobile-athlete>strong{color:#697482}
     .payment-mobile-athlete{min-width:0;flex:1}
     .payment-mobile-athlete strong{display:block;font-size:14px;line-height:1.35;overflow-wrap:anywhere}
     .payment-mobile-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:5px}
@@ -582,6 +590,8 @@
     .payment-mobile-amount.recorded-payment{background:transparent}
     .payment-mobile-amount.recorded-payment .payment-mobile-input{border-color:#d8e9df;background:#eef8f2}
     .payment-mobile-amount.saving .payment-mobile-input{border-color:#b9cbbf;background:#f4f7f5}
+    .payment-mobile-amount.payment-scope-conflict{display:grid;grid-template-columns:minmax(0,88px) auto;align-items:center;row-gap:3px}
+    .payment-mobile-amount .payment-scope-conflict-note{grid-column:1/-1;max-width:116px;font-size:9px;text-align:right}
     .payment-mobile-input{width:88px;min-height:44px;padding:8px 9px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);font-size:16px;font-weight:700;text-align:right;outline:0}
     .payment-mobile-input:hover{border-color:#cbd6cf;background:#fbfdfc}
     .payment-mobile-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(20,138,74,.12)}
@@ -2977,24 +2987,36 @@
       }));
     }
 
+    function mapRemotePaymentRecord(row,athleteId,month) {
+      const amount = Number(row?.amount);
+      if (!athleteId || !month || month < CLUBDESK_FEES_START_MONTH || !Number.isFinite(amount) || amount < 0) return null;
+      return {
+        id:String(row?.id || ""),
+        athleteId,
+        month,
+        status:amount > 0 ? "paid" : "unpaid",
+        amount,
+        paidAt:null,
+        amountCustomized:true,
+        paymentAmountEntered:true,
+        coachMembershipId:String(row?.coach_membership_id || "").trim() || null,
+        groupId:String(row?.group_id || "").trim() || null,
+        recordedByMembershipId:String(row?.recorded_by_membership_id || "").trim() || null,
+        note:typeof row?.note === "string" ? row.note : "",
+        supabaseId:String(row?.id || "")
+      };
+    }
+
     function mapRemotePaymentsStore(rows) {
       const maps = attendanceUuidMaps();
       const store = {};
       (Array.isArray(rows) ? rows : []).forEach(row => {
         const athleteId = maps.athleteUuidToLocal.get(String(row?.athlete_id || ""));
         const month = paymentMonthKey(row?.payment_month);
-        const amount = Number(row?.amount);
-        if (!athleteId || !month || month < CLUBDESK_FEES_START_MONTH || !Number.isFinite(amount) || amount < 0) return;
+        const payment = mapRemotePaymentRecord(row,athleteId,month);
+        if (!payment) return;
         store[month] ||= {};
-        store[month][athleteId] = {
-          status:amount > 0 ? "paid" : "unpaid",
-          amount,
-          paidAt:null,
-          amountCustomized:true,
-          paymentAmountEntered:true,
-          note:typeof row?.note === "string" ? row.note : "",
-          supabaseId:String(row?.id || "")
-        };
+        store[month][athleteId] = payment;
       });
       return store;
     }
@@ -3008,7 +3030,7 @@
         try {
           if (!membership?.club_id) throw new Error("Missing authenticated club context");
           const {data,error} = await window.clubdeskSupabase.from("payments")
-            .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note")
+            .select("id,club_id,athlete_id,payment_month,amount,coach_membership_id,group_id,recorded_by_membership_id,note")
             .eq("club_id",membership.club_id);
           if (error) throw error;
           onlinePaymentsStore = mapRemotePaymentsStore(data || []);
@@ -5958,7 +5980,9 @@
       document.getElementById("restoreClubDeskBackup")?.toggleAttribute("hidden",!isAdmin);
       document.getElementById("settingsArchiveCard")?.toggleAttribute("hidden",!isAdmin);
       renderOnlineSynchronizationStatus();
-      document.querySelectorAll("#paymentTable .payment-month-input,#paymentMobileList .payment-month-input").forEach(input => { input.disabled = !canEdit || !canEditOnlinePayments(); });
+      document.querySelectorAll("#paymentTable .payment-month-input,#paymentMobileList .payment-month-input").forEach(input => {
+        input.disabled = !canEdit || !canEditOnlinePayments() || !paymentInputCanEdit(input);
+      });
       const canManageCalendar = canManageClubCalendar() && canEditOnlineCalendar();
       document.getElementById("newCalendarEvent")?.toggleAttribute("hidden",!canManageClubCalendar());
       document.getElementById("newCalendarEvent")?.toggleAttribute("disabled",!canManageCalendar);
@@ -6858,6 +6882,26 @@
       return "";
     }
 
+    function paymentEffectiveCoachMembershipId(payment,athlete) {
+      const snapshot = String(payment?.coachMembershipId || "").trim();
+      return snapshot || athletePrimaryCoachMembershipId(athlete);
+    }
+
+    function paymentEffectiveGroupId(payment,athlete) {
+      const snapshot = String(payment?.groupId || "").trim();
+      return snapshot || String(groupById(athlete?.group)?.supabaseId || "").trim();
+    }
+
+    function paymentMatchesSelectedFeesScope(payment,athlete) {
+      if (!payment || !athlete) return false;
+      const selectedGroupUuid = String(selectedPaymentGroup()?.supabaseId || "").trim();
+      if (!selectedGroupUuid || paymentEffectiveGroupId(payment,athlete) !== selectedGroupUuid) return false;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role === "admin" && selectedCoachScope === "all") return true;
+      const coachMembershipId = effectiveFeesCoachMembershipId();
+      return Boolean(coachMembershipId && paymentEffectiveCoachMembershipId(payment,athlete) === coachMembershipId);
+    }
+
     function paymentAthletesForSelectedScope() {
       const membership = window.clubdeskAuthenticatedUser?.membership;
       if (membership?.access_role === "admin" && selectedCoachScope === "all") return allAthletes();
@@ -6873,6 +6917,91 @@
       return paymentAthletesForSelectedScope().filter(athlete =>
         !athlete.archived && String(groupById(athlete.group)?.supabaseId || "") === selectedGroupUuid
       );
+    }
+
+    function paymentAthletesForMonths(months,records=monthlyPayments()) {
+      const visibleMonths = [...new Set((Array.isArray(months) ? months : [months]).map(String).filter(Boolean))];
+      const currentIds = new Set(selectedPaymentAthletes().map(athlete => athlete.id));
+      return allAthletes().filter(athlete => currentIds.has(athlete.id) || visibleMonths.some(month => {
+        const payment = records[month]?.[athlete.id];
+        return paymentMatchesSelectedFeesScope(payment,athlete);
+      }));
+    }
+
+    function paymentHasOwnershipSnapshot(payment) {
+      return Boolean(String(payment?.coachMembershipId || "").trim() && String(payment?.groupId || "").trim());
+    }
+
+    function athleteCurrentlyMatchesSelectedFeesScope(athlete) {
+      const selectedGroupUuid = String(selectedPaymentGroup()?.supabaseId || "").trim();
+      const currentGroupUuid = String(groupById(athlete?.group)?.supabaseId || "").trim();
+      if (!selectedGroupUuid || currentGroupUuid !== selectedGroupUuid) return false;
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (membership?.access_role === "admin" && selectedCoachScope === "all") return true;
+      const coachMembershipId = effectiveFeesCoachMembershipId();
+      return Boolean(coachMembershipId && athletePrimaryCoachMembershipId(athlete) === coachMembershipId);
+    }
+
+    function paymentAthleteIsMovedForFeesScope(athlete,months,records=monthlyPayments()) {
+      if (!athlete || athleteCurrentlyMatchesSelectedFeesScope(athlete)) return false;
+      return (Array.isArray(months) ? months : [months]).some(month => {
+        const payment = records?.[month]?.[athlete.id];
+        return paymentHasOwnershipSnapshot(payment) && paymentMatchesSelectedFeesScope(payment,athlete);
+      });
+    }
+
+    function paymentRecordForSelectedFeesScope(records,month,athlete) {
+      const payment = records?.[month]?.[athlete?.id];
+      return paymentMatchesSelectedFeesScope(payment,athlete) ? payment : null;
+    }
+
+    function paymentScopeConflictMessage(payment,athlete) {
+      if (!payment
+        || !athleteCurrentlyMatchesSelectedFeesScope(athlete)
+        || !paymentHasOwnershipSnapshot(payment)
+        || paymentMatchesSelectedFeesScope(payment,athlete)) return "";
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const expectedCoachId = effectiveFeesCoachMembershipId();
+      const actualCoachId = paymentEffectiveCoachMembershipId(payment,athlete);
+      if (!(membership?.access_role === "admin" && selectedCoachScope === "all") && expectedCoachId && actualCoachId !== expectedCoachId) {
+        return "Таксата за месеца е записана при предишния треньор.";
+      }
+      return "Таксата за месеца е записана към предишната група.";
+    }
+
+    function paymentScopeConflictShortLabel(message) {
+      return String(message).includes("треньор") ? "При предишния треньор" : "Към предишната група";
+    }
+
+    function paymentCanCreateForCurrentScope(athlete) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      const selectedGroup = selectedPaymentGroup();
+      const athleteGroupUuid = String(groupById(athlete?.group)?.supabaseId || "").trim();
+      if (!membership || !selectedGroup?.supabaseId || athleteGroupUuid !== String(selectedGroup.supabaseId)) return false;
+      if (membership.access_role === "admin" && selectedCoachScope === "all") return true;
+      const coachMembershipId = effectiveFeesCoachMembershipId();
+      if (!coachMembershipId || athletePrimaryCoachMembershipId(athlete) !== coachMembershipId) return false;
+      if (membership.access_role === "coach") {
+        return coachMembershipId === String(membership.id || "").trim()
+          && String(selectedGroup.leadCoachMembershipId || "").trim() === coachMembershipId;
+      }
+      return true;
+    }
+
+    function paymentCanMutateExistingRecord(payment,athlete) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      if (!membership || !paymentMatchesSelectedFeesScope(payment,athlete)) return false;
+      if (membership.access_role === "admin") return true;
+      return membership.access_role === "coach"
+        && paymentEffectiveCoachMembershipId(payment,athlete) === String(membership.id || "").trim();
+    }
+
+    function paymentInputCanEdit(input) {
+      const athlete = allAthletes().find(item => item.id === input?.dataset?.athleteId);
+      if (!athlete) return false;
+      const payment = monthlyPayments()[input.dataset.month]?.[athlete.id];
+      if (payment) return paymentCanMutateExistingRecord(payment,athlete);
+      return paymentCanCreateForCurrentScope(athlete);
     }
 
     function normalizePaymentAthleteSearch(value) {
@@ -6912,42 +7041,49 @@
         : paymentEmptyStateMessage();
     }
 
-    function paymentMonthTotal(month,athletes=selectedPaymentAthletes(),records=monthlyPayments()) {
-      return athletes.reduce((total,athlete) => total + (paymentRecordAmount(records[month]?.[athlete.id]) ?? 0),0);
+    function paymentMonthTotal(month,athletes=paymentAthletesForMonths([month]),records=monthlyPayments()) {
+      return athletes.reduce((total,athlete) => total + (paymentRecordAmount(paymentRecordForSelectedFeesScope(records,month,athlete)) ?? 0),0);
     }
 
     function updatePaymentSheetTotals() {
-      const athletes = selectedPaymentAthletes();
       const records = monthlyPayments();
       visiblePaymentMonths().forEach(month => {
         const cell = document.querySelector(`#paymentTable [data-total-month="${month}"]`);
-        if (cell) cell.textContent = formatPaymentTotal(paymentMonthTotal(month,athletes,records));
+        if (cell) cell.textContent = formatPaymentTotal(paymentMonthTotal(month,paymentAthletesForMonths([month],records),records));
       });
       const summary = document.getElementById("paymentCurrentSummary");
       const summaryMonth = selectedPaymentMonth();
-      if (summary) summary.textContent = `Събрано за ${paymentMonthLongLabel(summaryMonth)}: ${formatPaymentTotal(paymentMonthTotal(summaryMonth,athletes,records))}`;
+      if (summary) summary.textContent = `Събрано за ${paymentMonthLongLabel(summaryMonth)}: ${formatPaymentTotal(paymentMonthTotal(summaryMonth,paymentAthletesForMonths([summaryMonth],records),records))}`;
     }
 
     function renderMobilePaymentList(month,athletes,records) {
       const container = document.getElementById("paymentMobileList");
       if (!container) return;
-      const editable = canEditViewedScope() && canEditOnlinePayments();
+      const baseEditable = canEditViewedScope() && canEditOnlinePayments();
       container.innerHTML = athletes.length ? athletes.map(athlete => {
-        const amount = paymentRecordAmount(records[month]?.[athlete.id]);
+        const moved = paymentAthleteIsMovedForFeesScope(athlete,[month],records);
+        const rawPayment = records[month]?.[athlete.id];
+        const payment = paymentRecordForSelectedFeesScope(records,month,athlete);
+        const conflictMessage = rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "";
+        const editable = baseEditable && !conflictMessage && (payment
+          ? paymentCanMutateExistingRecord(payment,athlete)
+          : paymentCanCreateForCurrentScope(athlete));
+        const amount = paymentRecordAmount(payment);
         const value = amount == null ? "" : formatPaymentCellAmount(amount);
         const status = String(athlete.status || (athlete.active === false ? "paused" : "active"));
         const subdued = status === "paused" || status === "inactive" || athlete.active === false;
         const statusText = status === "inactive" ? "Неактивен" : status === "paused" ? "В пауза" : "";
         const label = `${athlete.name}, ${paymentMonthLongLabel(month)}`;
         return `
-          <div class="payment-mobile-row ${subdued ? "payment-athlete-paused" : "payment-athlete-active"}" data-athlete-id="${escapeHtml(athlete.id)}">
+          <div class="payment-mobile-row ${subdued ? "payment-athlete-paused" : "payment-athlete-active"} ${moved ? "payment-athlete-moved" : ""}" data-athlete-id="${escapeHtml(athlete.id)}">
             <div class="payment-mobile-athlete">
               <strong>${escapeHtml(athlete.name)}</strong>
-              ${(statusText || athlete.feeExempt) ? `<div class="payment-mobile-meta">${statusText ? `<span class="payment-mobile-status">${escapeHtml(statusText)}</span>` : ""}${athlete.feeExempt ? '<span class="payment-mobile-fee-exempt">Без такса</span>' : ""}</div>` : ""}
+              ${(moved || statusText || athlete.feeExempt) ? `<div class="payment-mobile-meta">${moved ? '<span class="payment-moved-badge">Преместен</span>' : ""}${statusText ? `<span class="payment-mobile-status">${escapeHtml(statusText)}</span>` : ""}${athlete.feeExempt ? '<span class="payment-mobile-fee-exempt">Без такса</span>' : ""}</div>` : ""}
             </div>
-            <div class="payment-month-cell payment-mobile-amount ${amount == null ? "" : "recorded-payment"}">
-              <input class="payment-month-input payment-mobile-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${editable ? "" : "disabled"} />
+            <div class="payment-month-cell payment-mobile-amount ${amount == null ? "" : "recorded-payment"} ${conflictMessage ? "payment-scope-conflict" : ""}">
+              <input class="payment-month-input payment-mobile-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${conflictMessage ? `title="${escapeHtml(conflictMessage)}"` : ""} ${editable ? "" : "disabled"} />
               <span class="payment-mobile-currency" aria-hidden="true">€</span>
+              ${conflictMessage ? `<small class="payment-scope-conflict-note" title="${escapeHtml(conflictMessage)}">${escapeHtml(paymentScopeConflictShortLabel(conflictMessage))}</small>` : ""}
             </div>
           </div>`;
       }).join("") : `<div class="payment-mobile-empty">${visiblePaymentEmptyStateMessage()}</div>`;
@@ -6963,9 +7099,10 @@
       }
       paymentPeriodOffset = Math.max(0,Number(paymentPeriodOffset) || 0);
       const months = visiblePaymentMonths();
-      const groupAthletes = selectedPaymentAthletes();
-      const athletes = filteredPaymentAthletes(groupAthletes);
       const records = monthlyPayments();
+      const renderedMonths = paymentMobileMedia.matches ? [selectedPaymentMonth()] : months;
+      const groupAthletes = paymentAthletesForMonths(renderedMonths,records);
+      const athletes = filteredPaymentAthletes(groupAthletes);
       const thead = table.querySelector("thead");
       const tbody = table.querySelector("tbody");
       const tfoot = table.querySelector("tfoot");
@@ -6989,19 +7126,28 @@
 
       const currentMonth = getLocalMonthKey();
       thead.innerHTML = `<tr><th>Име</th><th>Тел. родител</th><th>Година</th>${months.map(month => `<th class="${month === currentMonth ? "current-month" : ""}">${paymentMonthShortLabel(month)}</th>`).join("")}</tr>`;
-      tbody.innerHTML = athletes.length ? athletes.map(athlete => `
-        <tr class="${athlete.active === false ? "payment-athlete-paused" : "payment-athlete-active"}" data-athlete-id="${escapeHtml(athlete.id)}">
-          <td>${escapeHtml(athlete.name)}</td>
+      tbody.innerHTML = athletes.length ? athletes.map(athlete => {
+        const moved = paymentAthleteIsMovedForFeesScope(athlete,months,records);
+        return `
+        <tr class="${athlete.active === false ? "payment-athlete-paused" : "payment-athlete-active"} ${moved ? "payment-athlete-moved" : ""}" data-athlete-id="${escapeHtml(athlete.id)}">
+          <td>${escapeHtml(athlete.name)}${moved ? '<span class="payment-moved-badge">Преместен</span>' : ""}</td>
           <td>${escapeHtml(athlete.phone || "—")}</td>
           <td>${escapeHtml(athlete.year)}</td>
           ${months.map(month => {
-            const amount = paymentRecordAmount(records[month]?.[athlete.id]);
+            const rawPayment = records[month]?.[athlete.id];
+            const payment = paymentRecordForSelectedFeesScope(records,month,athlete);
+            const conflictMessage = rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "";
+            const editable = canEditViewedScope() && canEditOnlinePayments() && !conflictMessage && (payment
+              ? paymentCanMutateExistingRecord(payment,athlete)
+              : paymentCanCreateForCurrentScope(athlete));
+            const amount = paymentRecordAmount(payment);
             const value = amount == null ? "" : formatPaymentCellAmount(amount);
             const label = `${athlete.name}, ${paymentMonthLongLabel(month)}`;
-            return `<td class="payment-month-cell ${month === currentMonth ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${canEditViewedScope() && canEditOnlinePayments() ? "" : "disabled"} /></td>`;
+            return `<td class="payment-month-cell ${month === currentMonth ? "current-month" : ""} ${amount == null ? "" : "recorded-payment"} ${conflictMessage ? "payment-scope-conflict" : ""}"><input class="payment-month-input" type="text" inputmode="decimal" autocomplete="off" value="${escapeHtml(value)}" data-athlete-id="${escapeHtml(athlete.id)}" data-month="${month}" aria-label="${escapeHtml(label)}" ${conflictMessage ? `title="${escapeHtml(conflictMessage)}"` : ""} ${editable ? "" : "disabled"} />${conflictMessage ? `<small class="payment-scope-conflict-note" title="${escapeHtml(conflictMessage)}">${escapeHtml(paymentScopeConflictShortLabel(conflictMessage))}</small>` : ""}</td>`;
           }).join("")}
         </tr>
-      `).join("") : `<tr><td colspan="13" class="empty">${visiblePaymentEmptyStateMessage()}</td></tr>`;
+      `;
+      }).join("") : `<tr><td colspan="13" class="empty">${visiblePaymentEmptyStateMessage()}</td></tr>`;
       tfoot.innerHTML = `<tr><td>Общо</td><td></td><td></td>${months.map(month => `<td class="payment-total-cell ${month === currentMonth ? "current-month" : ""}" data-total-month="${month}">${formatPaymentTotal(paymentMonthTotal(month,groupAthletes,records))}</td>`).join("")}</tr>`;
 
       const periodLabel = document.getElementById("paymentPeriodLabel");
@@ -7050,8 +7196,8 @@
       }
       const groupName = selectedGroup.name;
       const months = visiblePaymentMonths();
-      const athletes = selectedPaymentAthletes();
       const records = monthlyPayments();
+      const athletes = paymentAthletesForMonths(months,records);
       const [reportYear,reportMonth,reportDay] = getLocalTodayDate().split("-");
       const lines = [
         [paymentCsvValue(`Група: ${groupName}`)],
@@ -7062,7 +7208,7 @@
           paymentCsvValue(athlete.name),
           paymentCsvValue(paymentCsvPhone(athlete.phone)),
           paymentCsvValue(athlete.year),
-          ...months.map(month => paymentCsvValue(paymentCsvAmount(paymentRecordAmount(records[month]?.[athlete.id]))))
+          ...months.map(month => paymentCsvValue(paymentCsvAmount(paymentRecordAmount(paymentRecordForSelectedFeesScope(records,month,athlete)))))
         ]),
         [paymentCsvValue("Общо"),"","",...months.map(month => paymentCsvValue(paymentCsvAmount(paymentMonthTotal(month,athletes,records))))]
       ];
@@ -8115,20 +8261,24 @@
       const month = input.dataset.month;
       const athleteId = input.dataset.athleteId;
       const records = monthlyPayments();
-      const existingRecord = records[month]?.[athleteId];
+      const athlete = allAthletes().find(item => item.id === athleteId);
+      const rawExistingRecord = records[month]?.[athleteId];
+      const existingRecord = paymentMatchesSelectedFeesScope(rawExistingRecord,athlete)
+        ? rawExistingRecord
+        : null;
       const previousAmount = paymentRecordAmount(existingRecord);
       const membership = window.clubdeskAuthenticatedUser?.membership;
-      const athlete = allAthletes().find(item => item.id === athleteId);
-      if (membership?.access_role === "coach") {
-        const membershipId = String(membership.id || "").trim();
-        const athleteGroup = groupById(athlete?.group);
-        const ownsAthlete = athletePrimaryCoachMembershipId(athlete) === membershipId;
-        const ownsGroup = String(athleteGroup?.leadCoachMembershipId || "").trim() === membershipId;
-        if (!ownsAthlete || !ownsGroup) {
-          input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
-          if (typeof showToast === "function") showToast("Нямате право да променяте това плащане.");
-          return false;
-        }
+      const hasForeignScopePayment = Boolean(rawExistingRecord && !existingRecord);
+      const canMutate = existingRecord
+        ? paymentCanMutateExistingRecord(existingRecord,athlete)
+        : !hasForeignScopePayment && paymentCanCreateForCurrentScope(athlete);
+      if (!canMutate) {
+        input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
+        const message = hasForeignScopePayment
+          ? paymentScopeConflictMessage(rawExistingRecord,athlete)
+          : "Нямате право да променяте това плащане.";
+        if (typeof showToast === "function") showToast(message);
+        return false;
       }
 
       if (parsed.empty && previousAmount != null && !window.confirm("Сигурни ли сте, че искате да премахнете записаното плащане?")) {
@@ -8159,12 +8309,13 @@
         setPaymentSaveState("Запазване...");
         try {
           if (parsed.empty) {
-            const {data,error} = await window.clubdeskSupabase.from("payments")
+            let deleteQuery = window.clubdeskSupabase.from("payments")
               .delete()
-              .eq("club_id",membership.club_id)
-              .eq("athlete_id",athleteUuid)
-              .eq("payment_month",paymentMonth)
-              .select("id");
+              .eq("club_id",membership.club_id);
+            deleteQuery = existingRecord?.supabaseId
+              ? deleteQuery.eq("id",existingRecord.supabaseId)
+              : deleteQuery.eq("athlete_id",athleteUuid).eq("payment_month",paymentMonth);
+            const {data,error} = await deleteQuery.select("id");
             if (error) throw error;
             if (previousAmount != null && (!Array.isArray(data) || data.length !== 1)) throw new Error("Supabase payment delete verification failed");
             if (onlinePaymentsStore[month]) {
@@ -8181,21 +8332,27 @@
               recorded_by_membership_id:membership.id,
               note:typeof existingRecord?.note === "string" && existingRecord.note.trim() ? existingRecord.note.trim() : null
             };
-            const {data,error} = await window.clubdeskSupabase.from("payments")
-              .upsert(row,{onConflict:"athlete_id,payment_month"})
-              .select("id,club_id,athlete_id,payment_month,amount,recorded_by_membership_id,note");
-            if (error) throw error;
-            if (!Array.isArray(data) || data.length !== 1 || Math.abs(Number(data[0].amount)-parsed.amount) > 0.000001) throw new Error("Supabase payment save verification failed");
+            const paymentFields = "id,club_id,athlete_id,payment_month,amount,coach_membership_id,group_id,recorded_by_membership_id,note";
+            const result = existingRecord?.supabaseId
+              ? await window.clubdeskSupabase.from("payments")
+                  .update({amount:row.amount,recorded_by_membership_id:row.recorded_by_membership_id,note:row.note})
+                  .eq("id",existingRecord.supabaseId)
+                  .eq("club_id",membership.club_id)
+                  .select(paymentFields)
+                  .maybeSingle()
+              : await window.clubdeskSupabase.from("payments")
+                  .insert(row)
+                  .select(paymentFields)
+                  .maybeSingle();
+            if (result.error) {
+              if (String(result.error.code || "") === "23505") result.error.userMessage = "Таксата за месеца вече е записана.";
+              throw result.error;
+            }
+            if (!result.data || Math.abs(Number(result.data.amount)-parsed.amount) > 0.000001) throw new Error("Supabase payment save verification failed");
+            const mappedPayment = mapRemotePaymentRecord(result.data,athleteId,paymentMonthKey(result.data.payment_month));
+            if (!mappedPayment) throw new Error("Supabase returned an invalid payment snapshot");
             onlinePaymentsStore[month] ||= {};
-            onlinePaymentsStore[month][athleteId] = {
-              status:parsed.amount > 0 ? "paid" : "unpaid",
-              amount:parsed.amount,
-              paidAt:null,
-              amountCustomized:true,
-              paymentAmountEntered:true,
-              note:data[0].note || "",
-              supabaseId:String(data[0].id || "")
-            };
+            onlinePaymentsStore[month][athleteId] = mappedPayment;
             input.value = formatPaymentCellAmount(parsed.amount);
           }
           cacheOnlinePayments();
@@ -8204,18 +8361,19 @@
           updatePaymentSheetTotals();
           if (month === getLocalMonthKey()) updateDashboardStats();
           setPaymentSaveState("Запазено","saved");
+          if (parsed.empty) renderPaymentTable();
           return true;
         } catch (error) {
           console.error("ClubDesk Supabase payment save error",error);
           input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
           input.closest(".payment-month-cell")?.classList.toggle("recorded-payment",previousAmount != null);
           setPaymentSaveState("Грешка");
-          if (typeof showToast === "function") showToast(parsed.empty ? "Плащането не беше премахнато. Опитайте отново." : "Плащането не беше запазено. Опитайте отново.");
+          if (typeof showToast === "function") showToast(error.userMessage || (parsed.empty ? "Плащането не беше премахнато. Опитайте отново." : "Плащането не беше запазено. Опитайте отново."));
           return false;
         } finally {
           onlinePaymentMutations.delete(mutationKey);
           input.dataset.saving = "false";
-          input.disabled = !canEditViewedScope() || !canEditOnlinePayments();
+          input.disabled = !canEditViewedScope() || !canEditOnlinePayments() || !paymentInputCanEdit(input);
           input.closest(".payment-month-cell")?.classList.remove("saving");
         }
       }
@@ -8316,7 +8474,14 @@
         ? (onlinePaymentsStore[dashboardPaymentMonth] || {})
         : {};
       const scopedIds = new Set(athletes.filter(athlete => !athlete.archived).map(athlete => athlete.id));
-      const collected = Object.entries(monthRecords).reduce((sum,[athleteId,record]) => scopedIds.has(athleteId) ? sum + (paymentRecordAmount(record) ?? 0) : sum,0);
+      const dashboardIsClubWide = membership?.access_role === "admin" && selectedCoachScope === "all";
+      const collected = Object.entries(monthRecords).reduce((sum,[athleteId,record]) => {
+        const athlete = allAthletes().find(item => item.id === athleteId);
+        if (!athlete) return sum;
+        const belongsToScope = dashboardIsClubWide
+          || Boolean(effectiveCoachMembershipId && paymentEffectiveCoachMembershipId(record,athlete) === effectiveCoachMembershipId);
+        return belongsToScope ? sum + (paymentRecordAmount(record) ?? 0) : sum;
+      },0);
       const dashboardAttendanceMonth = getLocalMonthKey();
       const attendanceMonthIsOperational = `${dashboardAttendanceMonth}-01` >= CLUBDESK_ATTENDANCE_START_DATE;
       const savedSessions = attendanceMonthIsOperational
