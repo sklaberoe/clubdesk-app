@@ -2382,6 +2382,7 @@
     let attendanceMigrationInProgress = false;
     let currentAttendanceMigrationPreview = null;
     let onlinePaymentsStore = {};
+    let onlinePaymentTransferConflicts = new Set();
     let onlinePaymentsAvailable = false;
     let onlinePaymentsLoading = false;
     let onlinePaymentsLoadPromise = null;
@@ -3035,6 +3036,28 @@
       return store;
     }
 
+    function paymentTransferConflictKey(athleteId,month) {
+      return `${String(athleteId || "").trim()}|${String(month || "").trim()}`;
+    }
+
+    async function loadOnlinePaymentTransferConflicts() {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      onlinePaymentTransferConflicts = new Set();
+      if (membership?.access_role !== "coach") return true;
+      if (!membership?.id || !membership?.club_id || !window.clubdeskSupabase) {
+        throw new Error("Missing authenticated coach context for payment conflicts");
+      }
+      const {data,error} = await window.clubdeskSupabase.rpc("get_payment_transfer_conflicts");
+      if (error) throw error;
+      const maps = attendanceUuidMaps();
+      (Array.isArray(data) ? data : []).forEach(row => {
+        const athleteId = maps.athleteUuidToLocal.get(String(row?.athlete_id || ""));
+        const month = paymentMonthKey(row?.payment_month);
+        if (athleteId && month) onlinePaymentTransferConflicts.add(paymentTransferConflictKey(athleteId,month));
+      });
+      return true;
+    }
+
     async function loadOnlinePayments({force=false}={}) {
       if (onlinePaymentsLoadPromise) return onlinePaymentsLoadPromise;
       const membership = window.clubdeskAuthenticatedUser?.membership;
@@ -3048,6 +3071,7 @@
             .eq("club_id",membership.club_id);
           if (error) throw error;
           onlinePaymentsStore = mapRemotePaymentsStore(data || []);
+          await loadOnlinePaymentTransferConflicts();
           onlinePaymentsAvailable = true;
           window.clubdeskPaymentsDataSource = "supabase";
           cacheOnlinePayments();
@@ -3058,6 +3082,7 @@
           console.error("ClubDesk Supabase payments load error",error);
           const cached = cachedOnlinePaymentsStore();
           onlinePaymentsStore = cached || {};
+          onlinePaymentTransferConflicts = new Set();
           onlinePaymentsAvailable = false;
           window.clubdeskPaymentsDataSource = cached ? "supabase-cache" : "unavailable";
           updateDashboardStats();
@@ -3347,6 +3372,7 @@
       onlineAttendanceAvailable = false;
       onlineAttendanceLoadPromise = null;
       onlinePaymentsStore = {};
+      onlinePaymentTransferConflicts = new Set();
       onlinePaymentsAvailable = false;
       onlinePaymentsLoadPromise = null;
       onlineCalendarEvents = [];
@@ -6993,6 +7019,17 @@
       return paymentMatchesSelectedFeesScope(payment,athlete) ? payment : null;
     }
 
+    function paymentHasHiddenTransferConflict(athlete,month) {
+      const membership = window.clubdeskAuthenticatedUser?.membership;
+      return membership?.access_role === "coach"
+        && athleteCurrentlyMatchesSelectedFeesScope(athlete)
+        && onlinePaymentTransferConflicts.has(paymentTransferConflictKey(athlete?.id,month));
+    }
+
+    function hiddenPaymentTransferConflictMessage() {
+      return "Таксата за месеца е записана при предишния треньор.";
+    }
+
     function paymentScopeConflictMessage(payment,athlete) {
       if (!payment
         || !athleteCurrentlyMatchesSelectedFeesScope(athlete)
@@ -7037,6 +7074,7 @@
     function paymentInputCanEdit(input) {
       const athlete = allAthletes().find(item => item.id === input?.dataset?.athleteId);
       if (!athlete) return false;
+      if (paymentHasHiddenTransferConflict(athlete,input.dataset.month)) return false;
       const payment = monthlyPayments()[input.dataset.month]?.[athlete.id];
       if (payment) return paymentCanMutateExistingRecord(payment,athlete);
       return paymentCanCreateForCurrentScope(athlete);
@@ -7102,7 +7140,10 @@
         const moved = paymentAthleteIsMovedForFeesScope(athlete,[month],records);
         const rawPayment = records[month]?.[athlete.id];
         const payment = paymentRecordForSelectedFeesScope(records,month,athlete);
-        const conflictMessage = rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "";
+        const hiddenTransferConflict = paymentHasHiddenTransferConflict(athlete,month);
+        const conflictMessage = hiddenTransferConflict
+          ? hiddenPaymentTransferConflictMessage()
+          : (rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "");
         const editable = baseEditable && !conflictMessage && (payment
           ? paymentCanMutateExistingRecord(payment,athlete)
           : paymentCanCreateForCurrentScope(athlete));
@@ -7175,7 +7216,10 @@
           ${months.map(month => {
             const rawPayment = records[month]?.[athlete.id];
             const payment = paymentRecordForSelectedFeesScope(records,month,athlete);
-            const conflictMessage = rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "";
+            const hiddenTransferConflict = paymentHasHiddenTransferConflict(athlete,month);
+            const conflictMessage = hiddenTransferConflict
+              ? hiddenPaymentTransferConflictMessage()
+              : (rawPayment && !payment ? paymentScopeConflictMessage(rawPayment,athlete) : "");
             const editable = canEditViewedScope() && canEditOnlinePayments() && !conflictMessage && (payment
               ? paymentCanMutateExistingRecord(payment,athlete)
               : paymentCanCreateForCurrentScope(athlete));
@@ -8308,14 +8352,17 @@
       const previousAmount = paymentRecordAmount(existingRecord);
       const membership = window.clubdeskAuthenticatedUser?.membership;
       const hasForeignScopePayment = Boolean(rawExistingRecord && !existingRecord);
+      const hasHiddenTransferConflict = paymentHasHiddenTransferConflict(athlete,month);
       const canMutate = existingRecord
         ? paymentCanMutateExistingRecord(existingRecord,athlete)
-        : !hasForeignScopePayment && paymentCanCreateForCurrentScope(athlete);
+        : !hasForeignScopePayment && !hasHiddenTransferConflict && paymentCanCreateForCurrentScope(athlete);
       if (!canMutate) {
         input.value = previousAmount == null ? "" : formatPaymentCellAmount(previousAmount);
-        const message = hasForeignScopePayment
-          ? paymentScopeConflictMessage(rawExistingRecord,athlete)
-          : "Нямате право да променяте това плащане.";
+        const message = hasHiddenTransferConflict
+          ? hiddenPaymentTransferConflictMessage()
+          : (hasForeignScopePayment
+            ? paymentScopeConflictMessage(rawExistingRecord,athlete)
+            : "Нямате право да променяте това плащане.");
         if (typeof showToast === "function") showToast(message);
         return false;
       }
@@ -8346,6 +8393,7 @@
         input.disabled = true;
         input.closest(".payment-month-cell")?.classList.add("saving");
         setPaymentSaveState("Запазване...");
+        let refreshTransferConflict = false;
         try {
           if (parsed.empty) {
             let deleteQuery = window.clubdeskSupabase.from("payments")
@@ -8384,7 +8432,19 @@
                   .select(paymentFields)
                   .maybeSingle();
             if (result.error) {
-              if (String(result.error.code || "") === "23505") result.error.userMessage = "Таксата за месеца вече е записана.";
+              if (String(result.error.code || "") === "23505") {
+                if (membership.access_role === "coach") {
+                  try {
+                    await loadOnlinePaymentTransferConflicts();
+                    refreshTransferConflict = paymentHasHiddenTransferConflict(athlete,month);
+                  } catch (conflictError) {
+                    console.error("ClubDesk payment conflict refresh error",conflictError);
+                  }
+                }
+                result.error.userMessage = refreshTransferConflict
+                  ? hiddenPaymentTransferConflictMessage()
+                  : "Таксата за месеца вече е записана.";
+              }
               throw result.error;
             }
             if (!result.data || Math.abs(Number(result.data.amount)-parsed.amount) > 0.000001) throw new Error("Supabase payment save verification failed");
@@ -8414,6 +8474,7 @@
           input.dataset.saving = "false";
           input.disabled = !canEditViewedScope() || !canEditOnlinePayments() || !paymentInputCanEdit(input);
           input.closest(".payment-month-cell")?.classList.remove("saving");
+          if (refreshTransferConflict) renderPaymentTable();
         }
       }
 
